@@ -394,6 +394,27 @@ describe("closing and reopening Discord", () => {
         assert.equal(res.restarted, true);
     });
 
+    it("takes back the start it cut short, so closing Discord does not push the engine towards safe mode", async () => {
+        put("app.asar", original());
+        const folder = join(data, "canary");
+        mkdirSync(folder, { recursive: true });
+        writeFileSync(join(folder, "state.json"), JSON.stringify({ schema: 1, safeMode: false, safeModeReason: null, quarantine: [], startFailures: {}, bootAttempts: 2, lastBootAt: 5 }));
+        const ctx = context();
+        ctx.platform.running = 1;
+        ctx.platform.closeWorks = false;
+        await inject(ctx, { ...canary, forceClose: true });
+        assert.equal(JSON.parse(readFileSync(join(folder, "state.json"), "utf8")).bootAttempts, 1);
+    });
+
+    it("closes Discord as before when the engine has no state file yet", async () => {
+        put("app.asar", original());
+        const ctx = context();
+        ctx.platform.running = 1;
+        const res = await inject(ctx, { ...canary, closeDiscord: true });
+        assert.equal(res.closedDiscord, true);
+        assert.equal(existsSync(join(data, "canary", "state.json")), false);
+    });
+
     it("stops when even a forced close does not work", async () => {
         put("app.asar", original());
         const ctx = context();

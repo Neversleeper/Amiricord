@@ -31,6 +31,7 @@ function boot() {
         changeSetting: (change: unknown) => { ipcRenderer.send(IPC.settingsChange, change); },
         restart: () => { ipcRenderer.send(IPC.restart); },
         openDataFolder: () => { ipcRenderer.send(IPC.openDataFolder); },
+        leaveSafeMode: () => { ipcRenderer.send(IPC.leaveSafeMode); },
         firewallStatus: () => ipcRenderer.invoke(IPC.firewall) as Promise<unknown>,
         native: (message: unknown) => ipcRenderer.invoke(IPC.native, message) as Promise<unknown>,
         secret: (message: unknown) => ipcRenderer.invoke(IPC.secret, message) as Promise<unknown>,

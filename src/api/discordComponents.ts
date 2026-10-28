@@ -13,7 +13,7 @@
 
 import type { Finder } from "../webpack/finders";
 import { Common, CommonEntry, FindersFor, ReactLike } from "./common";
-import { type ButtonProps, type DialogBox, type FallbackComponents, type HeadingProps, makeFallbackComponents, type TextProps } from "./fallbackComponents";
+import { type ButtonProps, type DialogBox, type FallbackComponents, type HeadingProps, makeFallbackComponents, type ModalCloseButtonProps, type ModalPartProps, type TextProps } from "./fallbackComponents";
 
 /** The hooks that identify React among Discord's modules. */
 export const REACT_PROPS = ["useState", "useEffect", "createElement", "useSyncExternalStore"] as const;
@@ -24,7 +24,10 @@ export const COMPONENT_SNIPPETS = {
     Text: ["tabularNumbers:", "scaleFontToUserSetting:", "lineClamp:"],
     Heading: ["`h${Math.min(", "experiments?.enabledExperiments"],
     /** Discord's public Dialog, which draws the box with its focus lock (build 652418, sampled by the dev probe, docs/analysis-51). Fixed strings only. */
-    DialogWithLock: ["setDialogRef:", "trackingComponentName:", "returnRef:"]
+    DialogWithLock: ["setDialogRef:", "trackingComponentName:", "returnRef:"],
+    /** Discord's window pieces, all in one small module (build 653945, read whole by the dev probe). Each snippet list must be in that one function only. Only the content and the close button are used: Discord's header and footer lay their children out with its own flex constants (the close button stayed next to the title and the buttons of the footer touched each other in our window), so those two stay ours. */
+    ModalContent: ["scrollerRef", "scrollbarType", "scrollbarGutter"],
+    ModalCloseButton: ["focusProps", "withCircleBackground", "hideOnFullscreen"]
 } as const;
 
 type Component<P> = (props: P) => unknown;
@@ -122,9 +125,14 @@ export function declareCommon(finders: FindersFor, onFallback?: (name: string) =
         ModalRoot: common.component("ModalRoot", adapted(finders.componentByCode<DialogBox>(...COMPONENT_SNIPPETS.DialogWithLock), react,
             (dialogBox, lib): FallbackComponents["ModalRoot"] => makeFallbackComponents(lib, undefined, dialogBox).ModalRoot
         ), own("ModalRoot"), react),
+        // Discord's own pieces, drawn as elements (they use hooks), with only the props our window pieces take. Their context has a default, so they work outside Discord's own window.
         ModalHeader: common.component("ModalHeader", none<FallbackComponents["ModalHeader"]>("ModalHeader"), own("ModalHeader"), react),
-        ModalContent: common.component("ModalContent", none<FallbackComponents["ModalContent"]>("ModalContent"), own("ModalContent"), react),
+        ModalContent: common.component("ModalContent", adapted(finders.componentByCode<Component<Record<string, unknown>>>(...COMPONENT_SNIPPETS.ModalContent), react,
+            (original, lib): FallbackComponents["ModalContent"] => ({ className, children }: ModalPartProps) => lib.createElement(original, { className }, children)
+        ), own("ModalContent"), react),
         ModalFooter: common.component("ModalFooter", none<FallbackComponents["ModalFooter"]>("ModalFooter"), own("ModalFooter"), react),
-        ModalCloseButton: common.component("ModalCloseButton", none<FallbackComponents["ModalCloseButton"]>("ModalCloseButton"), own("ModalCloseButton"), react)
+        ModalCloseButton: common.component("ModalCloseButton", adapted(finders.componentByCode<Component<Record<string, unknown>>>(...COMPONENT_SNIPPETS.ModalCloseButton), react,
+            (original, lib): FallbackComponents["ModalCloseButton"] => ({ onClick }: ModalCloseButtonProps) => lib.createElement(original, { onClick })
+        ), own("ModalCloseButton"), react)
     };
 }

@@ -71,7 +71,7 @@ export interface RestResponse {
 
 type RestMethod = (request: RestRequest) => Promise<RestResponse>;
 
-export const RestAPI: { get: RestMethod; post: RestMethod; put: RestMethod; patch: RestMethod; del: RestMethod; } = findByPropsLazy("get", "post", "put", "del");
+export const RestAPI: { get: RestMethod; post: RestMethod; put: RestMethod; patch: RestMethod; del: RestMethod; } = findByPropsLazy("getAPIBaseURL", "get", "post", "put", "del");
 
 let transitionToFunction: ReturnType<ReturnType<typeof getContext>["finders"]["byCode"]> | undefined;
 
@@ -186,6 +186,7 @@ const MenuMarker = {
     MenuRadioItem: marker()
 } as const;
 export const Menu: Record<string, ComponentType<any>> = MenuMarker as unknown as Record<string, ComponentType<any>>;
+const menuMarkers = new Set<unknown>(Object.values(MenuMarker));
 
 interface MenuEntry { kind: "item" | "separator"; label?: string; action?: () => void; disabled?: boolean; danger?: boolean; checked?: boolean; }
 
@@ -210,6 +211,13 @@ function collectMenuEntries(node: unknown, out: MenuEntry[]): void {
         const before = out.length;
         collectMenuEntries(props.children, out);
         if (out.length > before) out.push({ kind: "separator" });
+    } else if (typeof element.type === "function" && !menuMarkers.has(element.type)) {
+        // A component of the plugin's own (for example the quest button's menu): run it and read what it returns.
+        try {
+            collectMenuEntries((element.type as (menuProps: Record<string, unknown>) => unknown)(props), out);
+        } catch {
+            // A component that needs hooks cannot be read outside a render.
+        }
     } else {
         collectMenuEntries(props.children, out);
     }

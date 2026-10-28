@@ -141,6 +141,9 @@ export function startMain(options: MainOptions): MainController | null {
     ipcMain.handle(IPC.privacyLog, event => (isTrustedSender(senderUrl(event)) ? blockLog() : null));
     let privacyChange: (change: unknown) => Promise<unknown> = async () => null;
     ipcMain.handle(IPC.privacyChange, (event, change: unknown) => (isTrustedSender(senderUrl(event)) ? privacyChange(change) : null));
+    ipcMain.on(IPC.leaveSafeMode, event => {
+        if (isTrustedSender(senderUrl(event))) controller.leaveSafeMode();
+    });
     ipcMain.on(IPC.openDataFolder, event => {
         // The folder is ours (not sent by the page), so the page cannot make the explorer open anything else.
         if (!isTrustedSender(senderUrl(event))) return;

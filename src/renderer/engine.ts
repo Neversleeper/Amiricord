@@ -67,6 +67,8 @@ export interface Bridge {
     restart(): void;
     /** Ask the main process to open the data folder in the file explorer. Only core plugins reach it, through `ctx.engine.openDataFolder`. */
     openDataFolder(): void;
+    /** Ask the main process to turn safe mode off for the next start. Only core plugins reach it, through `ctx.engine.leaveSafeMode`. */
+    leaveSafeMode?(): void;
     /** Ask the main process how many requests its firewall cancelled. Read only; the answer is checked field by field before it is used. */
     firewallStatus?(): Promise<unknown>;
     /** Send a plugin's call for its own main-process function and wait for the answer. The main process checks it again (`src/main/nativeHost.ts`). */
@@ -123,6 +125,8 @@ export interface EnginePluginContext extends PluginContext {
     engine?: {
         status(): EngineStatus;
         openDataFolder(): void;
+        /** Turn safe mode off for the next start (the caller restarts Discord after). */
+        leaveSafeMode(): void;
         /** The read-only snapshot of the Privacy & Security tab from the main process (null when it did not answer or the answer was not in the expected form). */
         privacy(): Promise<PrivacyAnswer | null>;
         /** "Test now" for one provider by id. Asks the provider a question and applies nothing. */
@@ -439,6 +443,7 @@ export function startEngine(options: EngineOptions): Engine {
             dns
         }),
         openDataFolder: () => { bridge.openDataFolder(); },
+        leaveSafeMode: () => { bridge.leaveSafeMode?.(); },
         privacy: async (): Promise<PrivacyAnswer | null> => {
             try {
                 const answer = bridge.privacyStatus ? parsePrivacyAnswer(await bridge.privacyStatus()) : null;

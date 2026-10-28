@@ -17,6 +17,8 @@ import type { ButtonGroupItem, ChoiceItem, QuickActionItem, SettingItem } from "
 
 export interface MainTabDeps {
     status(): EngineStatus;
+    /** Turn safe mode off and restart Discord (the next start is a normal one). */
+    leaveSafeMode(): void;
     cards(): PluginCard[];
     /** The tiles of Quick Actions, in order. */
     quickActions: QuickActionItem[];
@@ -41,6 +43,21 @@ function Logo({ src }: { src: string; }) {
     const [failed, setFailed] = currentReact().useState(false);
     if (failed || !src) return <div className="amiricord-logo-fallback" aria-hidden="true">A</div>;
     return <img className="amiricord-logo" src={src} alt="Amiricord" onError={() => setFailed(true)} />;
+}
+
+/** The way out of safe mode. Restarting loses a call or a draft, so the first click only opens the question. */
+function LeaveSafeMode({ leave }: { leave: () => void; }) {
+    const [asking, setAsking] = currentReact().useState(false);
+    if (!asking) return <button type="button" className="amiricord-button" onClick={() => setAsking(true)}>Leave safe mode</button>;
+    return (
+        <div className="amiricord-confirm">
+            <div>Discord restarts now and the plugins start again. A call or an unsent message is lost.</div>
+            <div className="amiricord-confirm-buttons">
+                <button type="button" className="amiricord-button" onClick={leave}>Leave and restart</button>
+                <button type="button" className="amiricord-button" onClick={() => setAsking(false)}>Cancel</button>
+            </div>
+        </div>
+    );
 }
 
 /** `soon` tags stay hidden until the row is hovered or clicked, so the page looks like a finished one. */
@@ -232,6 +249,7 @@ export function makeMainTab(deps: MainTabDeps): () => unknown {
                             ? `On${status.safeModeReason ? `: ${status.safeModeReason}` : ""}${status.enteredSafeMode ? " (entered by itself after failed starts)" : ""}`
                             : "Off"}
                     </Row>
+                    {status.safeMode && <div className="amiricord-row-action"><LeaveSafeMode leave={deps.leaveSafeMode} /></div>}
                     <Row name="Privacy check">{selfTestText(status.selfTests)}</Row>
                     <Row name="Stopped inside Discord">{stoppedText(status.stopped)}</Row>
                     <Row name="Cancelled on the network">{networkText(status.network)}</Row>

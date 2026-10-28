@@ -10,9 +10,10 @@
 // Discord is closed only when the caller allows it, and reopened afterwards if the installer closed it.
 // Design: docs/analysis-08-installer-patching.md.
 
-import { appendFile } from "node:fs/promises";
+import { appendFile, readFile, writeFile } from "node:fs/promises";
 import { basename, isAbsolute, join } from "node:path";
 
+import { BootState, forgetUnfinishedBoot, parseBootState, serializeBootState } from "../shared/bootState";
 import { buildLoaderAsar } from "./asar";
 import { BackupInfo, createBackup, listBackups, readBackup, verifyBackup } from "./backup";
 import { Classification, classifyResources, LEFTOVER_NAMES, State } from "./classify";
@@ -176,8 +177,24 @@ async function ensureClosed(ctx: Context, branch: Branch, opts: Options, res: Re
     if ((await ctx.platform.listProcesses(exe)).length > 0) {
         throw new InstallerError(`${exe} is still running after it was asked to close.`, EXIT.RUNNING, "running");
     }
+    await forgetClosedBoot(engineDir(ctx, branch));
     res.closedDiscord = true;
     return true;
+}
+
+/**
+ * Closing Discord ourselves cuts a start short, and a start cut short would count towards safe mode (three in a row turn it on). It was not a failure, so it
+ * is taken back. Best effort: a missing or unreadable file means there is nothing to take back.
+ */
+export async function forgetClosedBoot(folder: string): Promise<void> {
+    const file = join(folder, "state.json");
+    try {
+        const before = parseBootState(await readFile(file, "utf8")).state;
+        const after: BootState = forgetUnfinishedBoot(before);
+        if (after.bootAttempts !== before.bootAttempts) await writeFile(file, serializeBootState(after), "utf8");
+    } catch {
+        // No file, or one that cannot be read or written: the engine starts from its own defaults.
+    }
 }
 
 async function reopen(ctx: Context, install: Install, branch: Branch, opts: Options, res: Result): Promise<void> {

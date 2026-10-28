@@ -26,7 +26,8 @@ export enum QuestRewardType {
 }
 
 export enum QuestTargetedContent {
-    QUEST_HOME_DESKTOP = "quest_home_desktop"
+    // Discord's API wants the number here (the text "quest_home_desktop" is answered with 400 NUMBER_TYPE_COERCE, "is not int32"); 11 is what Discord's own Quest tile sends.
+    QUEST_HOME_DESKTOP = 11
 }
 
 export type QuestProgressMap = Partial<Record<QuestTaskType, { value: number; }>>;

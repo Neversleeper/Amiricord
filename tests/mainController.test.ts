@@ -115,6 +115,60 @@ describe("health events", () => {
     });
 });
 
+describe("boots that were cut short", () => {
+    it("does not count a boot that ends by Discord closing normally before it was reported clean", () => {
+        make().start();
+        assert.equal(savedBoot().bootAttempts, 1);
+        const second = make();
+        second.start();
+        assert.equal(savedBoot().bootAttempts, 2);
+        second.dispose();
+        assert.equal(savedBoot().bootAttempts, 1);
+        second.dispose();
+        assert.equal(savedBoot().bootAttempts, 1, "closing twice takes nothing more away");
+    });
+
+    it("does not enter safe mode after many restarts that each closed normally", () => {
+        for (let i = 0; i < 8; i++) {
+            const controller = make();
+            controller.start();
+            controller.dispose();
+        }
+        const last = make();
+        assert.equal(last.start().safeMode, false);
+    });
+
+    it("still enters safe mode when the boots never closed (a crash gives no chance to say so)", () => {
+        for (let i = 0; i < 3; i++) make().start();
+        const fourth = make();
+        const info = fourth.start();
+        assert.equal(info.safeMode, true);
+        assert.equal(info.enteredSafeMode, true);
+    });
+
+    it("leaves a clean boot at zero when it closes afterwards", () => {
+        const controller = make();
+        controller.start();
+        controller.cleanBoot();
+        controller.dispose();
+        assert.equal(savedBoot().bootAttempts, 0);
+    });
+});
+
+describe("leaving safe mode", () => {
+    it("turns safe mode off and forgets the failed boots for the next start", () => {
+        for (let i = 0; i < 3; i++) make().start();
+        const controller = make();
+        assert.equal(controller.start().safeMode, true);
+        controller.leaveSafeMode();
+        assert.equal(savedBoot().safeMode, false);
+        assert.equal(savedBoot().bootAttempts, 0);
+        controller.dispose();
+        assert.equal(savedBoot().bootAttempts, 0, "closing afterwards does not take away what is not there");
+        assert.equal(make().start().safeMode, false);
+    });
+});
+
 describe("dev mode and dev dumps", () => {
     const probeFolder = () => join(dir, "probe");
 

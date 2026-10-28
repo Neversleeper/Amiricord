@@ -12,7 +12,7 @@
 import { appendFileSync, existsSync, mkdirSync } from "node:fs";
 import { join } from "node:path";
 
-import { beginBoot, BootState, quarantinedIds, recordStartFailure, reportCleanBoot } from "../shared/bootState";
+import { beginBoot, BootState, forgetUnfinishedBoot, leaveSafeMode, quarantinedIds, recordStartFailure, reportCleanBoot } from "../shared/bootState";
 import { HealthEvent, HealthReport } from "../shared/health";
 import { BootInfo, DEV_DUMP_FOLDER, DEV_FLAG_FILE, parseDevDump } from "../shared/ipc";
 import { PROJECT_NAME } from "../shared/project";
@@ -39,6 +39,8 @@ export class MainController {
     readonly settings: SettingsStore;
     private boot: BootState | null = null;
     private enteredSafeMode = false;
+    /** True once this boot was reported clean, or its count was settled some other way, so it is not settled twice. */
+    private bootSettled = false;
     private devMode = false;
     private problems: string[] = [];
     private readonly now: () => number;
@@ -90,6 +92,15 @@ export class MainController {
     cleanBoot(): void {
         if (!this.boot) return;
         this.boot = reportCleanBoot(this.boot);
+        this.bootSettled = true;
+        this.saveBoot();
+    }
+
+    /** The person asked to leave safe mode. It takes effect at the next start (patches are chosen at start), so the page restarts Discord right after. */
+    leaveSafeMode(): void {
+        if (!this.boot) return;
+        this.boot = leaveSafeMode(this.boot);
+        this.bootSettled = true;
         this.saveBoot();
     }
 
@@ -156,6 +167,12 @@ export class MainController {
     }
 
     dispose(): void {
+        // Discord is closing by itself (not a crash): a boot that was cut short this way did not fail, so it is not counted towards safe mode.
+        if (this.boot && !this.bootSettled) {
+            this.bootSettled = true;
+            this.boot = forgetUnfinishedBoot(this.boot);
+            this.saveBoot();
+        }
         this.settings.dispose();
         this.health.dispose();
     }

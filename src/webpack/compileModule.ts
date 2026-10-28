@@ -16,6 +16,11 @@ export interface PatchReplacement {
     /** New text (`$1` and friends work as in String.replace, `$self` is the plugin) or a function that builds it. */
     // eslint-disable-next-line @typescript-eslint/no-explicit-any -- must accept the same functions as String.replace
     replace: string | ((substring: string, ...args: any[]) => string);
+    /**
+     * For a global regular expression that adds code to many places: if the result does not parse, try the places one by one and keep the ones that do,
+     * instead of dropping the whole replacement. (`arguments`, for example, is not allowed in a class field, but is fine in the same module elsewhere.)
+     */
+    perMatch?: boolean;
 }
 
 export interface PatchDefinition {
@@ -55,7 +60,9 @@ export type ReplacementStatus =
     /** Never ran, because an earlier replacement of its group failed. */
     | "not-run"
     /** Made the module unparseable and was dropped by the recovery step. */
-    | "syntax-error";
+    | "syntax-error"
+    /** A place-by-place replacement that no place of this module accepts (every one is somewhere the new code is not allowed). Not a problem. */
+    | "not-applicable";
 
 export interface ReplacementOutcome {
     /** The match, as text, for the report. */
@@ -170,6 +177,33 @@ function applyReplacement(code: string, replacement: PatchReplacement, self: str
         return code.replace(match, replace.split("$self").join(self.replaceAll("$", "$$$$")));
     }
     return code.replace(match, (...args: [string, ...unknown[]]) => String(Reflect.apply(replace, undefined, args)).split("$self").join(self));
+}
+
+/**
+ * Apply a global regular expression to one place at a time, from the last to the first so earlier positions stay valid, and keep each place only if the
+ * code still parses. Returns the code and how many places were kept and tried.
+ */
+function applyPlaceByPlace(code: string, replacement: PatchReplacement, self: string, canParse: (code: string) => boolean): { code: string; kept: number; tried: number; } {
+    if (typeof replacement.match === "string") return { code, kept: 0, tried: 0 };
+    const global = prepare(replacement.match);
+    const places = [...code.matchAll(global)].map(m => m.index);
+    const flags = global.flags.replace("g", "").replace("y", "") + "y";
+    let current = code;
+    let kept = 0;
+    for (const at of places.reverse()) {
+        const sticky = new RegExp(global.source, flags);
+        sticky.lastIndex = at;
+        // Not through `applyReplacement`: it would prepare the expression again and lose where this one must start.
+        const { replace } = replacement;
+        const next = typeof replace === "string"
+            ? current.replace(sticky, replace.split("$self").join(self.replaceAll("$", "$$$$")))
+            : current.replace(sticky, (...args: [string, ...unknown[]]) => String(Reflect.apply(replace, undefined, args)).split("$self").join(self));
+        if (next !== current && canParse(next)) {
+            current = next;
+            kept++;
+        }
+    }
+    return { code: current, kept, tried: places.length };
 }
 
 const isNumber = (value: number | null | undefined): value is number => typeof value === "number";
@@ -312,6 +346,14 @@ export function compileModule(moduleId: string, source: string, patches: readonl
                 const noLongerApplies = results.some(([, status]) => status !== "applied");
                 if (!noLongerApplies && canParse(candidate)) {
                     good = candidate;
+                } else if (!noLongerApplies && unit.length === 1 && patch.replacements[unit[0]].perMatch) {
+                    const placed = applyPlaceByPlace(good, patch.replacements[unit[0]], self, canParse);
+                    if (placed.kept > 0) {
+                        good = placed.code;
+                        if (placed.kept < placed.tried) problems.push(`a replacement by ${patch.plugin} on module ${moduleId} broke the code in ${placed.tried - placed.kept} of ${placed.tried} places, which were left as they were`);
+                    } else {
+                        outcome.replacements[unit[0]].status = "not-applicable";
+                    }
                 } else {
                     // Either some replacement no longer matches (an earlier one was dropped), or the unit made the code invalid.
                     for (const [i, status] of results) {

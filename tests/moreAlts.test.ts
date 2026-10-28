@@ -5,6 +5,7 @@
  */
 
 import assert from "node:assert/strict";
+import { existsSync, readFileSync } from "node:fs";
 import { afterEach, describe, it } from "node:test";
 
 import { SettingsClient } from "../src/api/settingsClient";
@@ -15,6 +16,7 @@ import { compileModule, type RegisteredPatch } from "../src/webpack/compileModul
 const patch = plugin.patches![0] as { find: string; replacements: Array<{ match: RegExp; replace: string; }>; };
 // Through the engine's own compiler, which understands `i` (any variable name) in the pattern.
 const registered: RegisteredPatch = { ...plugin.patches![0], plugin: "MoreAlts" };
+const registeredWindow: RegisteredPatch = { ...plugin.patches![1], plugin: "MoreAlts" };
 
 describe("MoreAlts", () => {
     // The shape of Discord's own account store in build 652418 (read from its public code, 2026-10-28), as a module function.
@@ -40,6 +42,56 @@ describe("MoreAlts", () => {
             assert.ok(!result.code.includes("altLimit"), limit);
             assert.notEqual(result.outcomes[0]?.replacements[0]?.status, "applied", limit);
         }
+    });
+
+    const real = "probe/module-source-274303.json";
+    it("takes the patch in the real account store of build 653945 and still parses (only when the probe dump is on this machine)", { skip: !existsSync(real) }, () => {
+        const { id, text } = JSON.parse(readFileSync(real, "utf8")) as { id: string; text: string; };
+        const result = compileModule(id, text, [registered]);
+        assert.equal(result.outcomes[0].replacements[0].status, "applied");
+        assert.equal(result.code.split("altLimit()").length - 1, 2);
+        assert.ok(!/length>5|splice(5)/.test(result.code));
+    });
+
+    // The shape of Discord's "Manage Accounts" window in build 653945, cut down: the three places where it checks the limit.
+    const windowModule = (button: string, effect: string, message: string) => `function(e,t,s){function A(e){let{multiAccountUsers:x}=e,[C,U]=i.useState(!1);return i.useEffect(()=>{if(C)N(g.intl.format(g.t.HAuRSM,{${message}}));else U(!1)},[b,C]),i.useEffect(()=>{${effect}},[x]),jsx(l.a,{actions:[{onClick:()=>{${button}}}]})}}`;
+    const windowOf = (limit: string) => windowModule(`x.length>=${limit}?U(!0):(s(),(0,f.D)())`, `x.length<${limit}&&U(!1)`, `maxNumAccounts:${limit}`);
+
+    it("looks for the window by the number it names, and takes all three places as a group that is lazy and optional", () => {
+        const second = plugin.patches![1] as { find: string; group?: boolean; lazy?: boolean; required?: boolean; replacements: unknown[]; };
+        assert.equal(second.find, "maxNumAccounts:5");
+        assert.ok(windowOf("5").includes(second.find));
+        assert.equal(second.group, true);
+        assert.equal(second.lazy, true);
+        assert.equal(second.required, false);
+        assert.equal(second.replacements.length, 3);
+    });
+
+    it("turns the three fives of the window into the setting, and only them", () => {
+        const result = compileModule("1", windowOf("5"), [registeredWindow]);
+        assert.equal(result.outcomes[0].status, "applied");
+        assert.equal(result.code.split("altLimit()").length - 1, 3);
+        assert.match(result.code, /x\.length>=[^?]*altLimit\(\)\?U\(!0\):/);
+        assert.match(result.code, /x\.length<[^&]*altLimit\(\)&&U\(!1\)/);
+        assert.match(result.code, /maxNumAccounts:[^}]*altLimit\(\)\}/);
+        assert.ok(!/length>=5|length<5|maxNumAccounts:5/.test(result.code), "no five is left");
+        assert.ok(result.code.includes("i.useState(!1)"), "other numbers stay");
+    });
+
+    it("changes none of them when one of the three is not as expected (the button and the notice must agree)", () => {
+        const odd = windowModule("x.length>=5?U(!0):(s(),(0,f.D)())", "x.length<=5&&U(!1)", "maxNumAccounts:5");
+        const result = compileModule("1", odd, [registeredWindow]);
+        assert.equal(result.code.includes("altLimit"), false);
+        assert.notEqual(result.outcomes[0].status, "applied");
+    });
+
+    const realWindow = "probe/module-source-623161.json";
+    it("takes the window patch in the real Manage Accounts module of build 653945 and still parses (only when the probe dump is on this machine)", { skip: !existsSync(realWindow) }, () => {
+        const { id, text } = JSON.parse(readFileSync(realWindow, "utf8")) as { id: string; text: string; };
+        const result = compileModule(id, text, [registeredWindow]);
+        assert.equal(result.outcomes[0].status, "applied");
+        assert.equal(result.code.split("altLimit()").length - 1, 3);
+        assert.ok(!/length>=5|length<5|maxNumAccounts:5/.test(result.code));
     });
 
     afterEach(() => { plugin.settings!.unbind(); });

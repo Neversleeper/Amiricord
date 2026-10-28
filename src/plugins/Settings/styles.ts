@@ -100,6 +100,7 @@ export const SETTINGS_CSS = `
 .amiricord-row:last-child { border-bottom: none; }
 .amiricord-row-name { flex-shrink: 0; font-size: 14px; font-weight: 500; color: var(--text-strong, var(--text-default, #dbdee1)); }
 .amiricord-row-value { min-width: 0; text-align: right; color: var(--text-muted, #949ba4); font-size: 14px; overflow-wrap: anywhere; }
+.amiricord-row-action { display: flex; justify-content: flex-end; padding: 10px 14px; border-bottom: 1px solid var(--border-subtle, var(--background-modifier-accent, #3f4147)); }
 .amiricord-button { padding: var(--space-8, 8px) var(--space-16, 16px); border: 0; border-radius: 6px; cursor: pointer; font: inherit; font-size: 14px; font-weight: 500; color: #fff; background: var(--brand-500, #5865f2); }
 .amiricord-error { margin: var(--space-16, 16px) 0; padding: var(--space-16, 16px) 18px; border-radius: 12px; border: 1px solid var(--border-feedback-critical, #da373c); background: var(--card-background-default, #2b2d31); }
 .amiricord-error-title { margin-bottom: var(--space-4, 4px); font-weight: 600; color: var(--text-feedback-critical, #f5787d); }

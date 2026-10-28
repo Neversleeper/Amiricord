@@ -47,6 +47,24 @@ describe("the patch that hands over what the menu's code was given", () => {
         assert.equal((exports.b as (p: unknown) => { navId: string; })(1).navId, "two");
     });
 
+    it("keeps the places that accept it when another one is in a class field, where `arguments` is not allowed", () => {
+        const mixed = "function(e,t,n){class K{handle=e=>{return {navId:\"in-field\"}}}t.K=K;t.make=function(p){return {navId:\"in-function\",p}}}";
+        const result = compileModule("1", mixed, [registered(argumentsPatch)], OPTIONS);
+        assert.equal(result.outcomes[0].replacements[0].status, "applied");
+        assert.equal(result.code.split("contextMenuAPIArguments").length - 1, 1);
+        assert.match(result.code, /contextMenuAPIArguments:typeof arguments!="undefined"\?arguments:\[\],navId:"in-function"/);
+        assert.equal(result.code.includes("arguments:[],navId:\"in-field\""), false);
+        assert.equal(result.problems.length, 1);
+    });
+
+    it("reports no problem, and changes nothing, when every place is in a class field", () => {
+        const onlyField = "function(e,t,n){class K{handle=e=>{return {navId:\"in-field\"}}}t.K=K}";
+        const result = compileModule("1", onlyField, [registered(argumentsPatch)], OPTIONS);
+        assert.equal(result.outcomes[0].replacements[0].status, "not-applicable");
+        assert.equal(result.changed, false);
+        assert.deepEqual(result.problems, []);
+    });
+
     it("leaves alone a navId that is not written as text (a destructuring, a variable)", () => {
         const pattern = "function(e,t,n){t.f=function(e){let{navId:t,variant:n=\"flexible\"}=e;return [t,n]};t.g=function(v){return {navId:v}}}";
         const result = compileModule("1", pattern, [registered(argumentsPatch)], OPTIONS);
@@ -101,6 +119,14 @@ describe("the patch on Discord's Menu component", () => {
 describe("the real code of Discord's Menu module and of the Quest tile menu (only when probe dumps are on this machine)", () => {
     const menu = "probe/module-source-980707.json";
     const quest = "probe/module-source-270045.json";
+    const favourites = "probe/module-source-navid.json";
+
+    it("does not report the favourites menu module (build 653945), whose only navId is in a class field", { skip: !existsSync(favourites) }, () => {
+        const [module] = JSON.parse(readFileSync(favourites, "utf8")) as Array<{ id: string; text: string; }>;
+        const result = compileModule(module.id, module.text, [registered(argumentsPatch)], OPTIONS);
+        assert.equal(result.outcomes[0].replacements[0].status, "not-applicable");
+        assert.equal(result.changed, false);
+    });
 
     it("takes the Menu patch and still parses", { skip: !existsSync(menu) }, () => {
         const calls: unknown[] = [];

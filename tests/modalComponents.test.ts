@@ -314,13 +314,13 @@ describe("window pieces in the common layer", () => {
         assert.deepEqual(misses, [...names]);
     });
 
-    it("looks up nothing for them in Discord's code, so a wrong guess can never put another component in a window", () => {
+    it("looks up only the pieces whose snippets were read from Discord's code, so a wrong guess can never put another component in a window", () => {
         const { parts, asked } = setup();
         parts.ModalRoot.get();
         parts.ModalFooter.get();
         const known = Object.values(COMPONENT_SNIPPETS).map(snippets => `component:${snippets.join("|")}`);
-        assert.deepEqual(asked.filter(question => !question.startsWith("props:") && !known.includes(question)), [], "only Button, Text, Heading and the dialog box have snippets");
-        assert.equal(Object.keys(COMPONENT_SNIPPETS).some(name => name.startsWith("Modal")), false);
+        assert.deepEqual(asked.filter(question => !question.startsWith("props:") && !known.includes(question)), [], "only the components that have snippets are asked for");
+        assert.deepEqual(Object.keys(COMPONENT_SNIPPETS).filter(name => name.startsWith("Modal")).sort(), ["ModalCloseButton", "ModalContent"]);
     });
 
     it("lists the components a plugin may ask for, each one declared", () => {

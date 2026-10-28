@@ -8,8 +8,9 @@
 // The original's patch looked for the module of the account switcher's "tooltip seen" flag, which Discord removed (build 652418: its health report said "no module
 // matched" in every session). In that build the limit is a plain `5` in Discord's own account store (`MultiAccountStore`): when someone signs in, the list is cut to
 // five and the tokens of the rest are deleted. This plugin's own patch (found by reading Discord's code, not taken from TestCord) puts the setting in both places.
-// The "Manage Accounts" window has its own two fives (found by searching module source in a running Stable); the second patch changes them.
-// Not verified in a real Discord: that nothing else in the switcher stops a sixth account. The setting is a whole number from 5 to 100, because a number below
+// Seen in build 653945: the store has the same two fives, and the "Manage Accounts" window checks three more of its own (with the store patch alone the owner saw
+// "Sorry, you can only add 5 accounts"), so a second patch takes those; both are tested against the real modules. Not verified in a real Discord: that a sixth account
+// can really be added. The setting is a whole number from 5 to 100, because a number below
 // Discord's own five would delete the saved accounts that are over it.
 
 import { definePluginSettings } from "../../api/pluginSettings";
@@ -29,15 +30,17 @@ const plugin: PluginCode & { altLimit(): number; } = {
             replacements: [{ match: /(\.length>)5(&&\i\.splice\()5\)/, replace: "$1$self.altLimit()$2$self.altLimit())" }]
         },
         {
-            // The "Manage Accounts" window (read in a running Stable, module 623161): "Add an account" shows "Sorry, you can only add 5 accounts." when `accounts.length>=5`,
-            // and the notice goes away when `accounts.length<5`. Both fives become the setting. The window loads when it is opened, so the patch is lazy.
-            // "ImpressionNames." matters: without it the first module found is Discord's list of screen names, which has the word but not the fives.
-            find: "ImpressionNames.MULTI_ACCOUNT_SWITCH_LANDING",
+            // Discord's "Manage Accounts" window (build 653945), loaded when it is first opened. It checks the same five by itself: the button "Add an account" shows
+            // "Sorry, you can only add 5 accounts" when the list has five or more, an effect hides that notice when it has fewer than five, and the notice names the number.
+            // All three become the setting, or none does, so the button and the notice never disagree.
+            find: "maxNumAccounts:5",
+            group: true,
             lazy: true,
             required: false,
             replacements: [
-                { match: /(\.length<)5(&&\i\(!1\))/, replace: "$1$self.altLimit()$2" },
-                { match: /(\.length>=)5(\?\i\(!0\))/, replace: "$1$self.altLimit()$2" }
+                { match: /(\i\.length>=)5(\?\i\(!0\):)/, replace: "$1$self.altLimit()$2" },
+                { match: /(\i\.length<)5(&&\i\(!1\))/, replace: "$1$self.altLimit()$2" },
+                { match: /maxNumAccounts:5/, replace: "maxNumAccounts:$self.altLimit()" }
             ]
         }
     ],

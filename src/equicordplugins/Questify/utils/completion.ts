@@ -203,6 +203,8 @@ const manuallyStoppedQuestIds = new Set<string>();
 let autoCompleteStartGeneration = 0;
 let enrollmentRateLimitBlockedUntil = 0;
 let queueAllAutoCompleteQuestsAbortController: AbortController | null = null;
+let queueAllNextStartAt: number | null = null;
+let queueAllRemaining = 0;
 let suppressQueueDrain = false;
 let videoProgressStackTracePatchSucceeded = false;
 let heartbeatStackTracePatchSucceeded = false;
@@ -702,6 +704,8 @@ export async function enrollInQuestAPI(quest: Quest): Promise<QuestAPIEnrollResu
 
             return { type: "rate_limited", retryAfter };
         }
+
+        QL.error("QUEST_ENROLL_API_ERROR", { questId: quest.id, questName: normalizeQuestName(quest), error });
 
         return { type: "unknown_error", error };
     }
@@ -1321,6 +1325,13 @@ export function processQuestForAutoComplete(quest: Quest, options: AutoCompleteS
     return true;
 }
 
+export function getQueueAllStatus(): { nextStartInSeconds: number | null; remaining: number; } {
+    return {
+        nextStartInSeconds: queueAllNextStartAt === null ? null : Math.max(0, Math.ceil((queueAllNextStartAt - Date.now()) / 1000)),
+        remaining: queueAllRemaining
+    };
+}
+
 export function isQueueAllAutoCompleteQuestsInProgress(): boolean {
     return queueAllAutoCompleteQuestsAbortController !== null;
 }
@@ -1332,7 +1343,6 @@ export function stopQueueAllAutoCompleteQuests(): void {
 export async function queueAllAutoCompleteQuests(): Promise<number> {
     if (
         queueAllAutoCompleteQuestsAbortController !== null ||
-        getQuestifySettings().autoCompleteQuestsSimultaneously ||
         isQuestEnrollmentRateLimited()
     ) {
         return 0;
@@ -1348,17 +1358,35 @@ export async function queueAllAutoCompleteQuests(): Promise<number> {
         let enrollmentAttempts = 0;
         let rateLimitEnrollmentFailures = 0;
         let nonRateLimitEnrollmentFailures = 0;
-        let first = true;
+        // The delay between activations only applies after a quest was really enrolled or started, so skipped quests cost no time.
+        let needsGap = false;
 
-        for (const quest of getQueueableAutoCompleteQuests()) {
+        const queue = getQueueableAutoCompleteQuests();
+
+        for (const [index, quest] of queue.entries()) {
             if (signal.aborted) {
                 break;
             }
 
-            if (!first) {
+            queueAllRemaining = queue.length - index;
+
+            if (activeAutoCompletes.has(quest.id) || !canAutoCompleteQuest(refreshQuest(quest))) {
+                QL.info("QUEUE_ALL_SKIPPED", { questId: quest.id, questName: normalizeQuestName(quest) });
+                continue;
+            }
+
+            if (needsGap) {
+                // Simultaneous mode starts many quests on one account, so the starts are spread out at random (10-30 s) instead of firing in a burst.
+                const gap = getQuestifySettings().autoCompleteQuestsSimultaneously ? 10000 + Math.floor(Math.random() * 20001) : 1000;
+
+                queueAllNextStartAt = Date.now() + gap;
+
                 try {
-                    await sleep(1000, signal);
+                    await sleep(gap, signal);
+                    queueAllNextStartAt = null;
                 } catch (error) {
+                    queueAllNextStartAt = null;
+
                     if (signal.aborted) {
                         break;
                     }
@@ -1367,7 +1395,7 @@ export async function queueAllAutoCompleteQuests(): Promise<number> {
                 }
             }
 
-            first = false;
+            needsGap = true;
             const refreshedQuest = refreshQuest(quest);
 
             if (!refreshedQuest.userStatus?.enrolledAt) {
@@ -1378,7 +1406,12 @@ export async function queueAllAutoCompleteQuests(): Promise<number> {
                 enrollmentAttempts++;
             }
 
-            const enrollment = await ensureQuestEnrolled(refreshedQuest, { method: "api" });
+            // The native enrollment is the path that works in Amiricord (the same one the quest tile menu uses).
+            const enrollment = await ensureQuestEnrolled(refreshedQuest, {
+                analytics: { taskType: Object.values(refreshedQuest.config.taskConfigV2?.tasks ?? {})[0]?.type },
+                method: "native"
+            });
+            QL.info("QUEUE_ALL_ENROLLMENT", { questId: quest.id, questName: normalizeQuestName(quest), result: enrollment.type });
 
             if (signal.aborted) {
                 break;
@@ -1402,7 +1435,11 @@ export async function queueAllAutoCompleteQuests(): Promise<number> {
                 continue;
             }
 
-            if (processQuestForAutoComplete(refreshQuest(refreshedQuest), { force: true, source: "manual" })) {
+            const started = processQuestForAutoComplete(refreshQuest(refreshedQuest), { force: true, source: "manual" });
+
+            QL.info("QUEUE_ALL_START", { questId: quest.id, questName: normalizeQuestName(quest), started });
+
+            if (started) {
                 queued++;
             }
         }
@@ -1412,6 +1449,9 @@ export async function queueAllAutoCompleteQuests(): Promise<number> {
         if (queueAllAutoCompleteQuestsAbortController === abortController) {
             queueAllAutoCompleteQuestsAbortController = null;
         }
+
+        queueAllNextStartAt = null;
+        queueAllRemaining = 0;
     }
 }
 
