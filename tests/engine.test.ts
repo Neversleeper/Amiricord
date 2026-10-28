@@ -7,6 +7,7 @@
 import assert from "node:assert/strict";
 import { describe, it, mock } from "node:test";
 
+import { createNativeMenuHub } from "../src/api/nativeMenus";
 import { definePluginSettings } from "../src/api/pluginSettings";
 import { Bridge, EngineOptions, EnginePluginContext, PluginCode, startEngine } from "../src/renderer/engine";
 import { HealthEvent } from "../src/shared/health";
@@ -608,6 +609,29 @@ describe("the dev-mode source search", () => {
         assert.deepEqual(JSON.parse(none.text).hits, { "QUEST_HOME)},[]),": [], ".ALL)}):(": [], questNameHeadingId: [] });
     });
 
+    it("looks for Discord's context menus and their parts, with whether each module has run, and writes the file even with no hit", async () => {
+        const t = setup([plugin("A")], {}, { boot: { devMode: true }, probeWaitMs: 20 });
+        const wreq = t.boot({
+            3: factory('var m={navId:"quests-entry",role:"menu"}; var user="a@b.example"'),
+            4: factory('var i={role:"menuitem"}; var c="menuitemcheckbox"')
+        });
+        wreq("4");
+        t.dom();
+        await t.engine.done;
+        t.delayed.splice(0).forEach(work => work());
+        const search = t.dumps.find(d => d.name === "module-search-menus");
+        assert.ok(search, "a module-search-menus dump was written");
+        const hits = JSON.parse(search.text).hits;
+        assert.equal(hits['"quests-entry"'][0].id, "3");
+        assert.equal(hits['"quests-entry"'][0].loaded, false);
+        assert.equal(hits["navId:"][0].id, "3");
+        assert.equal(hits['role:"menuitem"'][0].id, "4");
+        assert.equal(hits['role:"menuitem"'][0].loaded, true);
+        assert.equal(hits['"menuitemcheckbox"'][0].id, "4");
+        assert.deepEqual(hits.openContextMenuLazy, []);
+        assert.ok(!search.text.includes("a@b.example"), "what is written is redacted");
+    });
+
     it("writes nothing when dev mode is off", async () => {
         const t = setup([plugin("A")], {}, { probeWaitMs: 20 });
         t.boot({ 7: factory("var marker='billing_section'; var a='analyticsTrackingStoreMaker'") });
@@ -621,6 +645,7 @@ describe("the dev-mode source search", () => {
         assert.equal(t.dumps.some(d => d.name === "module-search-modal-parts"), false);
         assert.equal(t.dumps.some(d => d.name === "module-search-dialog"), false);
         assert.equal(t.dumps.some(d => d.name === "module-search-quests"), false);
+        assert.equal(t.dumps.some(d => d.name === "module-search-menus"), false);
     });
 });
 
@@ -1841,6 +1866,107 @@ describe("sounds for plugins", () => {
             assert.equal(StubAudio.made.length, 0);
             assert.equal(typesOf(t.events, "runtime-error").length, 0);
         });
+    });
+});
+
+describe("entries in Discord's own menus for plugins", () => {
+    const hot = (id: string) => ({ ...plugin(id, { enabledByDefault: false }) });
+    // Modules shaped like Discord's Menu module and its barrel of markers (the words the engine reads, our own names).
+    const MENU_BODY = "var Q$=r(777);function Menu2(e){let{navId:t,variant:n=\"flexible\",hideScroller:i=!1,children:o}=e;return o}"
+        + "function reduce(n,t){if(n.type===Q$.sepName)return t.push({type:\"separator\",navigable:!1}),t;"
+        + "if(n.type===Q$.grpName){let i=e(n.props.children);return i.length>0&&(t.push({type:\"groupstart\",length:i.length}),t.push(...i)),t}"
+        + "if(n.type===Q$.itmName)return t.push(null!=n.props.render?{type:\"customitem\",key:n.props.id}:{type:\"item\"}),t;"
+        + "if(n.type===Q$.chkName)return t.push({type:\"checkbox\",key:n.props.id}),t}"
+        + "if(0)r.d(t,{Wq:()=>Menu2});t.Wq=Menu2;";
+    const BARREL_BODY = "t.sepName=function(){return null};t.grpName=function(){return null};t.itmName=function(){return null};t.chkName=function(){return null};";
+
+    it("adds an entry to the menu with that navId through the engine's hub, and takes it away when the plugin is switched off", async () => {
+        const hub = createNativeMenuHub();
+        let plugins!: NonNullable<Parameters<NonNullable<PluginCode["start"]>>[0]["plugins"]>;
+        const t = setup([plugin("Core", { core: true }), hot("Menus")], {
+            Core: { start(ctx) { plugins = ctx.plugins!; } },
+            Menus: { start(ctx) { ctx.contextMenu.addNative("quests-entry", (children, props) => { children.unshift(["mine", props]); }); } }
+        }, { nativeMenus: hub });
+        t.boot();
+        t.dom();
+        await t.engine.done;
+        await plugins.toggle("Menus", true);
+        const quest = { id: "q" };
+        const drawn = (hub.patchProps({ navId: "quests-entry", children: ["theirs"], contextMenuAPIArguments: [{ quest }] }) as { children: unknown[]; }).children;
+        assert.deepEqual(drawn, [["mine", { quest }], "theirs"]);
+        await plugins.toggle("Menus", false);
+        const props = { navId: "quests-entry", children: ["theirs"] };
+        assert.equal(hub.patchProps(props), props, "nothing is left for that menu");
+        assert.equal(typesOf(t.events, "runtime-error").length, 0);
+    });
+
+    it("keeps one plugin's entries when another plugin is switched off", async () => {
+        const hub = createNativeMenuHub();
+        let plugins!: NonNullable<Parameters<NonNullable<PluginCode["start"]>>[0]["plugins"]>;
+        const t = setup([plugin("Core", { core: true }), hot("A"), hot("B")], {
+            Core: { start(ctx) { plugins = ctx.plugins!; } },
+            A: { start(ctx) { ctx.contextMenu.addNative("m", children => { children.push("a"); }); } },
+            B: { start(ctx) { ctx.contextMenu.addNative("m", children => { children.push("b"); }); } }
+        }, { nativeMenus: hub });
+        t.boot();
+        t.dom();
+        await t.engine.done;
+        await plugins.toggle("A", true);
+        await plugins.toggle("B", true);
+        await plugins.toggle("A", false);
+        assert.deepEqual((hub.patchProps({ navId: "m", children: [] }) as { children: unknown[]; }).children, ["b"]);
+    });
+
+    it("reports an entry that throws as an error of that plugin and draws the menu without it", async () => {
+        const hub = createNativeMenuHub();
+        const t = setup([plugin("Bad")], { Bad: { start(ctx) { ctx.contextMenu.addNative("m", () => { throw new Error("boom"); }); } } }, { nativeMenus: hub });
+        t.boot();
+        t.dom();
+        await t.engine.done;
+        assert.deepEqual((hub.patchProps({ navId: "m", children: ["x"] }) as { children: unknown[]; }).children, ["x"]);
+        const errors = typesOf(t.events, "runtime-error") as Array<{ plugin: string; source: string; }>;
+        assert.deepEqual(errors.map(e => [e.plugin, e.source]), [["Bad", "native menu m"]]);
+    });
+
+    it("looks for the pieces again only after five seconds, because the search reads every module, and finds them once the modules are there", async () => {
+        const holder: { ctx?: EnginePluginContext; } = {};
+        const t = setup([plugin("A")], { A: { start(ctx) { holder.ctx = ctx; } } }, { nativeMenus: createNativeMenuHub() });
+        const wreq = t.boot({});
+        t.dom();
+        await t.engine.done;
+        mock.timers.enable({ apis: ["Date"], now: 1000 });
+        try {
+            assert.equal(holder.ctx!.contextMenu.parts(), undefined, "no such module yet");
+            wreq.m["900"] = factory(MENU_BODY);
+            wreq.m["777"] = factory(BARREL_BODY);
+            assert.equal(holder.ctx!.contextMenu.parts(), undefined, "the modules are there but it looked a moment ago");
+            mock.timers.tick(4999);
+            assert.equal(holder.ctx!.contextMenu.parts(), undefined, "still inside the five seconds");
+            mock.timers.tick(1);
+            assert.equal(typeof holder.ctx!.contextMenu.parts()?.Menu, "function");
+            assert.ok(holder.ctx!.contextMenu.parts(), "once found it stays found");
+        } finally {
+            mock.timers.reset();
+        }
+    });
+
+    it("gives Discord's own menu pieces, read from the code of its Menu module, and undefined when Discord has no such module", async () => {
+        const answers: unknown[] = [];
+        const t = setup([plugin("A")], { A: { start(ctx) { answers.push(ctx.contextMenu.parts()); } } }, { nativeMenus: createNativeMenuHub() });
+        t.boot({ 900: factory(MENU_BODY), 777: factory(BARREL_BODY) });
+        t.dom();
+        await t.engine.done;
+        const parts = answers[0] as Record<string, unknown>;
+        assert.deepEqual(Object.keys(parts), ["Menu", "MenuSeparator", "MenuGroup", "MenuItem", "MenuCheckboxItem"]);
+        for (const piece of Object.values(parts)) assert.equal(typeof piece, "function");
+
+        const none: unknown[] = [];
+        const bare = setup([plugin("B")], { B: { start(ctx) { none.push(ctx.contextMenu.parts()); } } }, { nativeMenus: createNativeMenuHub() });
+        bare.boot({ 1: factory("t.value=1") });
+        bare.dom();
+        await bare.engine.done;
+        assert.deepEqual(none, [undefined]);
+        assert.equal(typesOf(bare.events, "runtime-error").length, 0);
     });
 });
 

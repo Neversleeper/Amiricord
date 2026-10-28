@@ -21,6 +21,7 @@ import { addServerListElement, removeServerListElement, ServerListRenderPosition
 import { PlainSettings, setPluginEnabled, Settings } from "./amiricord/settings";
 import { findComponentByCodeLazy, onceReady } from "./amiricord/webpack";
 import { disguiseHomeButton, QuestButton, showQuestButton } from "./components/questButton";
+import { QuestTileContextMenu } from "./components/questTileContextMenu";
 import type { Quest, QuestUserStatus } from "./discordTypes";
 import { getQuestifySettings } from "./settings/access";
 import { resetQuestsToResume, startAutoFetchingQuests, stopAutoFetchingQuests } from "./settings/fetching";
@@ -347,11 +348,11 @@ const questifyPatches: VencordPatch[] = [
         }
     },
     {
-        find: "prevIsQuestAccepted:",
+        find: '"quest-bar-container"',
         predicate: () => !getQuestifySettings().disableQuestsEverything && !getQuestifySettings().disableAccountPanelQuestProgress,
         replacement: {
-            match: /(?<=isLoading:\i}=\(0,\i\.\i\)\(\),\i=\i\.useContext\(\i\.\i\),\i=\i\|\|\i&&)(\i)/,
-            replace: "($1||$self.shouldForceQuestPanelVisible(arguments[0].quest))"
+            match: /(quest:(\(0,\i\.\i\)\(\i\)),location:\i\.\i\.QUESTS_BAR}\)[^]{0,400}?isLoading:\i}=\(0,\i\.\i\)\(\),\i=\i\.useContext\(\i\.\i\),\i=\i\|\|\i&&)(\i)/,
+            replace: "$1($3||$self.shouldForceQuestPanelVisible($2))"
         }
     },
     {
@@ -378,12 +379,12 @@ const questifyPatches: VencordPatch[] = [
         ]
     },
     {
-        find: 'STEP_2_CLICKED_INTERNAL,"quest_embed_card_footer',
+        find: "GameProfileSources.QuestEmbed",
         group: true,
         predicate: () => !getQuestifySettings().disableQuestsEverything,
         replacement: [
             {
-                match: /(?<=function \i\(\i\){)(?=let\{quest:\i,location:\i,questContentPosition:\i,sourceQuestContent:)/,
+                match: /(?<=function \i\(\i\){)(?=let\{quest:\i,location:\i,)/,
                 replace: "void $self.useQuestRerender();"
             },
             {
@@ -505,7 +506,6 @@ const questifyPatches: VencordPatch[] = [
         ]
     },
     {
-        // Amiricord only (not in Equicord's Questify): Vencord's server list API is not in Amiricord's engine, so this patch does its job. It puts
         find: /\i,\{guildDiscoveryButton:/,
         replacement: {
             match: /(\i(?:\.\i)*),\{(?=guildDiscoveryButton:)/,
@@ -652,6 +652,16 @@ const plugin: PluginCode & Record<string, unknown> = {
         ctx.addStyle(questifyCss, "questify");
         ctx.addStyle(settingsCss, "questify-settings");
         ctx.addStyle(pluginModalCss, "questify-window");
+
+        ctx.contextMenu.addNative("quests-entry", (children, props) => {
+            const parts = ctx.contextMenu.parts();
+
+            if (!parts) {
+                return;
+            }
+
+            QuestTileContextMenu(children, props as { quest?: Quest; }, parts);
+        });
 
         if (!enabledOnStartup && PlainSettings.plugins.Questify?.enabled) {
             setRestartDirty(true);

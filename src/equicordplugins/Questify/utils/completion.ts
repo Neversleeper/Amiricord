@@ -1017,6 +1017,18 @@ async function runVideoQuest(quest: Quest, entry: AutoCompleteEntry, target: Aut
     QL.info("AUTO_COMPLETE_VIDEO_STARTED", { questId: quest.id, questName: entry.questName, timeRemaining, target });
 
     if (timeRemaining <= 0) {
+        const missingSeconds = Math.max(0, reportTarget - reportedProgress);
+
+        if (missingSeconds > 0) {
+            await sleep(Math.ceil(missingSeconds * 1000) + 500, entry.abortController.signal);
+
+            if (!isEntryActive(entry)) {
+                return false;
+            }
+
+            maximumPlaybackTimestamp = Math.floor(reportTarget);
+        }
+
         return reportVideoQuestProgress(quest, entry, Math.min(reportTarget, maximumPlaybackTimestamp), { attempts: 3, displayProgress: completionTarget });
     }
 

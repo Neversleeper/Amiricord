@@ -8,8 +8,10 @@
 // one on a right click on the elements that match. It is plain DOM made here (no Discord module, no permission), styled with Discord's colour variables so it
 // follows the theme. It closes on a click outside, on Escape (which Discord does not get), on Tab, when the window changes size or something scrolls, after an item
 // runs, when another menu opens, and when the plugin stops. Arrow keys, Home, End, Enter and Space work. Text is always set as text, never as HTML.
-// This is NOT an entry inside Discord's own menu (that needs Discord's components, see the analysis). Design: docs/analysis-50-engine-apis-devtools-menus-sounds-notifications.md.
+// `addNative(navId, callback)` is the other way: an entry INSIDE Discord's own menu (see `nativeMenus.ts`), made with Discord's own pieces from `parts()`. Design: docs/analysis-50-engine-apis-devtools-menus-sounds-notifications.md.
 
+import type { MenuParts } from "./menuParts";
+import type { NativeMenuCallback, NativeMenuHub } from "./nativeMenus";
 import type { DocumentLike, ElementLike, EventLike } from "./notifications";
 
 export interface ContextMenuItem {
@@ -52,6 +54,15 @@ export interface PluginContextMenu {
      * Discord's own menu alone. Returns a function that stops it. An error in `build` is reported and Discord's menu goes on as if it had not been there.
      */
     onElement(selector: string, build: (event: PointerLike, element: unknown) => ContextMenuEntry[] | null | undefined): () => void;
+    /**
+     * Add entries to one of Discord's own menus: `callback(children, props)` runs every time Discord opens the menu with this `navId` (for the menu of a Quest tile, `"quests-entry"`).
+     * `children` is a copy of the menu's list, to change in place (`unshift`, `push`, `splice`); `props` is what the code that makes the menu was given (for a Quest tile, an object with
+     * the `quest`). Build the entries with `parts()`. A callback that throws is reported and the menu is drawn without it. Returns a function that stops it; it also stops when the plugin
+     * stops. Nothing happens (and the function does nothing) when the engine cannot reach Discord's menus. Only a menu whose `navId` is written as text in Discord's code is covered.
+     */
+    addNative(navId: string, callback: NativeMenuCallback): () => void;
+    /** Discord's own menu pieces, to build entries for `addNative`; undefined when they cannot be reached (yet). */
+    parts(): MenuParts | undefined;
 }
 
 export const MAX_ENTRIES = 60;
@@ -143,6 +154,10 @@ export interface ContextMenuDocument extends Omit<DocumentLike, "createElement">
 
 export interface ContextMenuLayerDeps {
     document?: ContextMenuDocument;
+    /** Where entries for Discord's own menus are kept. Without it `addNative` does nothing. */
+    native?: NativeMenuHub;
+    /** Finds Discord's own menu pieces. Without it `parts()` answers undefined. */
+    menuParts?(): MenuParts | undefined;
     /** Put the menu's CSS into the page (called once, the first time a menu opens). */
     addStyle(css: string): void;
 }
@@ -394,6 +409,27 @@ export function createContextMenuLayer(deps: ContextMenuLayerDeps) {
                     };
                     stops.add(stop);
                     return stop;
+                },
+
+                addNative(navId, callback) {
+                    const hub = deps.native;
+                    if (!hub || typeof callback !== "function") return () => undefined;
+                    if (!hub.add(id, navId, callback, error => { reportError(`native menu ${String(navId)}`, error); })) return () => undefined;
+                    register();
+                    const stop = () => {
+                        stops.delete(stop);
+                        hub.remove(id, navId, callback);
+                    };
+                    stops.add(stop);
+                    return stop;
+                },
+
+                parts() {
+                    try {
+                        return deps.menuParts?.();
+                    } catch {
+                        return undefined;
+                    }
                 }
             };
         }

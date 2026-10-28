@@ -7,7 +7,6 @@
 export enum QuestTaskType {
     STREAM_ON_DESKTOP = "STREAM_ON_DESKTOP",
     PLAY_ON_DESKTOP = "PLAY_ON_DESKTOP",
-    // No aparece en los scripts iniciales del build 647615; valor tomado de Equicord, sin verificar.
     PLAY_ON_DESKTOP_V2 = "PLAY_ON_DESKTOP_V2",
     PLAY_ON_XBOX = "PLAY_ON_XBOX",
     PLAY_ON_PLAYSTATION = "PLAY_ON_PLAYSTATION",
