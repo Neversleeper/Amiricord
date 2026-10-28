@@ -196,7 +196,8 @@ export function QuestButtonContextMenu({ dummy = false }: { dummy?: boolean; }):
     const markAllIgnoredDisabled = dummy || settings.questButtonBadgeCount <= 0;
     const resetIgnoredDisabled = dummy || getIgnoredQuestIDs().length <= 0;
     const noneAutoCompletable = getQueueableAutoCompleteQuests().length <= 0;
-    const queueAllQuestsVisible = !settings.autoCompleteQuestsSimultaneously && !noneAutoCompletable;
+    const queueAllQuestsVisible = !noneAutoCompletable;
+    const queueAllLabel = settings.autoCompleteQuestsSimultaneously ? "Start All Quests (Simultaneously)" : "Queue All Quests";
     const enrollmentRateLimited = isQuestEnrollmentRateLimited();
     const queueAllQuestsInProgress = isQueueAllAutoCompleteQuestsInProgress();
     const queueAllQuestsDisabled = dummy || queueAllQuestsInProgress || enrollmentRateLimited;
@@ -225,7 +226,7 @@ export function QuestButtonContextMenu({ dummy = false }: { dummy?: boolean; }):
             {queueAllQuestsVisible && (
                 <Menu.MenuItem
                     id={q(`${navId}-queue-all-quests`)}
-                    label={"Queue All Quests" + labelSuffix}
+                    label={queueAllLabel + labelSuffix}
                     action={() => {
                         const queueAllPromise = queueAllAutoCompleteQuests();
 
@@ -241,7 +242,7 @@ export function QuestButtonContextMenu({ dummy = false }: { dummy?: boolean; }):
             {clearQueueVisible && (
                 <Menu.MenuItem
                     id={q(`${navId}-clear-queue`)}
-                    label="Clear Quest Queue"
+                    label="Stop All Quests"
                     action={() => {
                         stopAllAutoCompletes({
                             manual: true,
