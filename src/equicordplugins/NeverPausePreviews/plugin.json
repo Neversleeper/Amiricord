@@ -1,0 +1,20 @@
+{
+    "schema": 1,
+    "id": "NeverPausePreviews",
+    "name": "Never Pause Previews",
+    "version": "1.0.0",
+    "description": "Keeps in-call and picture-in-picture previews (screenshares, streams) from pausing when Discord loses focus. Warning: Discord uses more resources than normal while it is on.",
+    "origin": "equicord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        { "name": "vappstar" }
+    ],
+    "credits": [
+        { "name": "Vendicated and contributors (Vencord), vappstar (Equicord), plugin NeverPausePreviews", "license": "GPL-3.0-or-later", "url": "https://github.com/TestcordDev/TestCord" }
+    ],
+    "tags": ["media"],
+    "enabledByDefault": false,
+    "startAt": "init",
+    "entry": { "renderer": "index.ts" },
+    "permissions": {}
+}
