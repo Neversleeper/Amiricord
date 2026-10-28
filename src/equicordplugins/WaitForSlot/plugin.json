@@ -1,0 +1,21 @@
+{
+    "schema": 1,
+    "id": "WaitForSlot",
+    "name": "Wait For Slot",
+    "version": "1.0.0",
+    "description": "Wait for a place in a full voice channel. When you try to join one that is full, or pick Join Queue in its right-click menu, you are told when someone leaves, or joined for you. Nothing is sent anywhere.",
+    "origin": "equicord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        { "name": "omaw" },
+        { "name": "prism" }
+    ],
+    "credits": [
+        { "name": "Vendicated and contributors (Vencord), omaw (Equicord) and prism, plugin WaitForSlot", "license": "GPL-3.0-or-later", "url": "https://github.com/TestcordDev/TestCord" }
+    ],
+    "tags": ["voice", "utility"],
+    "enabledByDefault": false,
+    "startAt": "webpackReady",
+    "entry": { "renderer": "index.tsx" },
+    "permissions": {}
+}
