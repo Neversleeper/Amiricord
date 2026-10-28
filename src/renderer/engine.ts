@@ -18,8 +18,10 @@ import { FALLBACK_CSS } from "../api/fallbackStyles";
 import { FluxDispatcherLike, FluxHandlers, subscribeFlux } from "../api/flux";
 import { setReactSource } from "../api/jsxRuntime";
 import { LifecycleEvent, LifecycleOptions, PluginContext, PluginLifecycle, PluginRuntime } from "../api/lifecycle";
+import { locateMenuParts, type MenuParts } from "../api/menuParts";
 import { buildModals, PluginModals } from "../api/modals";
 import { buildNative, PluginNativeCaller } from "../api/native";
+import { type NativeMenuHub, nativeMenus } from "../api/nativeMenus";
 import { createNotificationLayer, type PluginNotifications } from "../api/notifications";
 import { buildPluginCards, PluginCard, PluginSource } from "../api/pluginCards";
 import { describeSettings, isPluginSettings, PluginSettingsAnswer, PluginSettingsComponent } from "../api/pluginSettings";
@@ -244,6 +246,8 @@ export interface EngineOptions {
     lifecycle?: LifecycleOptions;
     /** Dev mode only: how long the settings probe waits for Discord's settings code (default 10 minutes). */
     probeWaitMs?: number;
+    /** Where entries for Discord's own menus are kept. Default: the one hub of the page, which the patch of the core plugin ContextMenuApi uses. */
+    nativeMenus?: NativeMenuHub;
     /**
      * The privacy self-test of the start (does the client tell Discord it has mods?). It runs only when this is given, with the page's
      * WebSocket class; the engine adds the reading of Discord's properties and the reporting. Left out in tests that do not need it.
@@ -294,6 +298,11 @@ const SOUND_NEEDLES = ["discodo", "message1", "bop_message1", ".mp3"] as const;
  * Texts looked for by the dev-mode search for the patches of a Quests plugin: where they are in Discord's code and whether that module has already run (`loaded`).
  * Written every round even when nothing is found, because "not registered yet" (its chunk was not downloaded) is an answer too.
  */
+/**
+ * Texts looked for by the dev-mode search to find where Discord draws its context menus and their parts (the menu, its items, groups, separators and check items),
+ * and the menu of a Quest tile (`quests-entry`). Written every round even with no hit; each hit says whether its module has already run.
+ */
+const MENU_NEEDLES = ["\"quests-entry\"", "navId:", "role:\"menu\"", "role:\"menuitem\"", "\"menuitemcheckbox\"", "role:\"separator\"", "openContextMenuLazy"] as const;
 const QUEST_NEEDLES = ["QUEST_HOME)},[]),", ".ALL)}):(", "questNameHeadingId"] as const;
 const DIALOG_NEEDLES = ["\"data-dialog\":\"modal\"", "setFocusLockDisabled:"] as const;
 const MODAL_PARTS_NEEDLES = ["\"aria-modal\":", "returnFocus", "FocusLock", "data-no-focus-lock", "focusin", "tabbable"] as const;
@@ -539,7 +548,23 @@ export function startEngine(options: EngineOptions): Engine {
             send({ type: "runtime-error", plugin: "common", source: what, error: describe(error) });
         }
     };
-    const contextMenuLayer = createContextMenuLayer({ document: pageDocument, addStyle: css => { addPageStyle(css, "context-menu", "context menu styles"); } });
+    // Discord's own menu pieces are looked for in the source of its modules; a miss is tried again only after a few seconds, because the search reads every module.
+    let menuPartsFound: MenuParts | undefined;
+    let menuPartsTriedAt: number | undefined;
+    const findMenuParts = (): MenuParts | undefined => {
+        if (menuPartsFound) return menuPartsFound;
+        const now = Date.now();
+        if (menuPartsTriedAt !== undefined && now - menuPartsTriedAt < 5000) return undefined;
+        menuPartsTriedAt = now;
+        menuPartsFound = locateMenuParts(view);
+        return menuPartsFound;
+    };
+    const contextMenuLayer = createContextMenuLayer({
+        document: pageDocument,
+        addStyle: css => { addPageStyle(css, "context-menu", "context menu styles"); },
+        native: options.nativeMenus ?? nativeMenus,
+        menuParts: findMenuParts
+    });
     const notificationLayer = createNotificationLayer({
         document: pageDocument,
         setTimeout: (work, ms) => setTimeout(work, ms),
@@ -788,6 +813,13 @@ export function startEngine(options: EngineOptions): Engine {
             try {
                 const hits = view.searchSources(SOUND_NEEDLES, 8, 500);
                 if (Object.values(hits).some(list => list.length > 0)) bridge.devDump?.("module-search-sounds", redact(JSON.stringify({ round: rounds, hits })));
+            } catch {
+                // Debug output must never disturb Discord.
+            }
+            // Where Discord draws its context menus and their parts. Written even with no hit.
+            try {
+                const hits = view.searchSources(MENU_NEEDLES, 6, 900);
+                bridge.devDump?.("module-search-menus", redact(JSON.stringify({ round: rounds, hits })));
             } catch {
                 // Debug output must never disturb Discord.
             }

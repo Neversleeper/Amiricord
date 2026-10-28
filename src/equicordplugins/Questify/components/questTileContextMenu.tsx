@@ -4,9 +4,8 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import type { ReactNode } from "react";
+import type { ComponentType } from "react";
 
-import { Menu } from "../amiricord/common";
 import { copyToClipboard } from "../amiricord/utils";
 import type { Quest } from "../discordTypes";
 import { addIgnoredQuest, questIsIgnored, removeIgnoredQuest } from "../settings/ignoredQuests";
@@ -15,11 +14,20 @@ import { canAutoCompleteQuest, enrollAndStartQuestAutoComplete, ensureQuestEnrol
 import { getQuestStatus, QuestStatus, refreshQuest } from "../utils/questState";
 import { q } from "../utils/ui";
 
+export interface QuestMenuParts {
+    MenuGroup: unknown;
+    MenuItem: unknown;
+}
+
+type MenuPiece = ComponentType<Record<string, unknown>>;
+
 export function QuestTileContextMenu(
-    children: ReactNode[],
+    children: unknown[],
     props: { quest?: Quest; },
+    parts: QuestMenuParts,
     isClaimedMenu: boolean = false
 ): void {
+    const Menu = { MenuGroup: parts.MenuGroup as MenuPiece, MenuItem: parts.MenuItem as MenuPiece };
     const quest = props.quest && refreshQuest(props.quest);
 
     if (!quest) {
