@@ -1,0 +1,52 @@
+{
+    "name": "amiricord",
+    "private": true,
+    "version": "0.3.0",
+    "description": "Amiricord, a Discord client mod for Windows",
+    "license": "GPL-3.0-or-later",
+    "author": "szlcx404 and Neversleeper",
+    "contributors": [
+        "szlcx404 (https://github.com/szlcx404)",
+        "Neversleeper (https://github.com/Neversleeper)"
+    ],
+    "type": "module",
+    "packageManager": "pnpm@11.9.0",
+    "engines": {
+        "node": ">=22"
+    },
+    "scripts": {
+        "typecheck": "tsc --noEmit -p tsconfig.json && tsc --noEmit -p tsconfig.node.json && tsc --noEmit -p tsconfig.electron.json",
+        "lint": "eslint",
+        "build": "node --import tsx scripts/build/build.ts",
+        "installer": "node --import tsx scripts/installer.ts",
+        "release": "node --import tsx scripts/release.ts",
+        "badges": "node --import tsx scripts/badges.ts",
+        "inject": "node --import tsx scripts/installer.ts inject",
+        "uninject": "node --import tsx scripts/installer.ts uninject",
+        "repair": "node --import tsx scripts/installer.ts repair",
+        "status": "node --import tsx scripts/installer.ts status",
+        "build:registry": "node --import tsx scripts/build/generateRegistry.ts",
+        "check:plugins": "node --import tsx scripts/build/checkPlugins.ts",
+        "test": "node --import tsx --test \"tests/**/*.test.ts\""
+    },
+    "devDependencies": {
+        "@stylistic/eslint-plugin": "5.10.0",
+        "@types/node": "26.0.1",
+        "@types/react": "19.1.0",
+        "@types/react-dom": "19.1.0",
+        "esbuild": "0.28.1",
+        "eslint": "10.6.0",
+        "eslint-import-resolver-alias": "1.1.2",
+        "eslint-plugin-react": "7.37.5",
+        "eslint-plugin-simple-header": "1.2.1",
+        "eslint-plugin-simple-import-sort": "13.0.0",
+        "eslint-plugin-unused-imports": "4.4.1",
+        "gifenc": "1.0.3",
+        "gifuct-js": "2.1.2",
+        "standalone-electron-types": "41.2.1",
+        "tsx": "4.22.4",
+        "type-fest": "5.7.0",
+        "typescript": "6.0.3",
+        "typescript-eslint": "8.62.1"
+    }
+}

@@ -1,0 +1,20 @@
+{
+    "schema": 1,
+    "id": "NoTrack",
+    "name": "NoTrack",
+    "version": "0.1.0",
+    "description": "Stops Discord from collecting usage reports, metrics and crash reports before they are created, and counts what it stopped.",
+    "origin": "amiricord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        { "name": "szlcx404", "discordId": "1554284154009682032" },
+        { "name": "Neversleeper", "discordId": "1564847328794382408", "github": "https://github.com/Neversleeper" }
+    ],
+    "credits": [],
+    "tags": ["privacy"],
+    "core": true,
+    "enabledByDefault": true,
+    "startAt": "init",
+    "entry": { "renderer": "index.ts" },
+    "permissions": {}
+}

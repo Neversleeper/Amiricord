@@ -1,0 +1,9 @@
+{
+    "extends": "./tsconfig.json",
+    "compilerOptions": {
+        "lib": ["ESNext", "DOM"],
+        "types": ["node"]
+    },
+    "include": ["scripts/**/*", "tests/**/*", "src/shared/**/*", "src/main/**/*", "src/installer/**/*"],
+    "exclude": ["src/main/electronGlue.ts", "src/main/index.ts"]
+}

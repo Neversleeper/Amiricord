@@ -1,0 +1,20 @@
+{
+    "schema": 1,
+    "id": "Settings",
+    "name": "Amiricord Settings",
+    "version": "0.1.0",
+    "description": "The Amiricord section in Discord's settings: engine status, quick actions and, soon, the list of plugins.",
+    "origin": "amiricord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        { "name": "szlcx404", "discordId": "1554284154009682032" },
+        { "name": "Neversleeper", "discordId": "1564847328794382408", "github": "https://github.com/Neversleeper" }
+    ],
+    "credits": [],
+    "tags": ["ui"],
+    "core": true,
+    "enabledByDefault": true,
+    "startAt": "webpackReady",
+    "entry": { "renderer": "index.tsx" },
+    "permissions": {}
+}

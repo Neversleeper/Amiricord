@@ -1,0 +1,23 @@
+{
+    "schema": 1,
+    "id": "DeleteMe",
+    "name": "DeleteMe",
+    "version": "1.0.0",
+    "description": "Deletes your own messages in the conversation that is open, slowly, after a scan, a typed confirmation and a button. It cannot be undone. Open it from the gear of this card.",
+    "origin": "testcord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        { "name": "Neversleeper", "discordId": "1564847328794382408", "github": "https://github.com/Neversleeper" }
+    ],
+    "credits": [
+        { "name": "Look of the window from the style file of the plugin DeleteMe of TestCord (Vencord / Equicord); the code is written for Amiricord", "license": "GPL-3.0-or-later", "url": "https://github.com/TestcordDev/TestCord" }
+    ],
+    "tags": ["utility", "experimental"],
+    "enabledByDefault": false,
+    "startAt": "domReady",
+    "entry": { "renderer": "index.ts" },
+    "permissions": {
+        "account": { "write": ["delete-own-messages"] },
+        "messages": { "read": "visible" }
+    }
+}

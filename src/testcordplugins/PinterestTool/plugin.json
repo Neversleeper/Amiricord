@@ -1,0 +1,33 @@
+{
+    "schema": 1,
+    "id": "PinterestTool",
+    "name": "Pinterest Tool",
+    "version": "0.3.0",
+    "description": "Find profile icons and banners on Pinterest, then edit them (effects, text, pictures, GIFs) before applying. Adds a Pinterest button to the Select an Image dialog of the profile. The interface is Pinterart by szcx404; the search, storage and secret cookie are written for Amiricord.",
+    "origin": "testcord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        { "name": "Neversleeper", "discordId": "1564847328794382408", "github": "https://github.com/Neversleeper" },
+        { "name": "szlcx404", "github": "https://github.com/szlcx404", "role": "original author" }
+    ],
+    "credits": [
+        { "name": "Vendicated and contributors (Vencord), plugin Pinterest Tool by szcx404", "license": "GPL-3.0-or-later", "url": "https://github.com/TestcordDev/TestCord" },
+        { "name": "Pinterart interface by szcx404 (also credited as szaleniec1327), derived from Vencord's PinterestSearch", "license": "GPL-3.0-or-later", "url": "https://github.com/TestcordDev/TestCord" }
+    ],
+    "tags": ["media", "ui"],
+    "enabledByDefault": false,
+    "experimental": true,
+    "startAt": "domReady",
+    "deferrable": true,
+    "entry": { "renderer": "index.ts", "main": "native.ts" },
+    "permissions": {
+        "network": [
+            { "host": "*.pinterest.com", "from": "main", "why": "search and anonymous session; Pinterest sends people to a regional Pinterest site" },
+            { "host": "i.pinimg.com", "from": "main", "why": "image download" },
+            { "host": "s.pinimg.com", "from": "main", "why": "image download" }
+        ],
+        "native": { "functions": ["fetchMedia", "search", "warmUp"] },
+        "system": { "clipboard": true, "openExternal": true }
+    },
+    "secrets": ["pinterestCookie"]
+}

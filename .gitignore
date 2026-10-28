@@ -1,0 +1,16 @@
+node_modules/
+dist/
+*.log
+.env
+.DS_Store
+Thumbs.db
+backups/
+release/
+
+# Dumps read from the owner's own Discord during development (code of Discord, not ours)
+notrack-discovery.json
+probe/
+
+# Personal working logs and handover notes of each owner: kept on their own PC, never published
+CONTEXTO-*.md
+PROMPT-NEXT-CHAT.md

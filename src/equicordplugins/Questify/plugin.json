@@ -1,0 +1,65 @@
+{
+    "schema": 1,
+    "id": "Questify",
+    "name": "Questify",
+    "version": "1.0.0",
+    "description": "Enhance specific Quest features, disable annoyances, or completely remove Quests.",
+    "origin": "equicord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        {
+            "name": "Etorix",
+            "role": "original author"
+        },
+        {
+            "name": "szlcx404",
+            "role": "Amiricord port"
+        }
+    ],
+    "credits": [
+        {
+            "name": "Vendicated and contributors (Vencord), Etorix (Equicord), plugin Questify",
+            "license": "GPL-3.0-or-later",
+            "url": "https://github.com/Equicord/Equicord"
+        }
+    ],
+    "tags": [
+        "ui",
+        "privacy",
+        "utility"
+    ],
+    "enabledByDefault": false,
+    "startAt": "webpackReady",
+    "entry": {
+        "renderer": "index.tsx",
+        "main": "native.ts"
+    },
+    "permissions": {
+        "network": [
+            {
+                "host": "*.discordsays.com",
+                "from": "main",
+                "why": "Sends a Quest's progress to the Activity's own server, for Quests that finish inside an Activity."
+            }
+        ],
+        "native": {
+            "functions": [
+                "complete"
+            ]
+        },
+        "account": {
+            "write": [
+                "quest.enroll",
+                "quest.progress",
+                "oauth.authorize",
+                "oauth.revoke"
+            ]
+        },
+        "system": {
+            "spawn": false,
+            "clipboard": true,
+            "listen": [],
+            "openExternal": false
+        }
+    }
+}

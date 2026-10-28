@@ -1,0 +1,30 @@
+{
+    "schema": 1,
+    "id": "CompactCompose",
+    "name": "Compact Compose",
+    "version": "1.0.0",
+    "description": "Slims down the message box and fades the upload and gift buttons until you hover or focus it.",
+    "origin": "testcord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        {
+            "name": "Sharp"
+        }
+    ],
+    "credits": [
+        {
+            "name": "Vendicated and contributors (Vencord), plugin CompactCompose by Sharp",
+            "license": "GPL-3.0-or-later",
+            "url": "https://github.com/TestcordDev/TestCord"
+        }
+    ],
+    "tags": [
+        "ui"
+    ],
+    "enabledByDefault": false,
+    "startAt": "webpackReady",
+    "entry": {
+        "renderer": "index.ts"
+    },
+    "permissions": {}
+}

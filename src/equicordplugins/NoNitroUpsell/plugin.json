@@ -1,0 +1,20 @@
+{
+    "schema": 1,
+    "id": "NoNitroUpsell",
+    "name": "No Nitro Upsell",
+    "version": "1.0.0",
+    "description": "Removes Discord's Nitro upsells by making the client believe you have Nitro. Only the client is told; nothing is sent to Discord.",
+    "origin": "equicord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        { "name": "thororen" }
+    ],
+    "credits": [
+        { "name": "Vendicated and contributors (Vencord), thororen (Equicord), plugin NoNitroUpsell", "license": "GPL-3.0-or-later", "url": "https://github.com/TestcordDev/TestCord" }
+    ],
+    "tags": ["utility"],
+    "enabledByDefault": false,
+    "startAt": "webpackReady",
+    "entry": { "renderer": "index.ts" },
+    "permissions": {}
+}

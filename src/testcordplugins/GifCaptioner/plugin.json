@@ -1,0 +1,32 @@
+{
+    "schema": 1,
+    "id": "GifCaptioner",
+    "name": "GIF Captioner",
+    "version": "1.0.0",
+    "description": "Adds a pencil button to the GIFs of Discord's GIF picker: write a caption, and the GIF is redrawn with it on a white band above and sent to the conversation that is open.",
+    "origin": "testcord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        { "name": "benjii" }
+    ],
+    "credits": [
+        { "name": "Vendicated and contributors (Vencord), benjii (Equicord), plugin GifCaptioner", "license": "GPL-3.0-or-later", "url": "https://github.com/TestcordDev/TestCord" }
+    ],
+    "tags": ["media", "utility"],
+    "enabledByDefault": false,
+    "startAt": "domReady",
+    "entry": { "renderer": "index.ts", "main": "native.ts" },
+    "permissions": {
+        "network": [
+            { "host": "*.discordapp.com", "from": "main", "why": "download the GIF you chose to caption" },
+            { "host": "*.discordapp.net", "from": "main", "why": "download the GIF you chose to caption" },
+            { "host": "*.tenor.com", "from": "main", "why": "download the GIF you chose to caption" },
+            { "host": "*.klipy.com", "from": "main", "why": "download the GIF you chose to caption" },
+            { "host": "fonts.google.com", "from": "main", "why": "the list of fonts to choose from, when the window opens" },
+            { "host": "fonts.googleapis.com", "from": "main", "why": "the style sheet of the font you choose" },
+            { "host": "fonts.gstatic.com", "from": "main", "why": "the file of the font you choose" }
+        ],
+        "native": { "functions": ["fetchMedia", "fontFile", "fontList"] },
+        "messages": { "send": true }
+    }
+}

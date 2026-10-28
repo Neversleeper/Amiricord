@@ -1,0 +1,31 @@
+{
+    "schema": 1,
+    "id": "WebRTCLeakPrevent",
+    "name": "WebRTC Leak Prevent",
+    "version": "1.0.0",
+    "description": "Forces the WebRTC ICE policy to relay-only so Discord does not expose your real IP address in voice calls. Relay-only can make calls fail on some networks.",
+    "origin": "testcord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        {
+            "name": "Irritably"
+        }
+    ],
+    "credits": [
+        {
+            "name": "Vendicated and contributors (Vencord), plugin WebRTCLeakPrevent by Irritably",
+            "license": "GPL-3.0-or-later",
+            "url": "https://github.com/TestcordDev/TestCord"
+        }
+    ],
+    "tags": [
+        "privacy",
+        "voice"
+    ],
+    "enabledByDefault": false,
+    "startAt": "init",
+    "entry": {
+        "renderer": "index.ts"
+    },
+    "permissions": {}
+}

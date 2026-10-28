@@ -1,0 +1,9 @@
+name = "amiricord-registry"
+main = "index.js"
+compatibility_date = "2026-10-01"
+
+# Created once with: npx wrangler kv namespace create USERS
+# then the id it prints goes below.
+[[kv_namespaces]]
+binding = "USERS"
+id = "3f167703ed5d4b6ca3a0c6abec46a290"

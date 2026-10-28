@@ -1,0 +1,21 @@
+{
+    "schema": 1,
+    "id": "MoreAlts",
+    "name": "More Alts",
+    "version": "1.0.0",
+    "description": "Allows more accounts in Discord's account switcher than the usual limit. Only the client's own limit is changed; Discord's servers still decide what an account may do.",
+    "origin": "testcord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        { "name": "zastix" },
+        { "name": "x2b" }
+    ],
+    "credits": [
+        { "name": "Vendicated and contributors (Vencord), plugin MoreAlts by zastix and x2b", "license": "GPL-3.0-or-later", "url": "https://github.com/TestcordDev/TestCord" }
+    ],
+    "tags": ["utility", "privacy"],
+    "enabledByDefault": false,
+    "startAt": "init",
+    "entry": { "renderer": "index.ts" },
+    "permissions": {}
+}

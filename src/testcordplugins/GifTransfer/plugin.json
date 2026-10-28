@@ -1,0 +1,24 @@
+{
+    "schema": 1,
+    "id": "GifTransfer",
+    "name": "GIF Transfer",
+    "version": "1.0.0",
+    "description": "Export and import your favorite GIFs between accounts as a file, and lift Discord's limit on how many favorites you can have. Adds Export, Import and Verify buttons to the GIF picker.",
+    "origin": "testcord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        { "name": "nnenaza" },
+        { "name": "x2b" }
+    ],
+    "credits": [
+        { "name": "Vendicated and contributors (Vencord), plugin GifTransfer by nnenaza and x2b", "license": "GPL-3.0-or-later", "url": "https://github.com/TestcordDev/TestCord" }
+    ],
+    "tags": ["media", "utility"],
+    "enabledByDefault": false,
+    "startAt": "init",
+    "entry": { "renderer": "index.ts" },
+    "permissions": {
+        "account": { "write": ["favorite-gifs"] },
+        "files": "user-chosen"
+    }
+}

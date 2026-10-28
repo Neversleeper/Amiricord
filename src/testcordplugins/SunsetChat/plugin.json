@@ -1,0 +1,30 @@
+{
+    "schema": 1,
+    "id": "SunsetChat",
+    "name": "Sunset Chat",
+    "version": "1.0.0",
+    "description": "Paints a dreamy vaporwave sunset gradient behind the message area.",
+    "origin": "testcord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        {
+            "name": "Sharp"
+        }
+    ],
+    "credits": [
+        {
+            "name": "Vendicated and contributors (Vencord), plugin SunsetChat by Sharp",
+            "license": "GPL-3.0-or-later",
+            "url": "https://github.com/TestcordDev/TestCord"
+        }
+    ],
+    "tags": [
+        "ui"
+    ],
+    "enabledByDefault": false,
+    "startAt": "webpackReady",
+    "entry": {
+        "renderer": "index.ts"
+    },
+    "permissions": {}
+}

@@ -1,0 +1,28 @@
+[
+    {
+        "version": "0.3.0",
+        "date": "2026-10-29",
+        "title": "Badges on profiles",
+        "notes": [
+            "New Badges plugin: people who use Amiricord see an Amiricord User badge on each other's profiles, and the owners have an Owner badge.",
+            "The owners can hand out their own badges with a list kept in the project's repository.",
+            "Amiricord tells the project's registry (a small free service, only the id of your Discord account) that you use it, and reads the list of Amiricord users every two hours, so everyone gets the badge without doing anything. It is always on: it is how Amiricord users recognise each other.",
+            "The plugin also adds an invisible mark to your own pronouns, as a second way to be recognised.",
+            "It reads the owners' badge list from GitHub when Discord starts and every 30 minutes. The plugin windows now show the Discord name and picture of each author."
+        ]
+    },
+    {
+        "version": "0.2.0",
+        "date": "2026-10-28",
+        "title": "Updates inside Amiricord, and a round of fixes",
+        "notes": [
+            "New Updates tab: press Check for updates and, when there is a newer version, Update now. Amiricord installs it and asks to restart Discord.",
+            "Copy Media Link works: right-click a picture or GIF and choose it at the end of the menu.",
+            "Copy Status URLs works with the buttons of someone's status (a game or app with its own buttons, not Spotify's).",
+            "GifTransfer has a Delete all button, and its buttons match Discord's look.",
+            "More Alts works again in the current Discord: more than five accounts in the account switcher.",
+            "DeleteMe tells you why a scan found nothing to delete.",
+            "New plugins: GifCaptioner, DeleteMe, MoreAlts, Copy Status URLs and Copy Media Link."
+        ]
+    }
+]

@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="currentColor" aria-label="Themes">
+
+  <rect x="2.25" y="3.55" width="15.05" height="7.3" rx="2.45"/>
+  <path d="M18.6 6.45c1.84 0 3.15 1.32 3.15 3.11v2.23c0 2.55-1.74 4.25-4.4 4.25h-2.42a1.35 1.35 0 0 1 0-2.7h2.42c1.19 0 1.7-.57 1.7-1.55V9.56c0-.26-.15-.41-.45-.41h-.33V6.45h.33Z"/>
+  <rect x="11.75" y="13.95" width="4.1" height="8.1" rx="2.05"/>
+</svg>

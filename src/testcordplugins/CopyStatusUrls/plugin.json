@@ -1,0 +1,23 @@
+{
+    "schema": 1,
+    "id": "CopyStatusUrls",
+    "name": "Copy Status URLs",
+    "version": "1.0.0",
+    "description": "Right-click the button of someone's status (for example \"Watch on Crunchyroll\") to copy its link. Discord may ask its own servers for the link when it is not already known.",
+    "origin": "testcord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        { "name": "sadan" },
+        { "name": "x2b" }
+    ],
+    "credits": [
+        { "name": "Vendicated and contributors (Vencord), plugin CopyStatusUrls by sadan and x2b", "license": "GPL-3.0-or-later", "url": "https://github.com/TestcordDev/TestCord" }
+    ],
+    "tags": ["utility"],
+    "enabledByDefault": false,
+    "startAt": "init",
+    "entry": { "renderer": "index.ts" },
+    "permissions": {
+        "system": { "clipboard": true }
+    }
+}

@@ -1,0 +1,20 @@
+{
+    "schema": 1,
+    "id": "StreamerModeOn",
+    "name": "Streamer Mode On",
+    "version": "1.0.0",
+    "description": "Turns Discord's streamer mode on when you start streaming in Discord, and off again when you stop.",
+    "origin": "vencord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        { "name": "icedmarina" }
+    ],
+    "credits": [
+        { "name": "Vendicated and contributors (Vencord), plugin StreamerModeOnStream by icedmarina", "license": "GPL-3.0-or-later", "url": "https://github.com/TestcordDev/TestCord" }
+    ],
+    "tags": ["privacy", "utility"],
+    "enabledByDefault": false,
+    "startAt": "webpackReady",
+    "entry": { "renderer": "index.ts" },
+    "permissions": {}
+}

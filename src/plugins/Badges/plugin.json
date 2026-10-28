@@ -1,0 +1,26 @@
+{
+    "schema": 1,
+    "id": "Badges",
+    "name": "Badges",
+    "version": "0.2.0",
+    "description": "Shows badges on profiles of people who use Amiricord: an Owner badge, the badges the owners hand out (kept in a list in the project's repository) and an Amiricord User badge for everyone who runs Amiricord. This is how Amiricord users recognise each other, so it is always on: it tells the project's registry the id of your account once per start, reads the list of Amiricord users at start and every two hours, reads the badge list at start and every 30 minutes, and adds an invisible mark to the end of your own pronouns.",
+    "origin": "amiricord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        { "name": "Neversleeper", "discordId": "1564847328794382408", "github": "https://github.com/Neversleeper" }
+    ],
+    "credits": [],
+    "tags": ["ui"],
+    "core": true,
+    "enabledByDefault": true,
+    "startAt": "webpackReady",
+    "entry": { "renderer": "index.ts", "main": "native.ts" },
+    "permissions": {
+        "network": [
+            { "host": "raw.githubusercontent.com", "from": "main", "why": "reads the badge list and its pictures from the project's repository, at start and every 30 minutes" },
+            { "host": "amiricord-registry.amiricord.workers.dev", "from": "main", "why": "tells the registry the id of your account (once per start) and reads the list of people who use Amiricord" }
+        ],
+        "native": { "functions": ["loadList", "loadRegistry", "registerSelf"] },
+        "account": { "write": ["profile-pronouns"] }
+    }
+}

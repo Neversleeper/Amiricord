@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+  <defs>
+    <mask id="amiricord-changelog-mask">
+      <rect width="24" height="24" fill="#fff"/>
+      <path d="M7.5 7.85h6.37M7.5 11.85h6.37M7.5 15.9h5.15" fill="none" stroke="#000" stroke-width="1.85" stroke-linecap="round"/>
+    </mask>
+  </defs>
+  <path mask="url(#amiricord-changelog-mask)" d="M5.2 2.5h13.3a2.3 2.3 0 0 1 2.3 2.3v2.45a1.03 1.03 0 0 1-2.06 0V5.6a.695.695 0 0 0-1.39 0v10.66a.5.5 0 0 0 .5.5h1.45a1.5 1.5 0 0 1 1.5 1.5V20a1.5 1.5 0 0 1-1.5 1.5H5.2a2 2 0 0 1-2-2v-15a2 2 0 0 1 2-2z"/>
+</svg>

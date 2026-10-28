@@ -1,0 +1,32 @@
+{
+    "schema": 1,
+    "id": "LazyMessageRender",
+    "name": "Lazy Message Render",
+    "version": "1.0.0",
+    "description": "Prevents the message action toolbar from clipping under the message above.",
+    "origin": "testcord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        {
+            "name": "x2b",
+            "github": "https://github.com/x2b1"
+        }
+    ],
+    "credits": [
+        {
+            "name": "Vendicated and contributors (Vencord), plugin LazyMessageRender by x2b",
+            "license": "GPL-3.0-or-later",
+            "url": "https://github.com/TestcordDev/TestCord"
+        }
+    ],
+    "tags": [
+        "fix",
+        "ui"
+    ],
+    "enabledByDefault": false,
+    "startAt": "webpackReady",
+    "entry": {
+        "renderer": "index.ts"
+    },
+    "permissions": {}
+}

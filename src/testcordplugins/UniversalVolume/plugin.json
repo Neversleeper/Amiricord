@@ -1,0 +1,31 @@
+{
+    "schema": 1,
+    "id": "UniversalVolume",
+    "name": "Universal Volume",
+    "version": "1.0.0",
+    "description": "Sets everyone in your voice channel to the same volume, and keeps new people who join at that level too.",
+    "origin": "testcord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        {
+            "name": "SirPhantom89"
+        }
+    ],
+    "credits": [
+        {
+            "name": "Vendicated and contributors (Vencord), plugin UniversalVolume by SirPhantom89",
+            "license": "GPL-3.0-or-later",
+            "url": "https://github.com/TestcordDev/TestCord"
+        }
+    ],
+    "tags": [
+        "voice",
+        "utility"
+    ],
+    "enabledByDefault": false,
+    "startAt": "webpackReady",
+    "entry": {
+        "renderer": "index.ts"
+    },
+    "permissions": {}
+}

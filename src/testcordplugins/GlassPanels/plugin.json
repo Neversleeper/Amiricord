@@ -1,0 +1,30 @@
+{
+    "schema": 1,
+    "id": "GlassPanels",
+    "name": "Glass Panels",
+    "version": "1.0.0",
+    "description": "Frosted-glass blur on the sidebar and member list.",
+    "origin": "testcord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        {
+            "name": "Sharp"
+        }
+    ],
+    "credits": [
+        {
+            "name": "Vendicated and contributors (Vencord), plugin GlassPanels by Sharp",
+            "license": "GPL-3.0-or-later",
+            "url": "https://github.com/TestcordDev/TestCord"
+        }
+    ],
+    "tags": [
+        "ui"
+    ],
+    "enabledByDefault": false,
+    "startAt": "webpackReady",
+    "entry": {
+        "renderer": "index.ts"
+    },
+    "permissions": {}
+}

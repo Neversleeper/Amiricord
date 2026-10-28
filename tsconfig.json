@@ -1,0 +1,31 @@
+{
+    "compilerOptions": {
+        "target": "ESNext",
+        "module": "ESNext",
+        "moduleResolution": "bundler",
+        "lib": ["DOM", "DOM.Iterable", "ESNext"],
+        "strict": true,
+        "noImplicitAny": false,
+        "skipLibCheck": false,
+        "resolveJsonModule": true,
+        "esModuleInterop": true,
+        "allowSyntheticDefaultImports": true,
+        "jsx": "react-jsx",
+        "jsxImportSource": "@amiricord/jsx",
+        "noEmit": true,
+        "types": [],
+        "paths": {
+            "@main/*": ["./src/main/*"],
+            "@api/*": ["./src/api/*"],
+            "@amiricord/jsx/jsx-runtime": ["./src/api/jsxRuntime.ts"],
+            "@components/*": ["./src/components/*"],
+            "@utils/*": ["./src/utils/*"],
+            "@plugins/*": ["./src/plugins/*"],
+            "@shared/*": ["./src/shared/*"],
+            "@webpack": ["./src/webpack/webpack"],
+            "@webpack/*": ["./src/webpack/*"]
+        }
+    },
+    "include": ["src/**/*"],
+    "exclude": ["src/main/**", "src/preload/**", "src/installer/**"]
+}

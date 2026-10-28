@@ -1,0 +1,22 @@
+{
+    "schema": 1,
+    "id": "CopyMediaLink",
+    "name": "Copy Media Link",
+    "version": "1.0.0",
+    "description": "Adds a working \"Copy Media Link\" to the right-click menu of pictures, GIFs and videos.",
+    "origin": "testcord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        { "name": "x2b" }
+    ],
+    "credits": [
+        { "name": "Vendicated and contributors (Vencord), plugin CopyMediaLink by x2b", "license": "GPL-3.0-or-later", "url": "https://github.com/TestcordDev/TestCord" }
+    ],
+    "tags": ["media", "utility"],
+    "enabledByDefault": false,
+    "startAt": "domReady",
+    "entry": { "renderer": "index.ts" },
+    "permissions": {
+        "system": { "clipboard": true }
+    }
+}

@@ -1,0 +1,32 @@
+{
+    "schema": 1,
+    "id": "MessageNitroBadge",
+    "name": "Message Nitro Badge",
+    "version": "1.0.0",
+    "description": "Enables Discord's social proofing Nitro badge experiment. It shows a Nitro badge next to your own name in servers; other people's badges are not shown.",
+    "origin": "testcord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        {
+            "name": "x2b",
+            "github": "https://github.com/x2b1"
+        }
+    ],
+    "credits": [
+        {
+            "name": "Vendicated and contributors (Vencord), plugin MessageNitroBadge by x2b",
+            "license": "GPL-3.0-or-later",
+            "url": "https://github.com/TestcordDev/TestCord"
+        }
+    ],
+    "tags": [
+        "chat",
+        "experimental"
+    ],
+    "enabledByDefault": false,
+    "startAt": "webpackReady",
+    "entry": {
+        "renderer": "index.ts"
+    },
+    "permissions": {}
+}

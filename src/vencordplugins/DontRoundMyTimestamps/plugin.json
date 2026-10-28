@@ -1,0 +1,20 @@
+{
+    "schema": 1,
+    "id": "DontRoundMyTimestamps",
+    "name": "Don't Round My Timestamps",
+    "version": "1.0.0",
+    "description": "Always rounds relative timestamps down, so 7.6y becomes 7y instead of 8y.",
+    "origin": "vencord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        { "name": "Lexi" }
+    ],
+    "credits": [
+        { "name": "Vendicated and contributors (Vencord), plugin DontRoundMyTimestamps", "license": "GPL-3.0-or-later", "url": "https://github.com/TestcordDev/TestCord" }
+    ],
+    "tags": ["ui", "utility"],
+    "enabledByDefault": false,
+    "startAt": "webpackReady",
+    "entry": { "renderer": "index.ts" },
+    "permissions": {}
+}

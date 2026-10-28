@@ -1,0 +1,20 @@
+{
+    "schema": 1,
+    "id": "QuietHours",
+    "name": "Quiet Hours",
+    "version": "1.0.0",
+    "description": "Silences Discord's notification sounds during a time window you set, for example 23:00 to 08:00. Visual notifications still show.",
+    "origin": "testcord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        { "name": "Sharp" }
+    ],
+    "credits": [
+        { "name": "Vendicated and contributors (Vencord), plugin QuietHours by Sharp", "license": "GPL-3.0-or-later", "url": "https://github.com/TestcordDev/TestCord" }
+    ],
+    "tags": ["utility"],
+    "enabledByDefault": false,
+    "startAt": "webpackReady",
+    "entry": { "renderer": "index.ts" },
+    "permissions": {}
+}
