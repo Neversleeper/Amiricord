@@ -1,5 +1,15 @@
 [
     {
+        "version": "0.3.1",
+        "date": "2026-10-29",
+        "title": "More Alts in the account window, and a Server Search button",
+        "notes": [
+            "More Alts works: the Manage Accounts window now lets you add more accounts than Discord's own five (the limit is set in the plugin's settings).",
+            "New Server Search plugin (from Equicord): a search button under the Home button opens Discord's quick switcher. It turns on and off without restarting Discord.",
+            "New pieces for plugin authors: plugins can draw things in the server list and add slash commands."
+        ]
+    },
+    {
         "version": "0.3.0",
         "date": "2026-10-29",
         "title": "Badges on profiles",

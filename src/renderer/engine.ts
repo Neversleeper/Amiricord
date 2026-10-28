@@ -9,6 +9,7 @@
 // It never touches Electron or the DOM directly (they come in through options), so it is tested with fakes.
 // Design: docs/design-02-core.md sections 4 to 8.
 
+import { buildCommands, commandHub, type PluginCommands } from "../api/commands";
 import type { ReactLike } from "../api/common";
 import { buildCommon, PluginCommon } from "../api/commonStores";
 import { type ContextMenuDocument, createContextMenuLayer, type PluginContextMenu } from "../api/contextMenu";
@@ -27,6 +28,7 @@ import { buildPluginCards, PluginCard, PluginSource } from "../api/pluginCards";
 import { describeSettings, isPluginSettings, PluginSettingsAnswer, PluginSettingsComponent } from "../api/pluginSettings";
 import { PluginSwitch, ToggleResult } from "../api/pluginSwitch";
 import { buildSecrets, PluginSecrets } from "../api/secrets";
+import { buildServerList, type PluginServerList, serverList } from "../api/serverList";
 import { SettingsClient } from "../api/settingsClient";
 import { type AudioLike, createSoundLayer, locateSoundContext, type PluginSounds } from "../api/sounds";
 import { buildStorage, indexedDbBackend, IndexedDbFactory, PluginStorage, StorageBackend } from "../api/storage";
@@ -138,6 +140,10 @@ export interface EnginePluginContext extends PluginContext {
     common: PluginCommon;
     /** Items added to Discord's own right-click menu (next to ctx.contextMenu, which draws a menu of its own). They go when the plugin stops. See `src/api/contextMenus.ts`. */
     menuItems: PluginContextMenus;
+    /** Things drawn in Discord's server list (above, in, below). They go when the plugin stops. See `src/api/serverList.ts`. */
+    serverList: PluginServerList;
+    /** Slash commands. They go when the plugin stops. See `src/api/commands.ts`. */
+    commands: PluginCommands;
     /** A short message at the bottom of the page. See `src/api/toasts.ts`. */
     toasts: PluginToasts;
     /** Opens Discord's dialogs and closes what this plugin left open when it stops. See `src/api/modals.ts`. */
@@ -595,6 +601,8 @@ export function startEngine(options: EngineOptions): Engine {
                 finders: pluginFinders,
                 common: buildCommon(pluginFinders),
                 menuItems: menuHub ? buildContextMenus(menuHub, id, ctx.onDispose) : { add: () => undefined },
+                serverList: buildServerList(serverList, id, ctx.onDispose),
+                commands: buildCommands(commandHub, id, ctx.onDispose, reportError),
                 toasts: havePage ? buildToasts(globalThis as unknown as ToastPage, css => { addCommonStyle(css, "toasts"); }, ctx.onDispose) : { show: () => undefined },
                 modals: buildModals(pluginFinders, ctx.onDispose, reportError),
                 notifications: notificationLayer.forPlugin(id, ctx.onDispose, reportError),

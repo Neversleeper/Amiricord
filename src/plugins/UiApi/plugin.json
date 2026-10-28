@@ -1,0 +1,19 @@
+{
+    "schema": 1,
+    "id": "UiApi",
+    "name": "UI API",
+    "version": "1.0.0",
+    "description": "The patches behind three things other plugins can add to Discord: elements in the server list, slash commands, and buttons on the bar of a message. It does nothing until a plugin uses them.",
+    "origin": "amiricord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        { "name": "Neversleeper", "discordId": "1564847328794382408", "github": "https://github.com/Neversleeper" }
+    ],
+    "credits": [],
+    "tags": ["developer"],
+    "core": true,
+    "enabledByDefault": true,
+    "startAt": "init",
+    "entry": { "renderer": "index.ts" },
+    "permissions": {}
+}

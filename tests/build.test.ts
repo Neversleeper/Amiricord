@@ -127,11 +127,11 @@ describe("the build", () => {
         for (const file of ["main.js", "preload.js", "renderer.js"]) assert.match(read(file), /SPDX-License-Identifier: GPL-3\.0-or-later/);
 
         const { events } = await runPage(read("renderer.js"));
-        // The self-test also reports at once that this test page has no WebSocket to watch: "not seen", never a pass; NoTrack and ContextMenuApi start at once (stage init).
-        assert.deepEqual(events.map(e => e.type), ["enabled", "discord-build", "self-test", "started", "started"]);
+        // The self-test also reports at once that this test page has no WebSocket to watch: "not seen", never a pass; NoTrack, ContextMenuApi and UiApi start at once (stage init).
+        assert.deepEqual(events.map(e => e.type), ["enabled", "discord-build", "self-test", "started", "started", "started"]);
         const selfTest = events.find(e => e.type === "self-test");
         assert.ok(selfTest && selfTest.type === "self-test" && selfTest.name === "first-gateway-message" && selfTest.status === "not-seen");
-        assert.deepEqual(events[0], { type: "enabled", plugins: ["Badges", "ContextMenuApi", "NoTrack", "Settings"] });
+        assert.deepEqual(events[0], { type: "enabled", plugins: ["Badges", "ContextMenuApi", "NoTrack", "Settings", "UiApi"] });
     });
 
     it("includes a plugin's code in the page script and starts it", async () => {
@@ -157,7 +157,7 @@ describe("the build", () => {
 
         const { events, page } = await runPage(readFileSync(join(out, "renderer.js"), "utf8"));
         assert.equal((page as Record<string, unknown>).startedBy, "Demo");
-        assert.deepEqual(events.find(e => e.type === "enabled"), { type: "enabled", plugins: ["Badges", "ContextMenuApi", "Demo", "NoTrack", "Settings"] });
+        assert.deepEqual(events.find(e => e.type === "enabled"), { type: "enabled", plugins: ["Badges", "ContextMenuApi", "Demo", "NoTrack", "Settings", "UiApi"] });
         assert.equal(events.some(e => e.type === "started" && e.plugin === "Demo"), true);
     });
 
@@ -183,7 +183,7 @@ describe("the build", () => {
 
     it("does not run any code of a plugin that is switched off, even what its file does outside start()", async () => {
         const { page, events } = await buildWithFlagPlugin(false);
-        assert.deepEqual(events.find(e => e.type === "enabled"), { type: "enabled", plugins: ["Badges", "ContextMenuApi", "NoTrack", "Settings"] });
+        assert.deepEqual(events.find(e => e.type === "enabled"), { type: "enabled", plugins: ["Badges", "ContextMenuApi", "NoTrack", "Settings", "UiApi"] });
         assert.equal((page as Record<string, unknown>).flagFileRan, undefined);
     });
 
