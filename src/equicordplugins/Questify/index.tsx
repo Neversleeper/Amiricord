@@ -20,6 +20,7 @@ import { pluginModalCss, QuestifySettingsPanel } from "./amiricord/pluginModal";
 import { addServerListElement, removeServerListElement, ServerListRenderPosition, ServerListWrapper } from "./amiricord/serverList";
 import { PlainSettings, setPluginEnabled, Settings } from "./amiricord/settings";
 import { findComponentByCodeLazy, onceReady } from "./amiricord/webpack";
+import { startQuestHeaderButtons, stopQuestHeaderButtons } from "./components/headerButtons";
 import { disguiseHomeButton, QuestButton, showQuestButton } from "./components/questButton";
 import { QuestTileContextMenu } from "./components/questTileContextMenu";
 import type { Quest, QuestUserStatus } from "./discordTypes";
@@ -673,6 +674,8 @@ const plugin: PluginCode & Record<string, unknown> = {
             addServerListElement(ServerListRenderPosition.Above, renderQuestifyButton);
         }
 
+        startQuestHeaderButtons();
+
         onceReady.then(() => {
             showPendingQuestifyNotice();
 
@@ -688,6 +691,7 @@ const plugin: PluginCode & Record<string, unknown> = {
         setPluginEnabled(false);
         const pluginEnabled = Settings.plugins.Questify?.enabled;
 
+        stopQuestHeaderButtons();
         disposeRestartTracking();
         removeServerListElement(ServerListRenderPosition.Above, renderQuestifyButton);
         stopPerAccountTasks("PLUGIN_STOP", pluginEnabled);
