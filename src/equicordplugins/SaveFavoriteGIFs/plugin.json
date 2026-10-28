@@ -1,0 +1,22 @@
+{
+    "schema": 1,
+    "id": "SaveFavoriteGIFs",
+    "name": "Save Favorite GIFs",
+    "version": "1.0.0",
+    "description": "Adds the command /savegifs, which saves the addresses of your favorite GIFs to a text file, one per line. Nothing is sent anywhere.",
+    "origin": "equicord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        { "name": "thororen" }
+    ],
+    "credits": [
+        { "name": "Vendicated and contributors (Vencord), thororen (Equicord), plugin SaveFavoriteGIFs", "license": "GPL-3.0-or-later", "url": "https://github.com/TestcordDev/TestCord" }
+    ],
+    "tags": ["utility", "media"],
+    "enabledByDefault": false,
+    "startAt": "webpackReady",
+    "entry": { "renderer": "index.ts" },
+    "permissions": {
+        "files": "user-chosen"
+    }
+}
