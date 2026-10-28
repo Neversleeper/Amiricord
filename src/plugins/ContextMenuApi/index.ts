@@ -22,7 +22,7 @@ const plugin: PluginCode & { patchMenu(props: unknown): unknown; } = {
             all: true,
             lazy: true,
             required: false,
-            replacements: [{ match: /navId:(?=")/g, replace: "contextMenuAPIArguments:typeof arguments!=\"undefined\"?arguments:[],navId:" }]
+            replacements: [{ match: /navId:(?=")/g, replace: "contextMenuAPIArguments:typeof arguments!=\"undefined\"?arguments:[],navId:", perMatch: true }]
         },
         {
             find: "hideScroller:",

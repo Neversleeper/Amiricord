@@ -102,7 +102,7 @@ export function parseDevDump(value: unknown): DevDump | null {
 }
 
 const PATCH_STATUSES = ["applied", "partial", "failed", "undone", "skipped"];
-const REPLACEMENT_STATUSES = ["applied", "no-effect", "errored", "undone", "not-run", "syntax-error"];
+const REPLACEMENT_STATUSES = ["applied", "no-effect", "errored", "undone", "not-run", "syntax-error", "not-applicable"];
 
 function isReplacement(value: unknown): boolean {
     return isRecord(value) && isString(value.match) && REPLACEMENT_STATUSES.includes(value.status as string)

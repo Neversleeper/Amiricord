@@ -103,7 +103,7 @@ export interface HealthState {
 /** Patch outcome as the patch compiler reports it (only the fields health needs). */
 export interface PatchEventReplacement {
     match: string;
-    status: "applied" | "no-effect" | "errored" | "undone" | "not-run" | "syntax-error";
+    status: "applied" | "no-effect" | "errored" | "undone" | "not-run" | "syntax-error" | "not-applicable";
     error?: string;
 }
 
