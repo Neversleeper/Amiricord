@@ -5,6 +5,7 @@
  */
 
 import assert from "node:assert/strict";
+import { existsSync, readFileSync } from "node:fs";
 import { describe, it } from "node:test";
 
 import type { FindersFor, ReactLike } from "../src/api/common";
@@ -88,14 +89,16 @@ describe("declareCommon", () => {
             Button: ["loadingStartedLabel", "iconOpticalOffsetMargin"],
             Text: ["tabularNumbers:", "scaleFontToUserSetting:", "lineClamp:"],
             Heading: ["`h${Math.min(", "experiments?.enabledExperiments"],
-            DialogWithLock: ["setDialogRef:", "trackingComponentName:", "returnRef:"]
+            DialogWithLock: ["setDialogRef:", "trackingComponentName:", "returnRef:"],
+            ModalContent: ["scrollerRef", "scrollbarType", "scrollbarGutter"],
+            ModalCloseButton: ["focusProps", "withCircleBackground", "hideOnFullscreen"]
         });
     });
 
     it("looks React up by its hooks and each component by the snippets of its source, and nothing before get()", () => {
         const { finders, asked } = fakeFinders({});
         declareCommon(finders);
-        assert.deepEqual(asked.sort(), [`props:${REACT_PROPS.join("|")}`].concat(["Button", "DialogWithLock", "Heading", "Text"].map(n => key(n as "Button"))).sort());
+        assert.deepEqual(asked.sort(), [`props:${REACT_PROPS.join("|")}`].concat(["Button", "DialogWithLock", "Heading", "ModalCloseButton", "ModalContent", "Text"].map(n => key(n as "Button"))).sort());
     });
 
     it("translates our props to Discord's for the Button, with text labels", () => {
@@ -165,6 +168,62 @@ describe("declareCommon", () => {
         const parts = declareCommon(finders);
         for (const entry of [parts.Switch, parts.TextInput, parts.Select]) assert.ok(entry.get());
         assert.deepEqual(parts.common.status().filter(s => s.source === "fallback").map(s => s.name).sort(), ["Select", "Switch", "TextInput"]);
+    });
+});
+
+describe("Discord's window pieces", () => {
+    const USED = ["ModalContent", "ModalCloseButton"] as const;
+    const OURS = ["ModalHeader", "ModalFooter"] as const;
+
+    it("draws the content and the close button as elements of Discord's pieces, with only the props our pieces take", () => {
+        const discord = Object.fromEntries(USED.map(name => [name, () => `discord ${name}`]));
+        const { finders } = fakeFinders({ [`props:${REACT_PROPS.join("|")}`]: react, ...Object.fromEntries(USED.map(name => [key(name), discord[name]])) });
+        const parts = declareCommon(finders);
+        for (const name of USED) assert.equal(parts[name].usingFallback(), false, name);
+        const content = parts.ModalContent.get()!({ className: "mine", children: "body" }) as FakeElement;
+        assert.equal(content.type, discord.ModalContent);
+        assert.deepEqual(content.props, { className: "mine" });
+        assert.deepEqual(content.children, ["body"]);
+        const click = () => undefined;
+        const close = parts.ModalCloseButton.get()!({ onClick: click }) as FakeElement;
+        assert.equal(close.type, discord.ModalCloseButton);
+        assert.deepEqual(close.props, { onClick: click });
+    });
+
+    it("keeps our own header and footer even when something is found for them, because Discord's lay their children out with its own flex constants", () => {
+        const { finders } = fakeFinders({ [`props:${REACT_PROPS.join("|")}`]: react });
+        const parts = declareCommon(finders);
+        for (const name of OURS) {
+            parts[name].get();
+            assert.equal(parts[name].usingFallback(), true, name);
+            assert.equal(name in COMPONENT_SNIPPETS, false, name);
+        }
+    });
+
+    it("keeps our own pieces, and says so once each, when Discord's are not found", () => {
+        const misses: string[] = [];
+        const { finders } = fakeFinders({ [`props:${REACT_PROPS.join("|")}`]: react });
+        const parts = declareCommon(finders, name => misses.push(name));
+        for (const name of [...USED, ...OURS]) {
+            assert.ok(parts[name].get(), name);
+            assert.equal(parts[name].usingFallback(), true, name);
+            parts[name].get();
+        }
+        assert.deepEqual(misses.filter(name => name.startsWith("Modal") && name !== "ModalRoot").sort(), ["ModalCloseButton", "ModalContent", "ModalFooter", "ModalHeader"]);
+    });
+
+    const real = "probe/module-source-modalparts.json";
+    it("finds the content and the close button by exactly one function each of the real module of build 653945 (only when the probe dump is on this machine)", { skip: !existsSync(real) }, () => {
+        const modules = JSON.parse(readFileSync(real, "utf8")) as Array<{ id: string; text: string; }>;
+        const text = modules.find(m => m.text.includes("headerIdIsManaged:n"))!.text;
+        // The functions of the module, as Discord's own `String(function)` would give them.
+        const functions = text.split(/(?=\bfunction \w+\()/).filter(chunk => chunk.startsWith("function "));
+        const matching = (name: keyof typeof COMPONENT_SNIPPETS) => functions.filter(source => COMPONENT_SNIPPETS[name].every(snippet => source.includes(snippet)));
+        assert.equal(matching("ModalContent").length, 1);
+        assert.match(matching("ModalContent")[0], /scrollbarType:r/);
+        assert.equal(matching("ModalCloseButton").length, 1);
+        assert.match(matching("ModalCloseButton")[0], /withCircleBackground/);
+        assert.notEqual(matching("ModalContent")[0], matching("ModalCloseButton")[0]);
     });
 });
 
