@@ -1,0 +1,20 @@
+{
+    "schema": 1,
+    "id": "ServerSearch",
+    "name": "Server Search",
+    "version": "1.0.0",
+    "description": "Adds a search button at the top of the server list that opens Discord's quick switcher, to jump to a server or channel faster.",
+    "origin": "equicord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        { "name": "camila314" }
+    ],
+    "credits": [
+        { "name": "Vendicated and contributors (Vencord), camila314 (Equicord), plugin ServerSearch", "license": "GPL-3.0-or-later", "url": "https://github.com/TestcordDev/TestCord" }
+    ],
+    "tags": ["ui", "utility"],
+    "enabledByDefault": false,
+    "startAt": "webpackReady",
+    "entry": { "renderer": "index.tsx" },
+    "permissions": {}
+}
