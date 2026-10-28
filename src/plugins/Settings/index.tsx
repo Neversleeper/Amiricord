@@ -92,6 +92,7 @@ const plugin: PluginCode & { buildLayout(builder: { key?: unknown; buildLayout()
             title: "Amiricord",
             panelTitle: "Amiricord Settings",
             Component: guarded("The Amiricord tab", makeMainTab({
+                leaveSafeMode: () => { engine.leaveSafeMode(); plugins.restart(); },
                 status: () => engine.status(),
                 cards: () => plugins.cards(),
                 quickActions: defaultQuickActions({ openDataFolder: () => { engine.openDataFolder(); }, restart: () => { plugins.restart(); } }),

@@ -138,7 +138,7 @@ function mainTab(extra: Partial<MainTabDeps> = {}, hooks: { initial?: unknown[];
     setReactSource(() => fake.react);
     const log: string[] = [];
     const deps: MainTabDeps = {
-        status: () => status(), cards: () => [],
+        status: () => status(), leaveSafeMode: () => { log.push("leave-safe-mode"); }, cards: () => [],
         quickActions: defaultQuickActions({ openDataFolder: () => { log.push("folder"); }, restart: () => { log.push("restart"); } }),
         settings: defaultSettings(), choices: defaultChoices(), buttonGroups: defaultButtonGroups(),
         logo: "data:image/webp;base64,AAAA", editor: () => ({ type: "div", props: { className: "editor-stub" }, children: [] }), ...extra
@@ -403,7 +403,7 @@ describe("the main tab", () => {
         let version = "0.1.0";
         const fake = fakeReact();
         setReactSource(() => fake.react);
-        const Tab = makeMainTab({ status: () => status({ version }), cards: () => [], quickActions: [], settings: [], choices: [], buttonGroups: [], logo: "", editor: () => null });
+        const Tab = makeMainTab({ status: () => status({ version }), leaveSafeMode: () => undefined, cards: () => [], quickActions: [], settings: [], choices: [], buttonGroups: [], logo: "", editor: () => null });
         assert.match(textOf(render(Tab())), /Amiricord 0\.1\.0/);
         version = "0.2.0";
         assert.match(textOf(render(Tab())), /Amiricord 0\.2\.0/);

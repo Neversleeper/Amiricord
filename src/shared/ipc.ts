@@ -30,6 +30,8 @@ export const IPC = {
     restart: `${prefix}:restart`,
     /** The page asks to open the data folder in the file explorer. The folder is the main process's own; the page cannot name another. */
     openDataFolder: `${prefix}:open-data-folder`,
+    /** The page asks to leave safe mode (the Settings page, after the user clicked). It takes effect at the next start, so the page restarts Discord right after. */
+    leaveSafeMode: `${prefix}:leave-safe-mode`,
     /** The page asks how many requests the network firewall cancelled. Read only; the answer is counts and nothing else. */
     firewall: `${prefix}:firewall`,
     /** A plugin's page code asks for one of its own main-process functions. The main process checks the sender, the plugin, the function and the arguments (`src/main/nativeHost.ts`). */

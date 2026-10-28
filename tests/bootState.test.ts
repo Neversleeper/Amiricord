@@ -16,7 +16,9 @@ import {
     BOOT_FAILURE_LIMIT,
     BootState,
     defaultBootState,
+    forgetUnfinishedBoot,
     isQuarantined,
+    leaveSafeMode,
     parseBootState,
     quarantinedIds,
     quarantinePlugin,
@@ -250,5 +252,22 @@ describe("boot state file", () => {
         const r = readBootStateFile(path);
         assert.deepEqual(r.state, defaultBootState());
         assert.equal(r.problems.length, 1);
+    });
+});
+
+describe("forgetUnfinishedBoot and leaveSafeMode", () => {
+    it("takes one failed boot away, never below zero", () => {
+        assert.equal(forgetUnfinishedBoot({ ...defaultBootState(), bootAttempts: 2 }).bootAttempts, 1);
+        const zero = defaultBootState();
+        assert.equal(forgetUnfinishedBoot(zero), zero);
+    });
+
+    it("leaves safe mode and forgets the failed boots, keeping the quarantine", () => {
+        const state = quarantinePlugin({ ...defaultBootState(), safeMode: true, safeModeReason: "x", bootAttempts: 4 }, "P", "r", 1);
+        const left = leaveSafeMode(state);
+        assert.equal(left.safeMode, false);
+        assert.equal(left.safeModeReason, null);
+        assert.equal(left.bootAttempts, 0);
+        assert.deepEqual(quarantinedIds(left), ["P"]);
     });
 });

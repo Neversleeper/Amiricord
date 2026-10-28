@@ -162,6 +162,19 @@ export function reportCleanBoot(state: BootState): BootState {
     return { ...state, bootAttempts: 0 };
 }
 
+/**
+ * Call when Discord closes by itself before this boot was reported clean (an update restarting it, the person closing it, a restart asked from the
+ * Settings page). Such a boot did not fail, so it stops counting. A crash never gets here: only the failed boots stay counted.
+ */
+export function forgetUnfinishedBoot(state: BootState): BootState {
+    return state.bootAttempts > 0 ? { ...state, bootAttempts: state.bootAttempts - 1 } : state;
+}
+
+/** Turn safe mode off and forget the failed boots, so the next start is a normal one. */
+export function leaveSafeMode(state: BootState): BootState {
+    return { ...state, safeMode: false, safeModeReason: null, bootAttempts: 0 };
+}
+
 export function setSafeMode(state: BootState, on: boolean, reason: string | null = null): BootState {
     return { ...state, safeMode: on, safeModeReason: on ? reason : null };
 }
