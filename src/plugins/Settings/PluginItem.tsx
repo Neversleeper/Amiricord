@@ -66,6 +66,20 @@ function Switch({ card, pending, onSwitch }: Pick<PluginItemProps, "card" | "pen
     );
 }
 
+/** The same name always gets the same hue (0 to 359), so a plugin keeps its color between sessions. */
+export function hueOf(name: string): number {
+    let hash = 0;
+    for (const char of name) hash = (hash * 31 + char.codePointAt(0)!) % 360;
+    return hash;
+}
+
+/** One or two letters for the round mark: the first letters of the first two words, or the first two letters of one word. */
+export function initialsOf(name: string): string {
+    const words = name.trim().split(/[\s_-]+/).filter(Boolean);
+    const letters = words.length > 1 ? words[0][0] + words[1][0] : (words[0] ?? "?").slice(0, 2);
+    return letters.toUpperCase();
+}
+
 export function PluginItem({ card, note, pending, question, onSwitch, onConfirm, onCancel, onDetails }: PluginItemProps) {
     const status = cardStatus(card);
     const problem = card.state.error !== null || card.state.skipped !== undefined;
@@ -75,6 +89,7 @@ export function PluginItem({ card, note, pending, question, onSwitch, onConfirm,
     return (
         <div className={`amiricord-card amiricord-plugin${isOn(card) ? "" : " amiricord-plugin-off"}`} data-plugin={card.id}>
             <div className="amiricord-plugin-head">
+                <div className="amiricord-plugin-avatar" aria-hidden="true" style={{ "--amiricord-hue": hueOf(card.name) }}>{initialsOf(card.name)}</div>
                 <div className="amiricord-plugin-name">{card.name}</div>
                 <div className="amiricord-plugin-controls">
                     <DetailsButton card={card} onDetails={onDetails} />
