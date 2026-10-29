@@ -46,6 +46,11 @@ describe("slash commands from plugins", () => {
     it("refuses a bad name or description, a name that is taken (by a plugin) and too many commands", () => {
         const hub = createCommandHub();
         assert.equal(hub.add("P", definition("Bad Name"), quiet), false);
+        assert.equal(hub.add("P", definition("two  spaces"), quiet), false);
+        assert.equal(hub.add("P", definition(" lead"), quiet), false);
+        assert.equal(hub.add("P", definition("a".repeat(33)), quiet), false);
+        assert.equal(hub.add("P", definition("create friend invite"), quiet), true);
+        hub.removeAll("P");
         assert.equal(hub.add("P", { ...definition("ok"), description: "" }, quiet), false);
         assert.equal(hub.add("P", { ...definition("ok"), execute: undefined as never }, quiet), false);
         assert.equal(hub.add("P", definition("same"), quiet), true);

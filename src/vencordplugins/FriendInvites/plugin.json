@@ -1,0 +1,38 @@
+{
+    "schema": 1,
+    "id": "FriendInvites",
+    "name": "Friend Invites",
+    "version": "1.0.0",
+    "description": "Commands to create, list and revoke your friend invite links: /create friend invite, /view friend invites, /revoke friend invites.",
+    "origin": "vencord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        {
+            "name": "afn",
+            "role": "original author"
+        },
+        {
+            "name": "Dziurwa",
+            "role": "original author"
+        },
+        {
+            "name": "Neversleeper",
+            "role": "Amiricord port"
+        }
+    ],
+    "credits": [
+        {
+            "name": "Vendicated and contributors (Vencord), plugin FriendInvites",
+            "license": "GPL-3.0-or-later",
+            "url": "https://github.com/Vendicated/Vencord"
+        }
+    ],
+    "tags": ["chat",
+        "utility"],
+    "enabledByDefault": false,
+    "startAt": "webpackReady",
+    "entry": {
+        "renderer": "index.ts"
+    },
+    "permissions": {}
+}
