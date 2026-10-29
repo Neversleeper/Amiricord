@@ -1,0 +1,38 @@
+{
+    "schema": 1,
+    "id": "BetterUploadButton",
+    "name": "Better Upload Button",
+    "version": "1.0.0",
+    "description": "Upload with a single click on the attach button; the menu opens with a right click.",
+    "origin": "vencord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        {
+            "name": "fawn",
+            "role": "original author"
+        },
+        {
+            "name": "Ven",
+            "role": "original author"
+        },
+        {
+            "name": "Neversleeper",
+            "role": "Amiricord port"
+        }
+    ],
+    "credits": [
+        {
+            "name": "Vendicated and contributors (Vencord), plugin BetterUploadButton",
+            "license": "GPL-3.0-or-later",
+            "url": "https://github.com/Vendicated/Vencord"
+        }
+    ],
+    "tags": ["chat",
+        "utility"],
+    "enabledByDefault": false,
+    "startAt": "init",
+    "entry": {
+        "renderer": "index.ts"
+    },
+    "permissions": {}
+}
