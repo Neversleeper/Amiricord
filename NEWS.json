@@ -1,10 +1,21 @@
 [
     {
+        "version": "0.3.3",
+        "date": "2026-10-29",
+        "title": "A new look for the settings, and developer tools ready to use",
+        "notes": [
+            "The Plugins tab has a new look: a round mark for each plugin, a glow on the ones that are on, quick filters (All, On, Off) with counts, a search box that stays in view, and animated switches. The other tabs share the new look.",
+            "Discord's developer tools and the console are on by default, and the big \"Hold Up!\" warning in the console is gone, so it is easy to read a plugin's errors when asked. Installing or repairing Amiricord sets this up.",
+            "The warning against pasting code into the console is off, so only paste what you understand."
+        ]
+    },
+    {
         "version": "0.3.2",
         "date": "2026-10-29",
         "title": "Four new plugins, Quest buttons and safer safe mode",
         "notes": [
-            "New plugins (from Equicord): Save Favorite GIFs (type /savegifs to save your favourite GIFs to a text file), Voice Rejoin (rejoins your voice channel after Discord restarts), Wait For Slot (joins a full voice channel when a place frees up) and Never Pause Previews (stream previews keep moving when Discord is not focused).",
+            "New plugins (from Equicord): Save Favorite GIFs (type /savegifs to save your favourite GIFs to a text file) and Voice Rejoin (rejoins your voice channel after Discord restarts).",
+            "More new plugins: Wait For Slot (joins a full voice channel when a place frees up) and Never Pause Previews (stream previews keep moving when Discord is not focused).",
             "Quests: new Start All and Stop All buttons on the Quests page, and fixes to quest enrollment and the quest button menu.",
             "Safe mode no longer counts a normal close of Discord as a failure, and the Settings page has a way to leave it.",
             "More Alts: the Manage Accounts window follows the new Discord build."
@@ -27,7 +38,8 @@
         "notes": [
             "New Badges plugin: people who use Amiricord see an Amiricord User badge on each other's profiles, and the owners have an Owner badge.",
             "The owners can hand out their own badges with a list kept in the project's repository.",
-            "Amiricord tells the project's registry (a small free service, only the id of your Discord account) that you use it, and reads the list of Amiricord users every two hours, so everyone gets the badge without doing anything. It is always on: it is how Amiricord users recognise each other.",
+            "Amiricord tells the project's registry (a small free service, only the id of your Discord account) that you use it, and reads the list of Amiricord users every two hours, so everyone gets the badge without doing anything.",
+            "The registry part is always on: it is how Amiricord users recognise each other.",
             "The plugin also adds an invisible mark to your own pronouns, as a second way to be recognised.",
             "It reads the owners' badge list from GitHub when Discord starts and every 30 minutes. The plugin windows now show the Discord name and picture of each author."
         ]
