@@ -7,7 +7,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any -- Discord's stores and menu pieces have no types */
 
 // Adapted for Amiricord (2026) from the plugin ViewIcons (authors Vendicated, TheKodeToad, Nuckyz and nyx) of Vencord. Differences from the original:
-//  - the image opens in a window of Amiricord's own (the original used a Vencord helper that reuses Discord's picture viewer), with a link to the full size;
+//  - the image opens in Discord's own picture viewer (the function behind "Media Viewer Modal", found by its code), like the original; if that function is not found the
+//    picture opens in a window of Amiricord's own, with a Save image button and a link to the full size;
 //  - the original's four patches for avatars (profile picture, group chat icon, the two icons at the top of a direct message) no longer find their text in Discord's web build
 //    653945. One patch replaces them for the profile picture: Discord's avatar component takes the function that opens the picture (`onOpenAvatar`) and the patch swaps it for the
 //    plugin's window, so a click on a person's picture there shows it with a Save button (the right-click "View Avatar" does the same). The group chat icon is only in the right-click menu; The banner patch was checked against that build (module with
@@ -34,6 +35,7 @@ const settings = definePluginSettings({
 
 let context: EnginePluginContext | undefined;
 let icons: any;
+let mediaViewer: { get(): any; } | undefined;
 let members: any;
 
 /** The address to show and the address of the full size, from one of Discord's picture addresses. */
@@ -54,6 +56,17 @@ function openImage(url: string | null | undefined, event?: Clickable) {
     const ctx = context;
     if (!ctx || !url) return;
     const { shown, original } = viewUrls(url, window.location.href, String(settings.store.format), String(settings.store.imgSize));
+    // Discord's own picture viewer (zoom, right-click to save or copy, open in the browser), the one a picture in a chat opens, like the original plugin.
+    const open = mediaViewer?.get();
+    if (typeof open === "function") {
+        try {
+            const size = Number(settings.store.imgSize);
+            open({ items: [{ type: "IMAGE", url: shown, proxyUrl: shown, original, width: size, height: size, spoiler: false, srcIsAnimated: false }], startingIndex: 0, location: "ViewIcons" });
+            return;
+        } catch {
+            // the viewer changed: fall through to the window of the plugin
+        }
+    }
     const react = currentReact() as any;
     const Root = ctx.components.ModalRoot.get() as any;
     const Content = ctx.components.ModalContent.get() as any;
@@ -148,6 +161,7 @@ const plugin: PluginCode & { openAvatar: typeof openAvatar; openBanner: typeof o
     start(ctx) {
         context = ctx;
         icons = ctx.finders.byProps("getUserAvatarURL", "getGuildIconURL");
+        mediaViewer = ctx.finders.byCode("markSessionStarted", "numMediaItems");
         members = ctx.common.GuildMemberStore;
 
         ctx.contextMenu.addNative("user-context", (children, props) => {
@@ -183,7 +197,7 @@ const plugin: PluginCode & { openAvatar: typeof openAvatar; openBanner: typeof o
 
     stop() {
         context?.modals.closeAll();
-        context = icons = members = undefined;
+        context = icons = members = mediaViewer = undefined;
     }
 };
 
