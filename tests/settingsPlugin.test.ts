@@ -255,7 +255,7 @@ describe("the Settings plugin in use", () => {
 
     it("declares the three window options as settings that need a restart, off by default, and the effect as one of four", () => {
         const definition = (load().settings as unknown as { definition: Record<string, { type: string; default: unknown; restartNeeded?: boolean; options?: Array<{ value: string; }>; }>; }).definition;
-        for (const key of ["removeMinimumSize", "ctrlQToQuit"]) {
+        for (const key of ["removeMinimumSize", "ctrlQToQuit", "nativeTitleBar", "transparentWindow"]) {
             assert.equal(definition[key].type, "boolean", key);
             assert.equal(definition[key].default, false, key);
             assert.equal(definition[key].restartNeeded, true, key);

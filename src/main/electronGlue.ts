@@ -46,6 +46,7 @@ import { TokenHosts, tokenHostsFromRegistry } from "./tokenHosts";
 import { trace } from "./trace";
 import { createUpdater } from "./updater";
 import { answerUpdateRequest, type FetchLike as UpdateFetch, makeFetchBytes, realFiles } from "./updatesGlue";
+import { anyCreationChoice, creationChoicesOf, hookBrowserWindow } from "./windowHook";
 import { anyWindowOption, applyWindowOptions, type WindowLike, windowOptionsOf } from "./windowOptions";
 
 export interface MainOptions {
@@ -95,6 +96,16 @@ export function startMain(options: MainOptions): MainController | null {
         }
     } catch (error) {
         trace(dataDir, `window options: FAILED ${error instanceof Error ? error.message : String(error)}`);
+    }
+
+    // The two options that Electron only reads when a window is created (Windows title bar, transparent window): the window constructor is swapped before Discord asks for it.
+    try {
+        const creation = creationChoicesOf(key => controller.pluginValue("Settings", key));
+        if (anyCreationChoice(creation) && !controller.bootInfo().safeMode) {
+            hookBrowserWindow({ resolve: id => require.resolve(id), cache: require.cache }, creation, text => { trace(dataDir, text); });
+        }
+    } catch (error) {
+        trace(dataDir, `window options: the creation options FAILED ${error instanceof Error ? error.message : String(error)}`);
     }
 
     ipcMain.on(IPC.bootInfo, event => {
