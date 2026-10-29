@@ -1,0 +1,21 @@
+{
+    "schema": 1,
+    "id": "ImageLink",
+    "name": "Image Link",
+    "version": "1.0.0",
+    "description": "Shows a message that is only an image link as a link as well as the picture, instead of hiding the link.",
+    "origin": "vencord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        { "name": "Vap", "role": "original author" },
+        { "name": "Neversleeper", "github": "https://github.com/Neversleeper", "role": "Amiricord port" }
+    ],
+    "credits": [
+        { "name": "Vendicated and contributors (Vencord), plugin ImageLink by Vap", "license": "GPL-3.0-or-later", "url": "https://github.com/Vendicated/Vencord" }
+    ],
+    "tags": ["chat"],
+    "enabledByDefault": false,
+    "startAt": "init",
+    "entry": { "renderer": "index.ts" },
+    "permissions": {}
+}
