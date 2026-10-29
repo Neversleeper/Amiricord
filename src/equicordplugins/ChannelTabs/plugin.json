@@ -1,0 +1,27 @@
+{
+    "schema": 1,
+    "id": "ChannelTabs",
+    "name": "Channel Tabs",
+    "version": "1.0.0",
+    "description": "Keep the channels you visit most in tabs, like a browser: open, close, reorder and bookmark them, switch with the keyboard, and get them back the next time Discord starts.",
+    "origin": "equicord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        { "name": "TheSun", "role": "original author" },
+        { "name": "TheKodeToad", "role": "original author" },
+        { "name": "keifufu", "role": "original author" },
+        { "name": "Nickyux", "role": "original author" },
+        { "name": "DiabeloDEV", "role": "original author" },
+        { "name": "justjxke", "role": "original author" },
+        { "name": "keircn", "role": "original author" },
+        { "name": "Neversleeper", "role": "Amiricord port" }
+    ],
+    "credits": [
+        { "name": "Vendicated and contributors (Vencord), TheSun, TheKodeToad, keifufu, Nickyux, DiabeloDEV, justjxke and keircn (Equicord), plugin ChannelTabs", "license": "GPL-3.0-or-later", "url": "https://github.com/Equicord/Equicord" }
+    ],
+    "tags": ["ui", "utility"],
+    "enabledByDefault": false,
+    "startAt": "webpackReady",
+    "entry": { "renderer": "index.tsx" },
+    "permissions": {}
+}
