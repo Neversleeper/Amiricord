@@ -1,0 +1,21 @@
+{
+    "schema": 1,
+    "id": "DevToolsShortcut",
+    "name": "Developer Tools Shortcut",
+    "version": "1.0.0",
+    "description": "F12 and Ctrl+Shift+I open Discord's developer tools, even when Discord's own shortcut does not work (for example when its settings file lost the flag that allows the tools). It starts before Discord's code is found, so it still works when other plugins fail. The tools are the same ones Discord has; nothing is sent anywhere.",
+    "origin": "amiricord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        { "name": "Neversleeper", "discordId": "1564847328794382408", "github": "https://github.com/Neversleeper" }
+    ],
+    "credits": [],
+    "tags": ["developer"],
+    "enabledByDefault": true,
+    "startAt": "init",
+    "entry": { "renderer": "index.ts", "main": "native.ts" },
+    "permissions": {
+        "native": { "functions": ["open"] },
+        "system": { "spawn": false, "clipboard": false, "listen": [], "openExternal": false, "devtools": true }
+    }
+}
