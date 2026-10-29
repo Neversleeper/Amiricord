@@ -66,16 +66,18 @@ export interface ButtonGroupItem {
 
 export interface QuickActionActions {
     openDataFolder(): void;
+    openNotificationLog(): void;
+    openNotificationOptions(): void;
     openCssEditor(): void;
     openHealthReport(): void;
     openSourceCode(): void;
     restart(): void;
 }
 
-/** The six tiles, in the order they are drawn. The four that work are wired to what the engine offers. */
+/** The six tiles, in the order they are drawn. Five of them work and are wired to what the engine offers; "Edit Custom CSS" and "Notification Log" open their own windows. */
 export function defaultQuickActions(actions: QuickActionActions): QuickActionItem[] {
     return [
-        { id: "notification-log", title: "Notification Log", Icon: LogIcon, soon: true },
+        { id: "notification-log", title: "Notification Log", Icon: LogIcon, run: actions.openNotificationLog },
         { id: "quick-css", title: "Edit Custom CSS", Icon: PaintbrushIcon, run: actions.openCssEditor },
         {
             id: "relaunch", title: "Relaunch Discord", Icon: RefreshIcon, run: actions.restart,
@@ -142,13 +144,13 @@ export function defaultChoices(): ChoiceItem[] {
 }
 
 /** The groups of buttons at the end of the settings. */
-export function defaultButtonGroups(): ButtonGroupItem[] {
+export function defaultButtonGroups(actions: Pick<QuickActionActions, "openNotificationLog" | "openNotificationOptions">): ButtonGroupItem[] {
     return [{
         id: "notifications", title: "Notifications",
         description: "Controls for the notifications Amiricord itself shows. Discord's own message notifications are not affected.",
         buttons: [
-            { id: "notification-settings", title: "Notification options", soon: true },
-            { id: "notification-log", title: "Open the log", soon: true }
+            { id: "notification-settings", title: "Notification options", run: actions.openNotificationOptions },
+            { id: "notification-log", title: "Open the log", run: actions.openNotificationLog }
         ]
     }];
 }

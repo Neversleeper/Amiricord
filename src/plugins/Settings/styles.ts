@@ -153,6 +153,12 @@ export const SETTINGS_CSS = `
 .amiricord-css-editor { box-sizing: border-box; display: block; width: 100%; height: 45vh; min-height: 260px; margin-top: var(--space-8, 8px); padding: 10px var(--space-12, 12px); border: 1px solid var(--input-border-default, var(--border-subtle, #3f4147)); border-radius: 4px; resize: vertical; overflow: auto; white-space: pre; font-family: Consolas, "Cascadia Mono", "Courier New", monospace; font-size: 13px; line-height: 1.45; tab-size: 4; color: var(--text-default, #dbdee1); background: var(--input-background-default, var(--background-base-lowest, #1e1f22)); outline: none; }
 .amiricord-css-editor:focus { border-color: var(--border-focus, #00a8fc); }
 .amiricord-css-footer-note { flex: 1; min-width: 0; margin-right: var(--space-12, 12px); align-self: center; }
+.amiricord-nlog-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--space-8, 8px); }
+.amiricord-nlog-item { padding: 10px var(--space-12, 12px); border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.1)); border-radius: 8px; background: var(--background-mod-subtle, rgba(255, 255, 255, 0.03)); overflow-wrap: anywhere; }
+.amiricord-nlog-meta { display: flex; gap: var(--space-8, 8px); font-size: 12px; color: var(--text-subtle, var(--text-muted, #949ba4)); }
+.amiricord-nlog-plugin { font-weight: 600; }
+.amiricord-nlog-title { margin-top: 2px; font-weight: 600; color: var(--text-strong, var(--text-default, #f2f3f5)); }
+.amiricord-nlog-body { margin-top: 2px; font-size: 14px; line-height: 1.3; color: var(--text-default, #dbdee1); }
 .amiricord-css-count { margin-top: var(--space-4, 4px); text-align: right; font-size: 12px; color: var(--text-subtle, var(--text-muted, #949ba4)); }
 .amiricord-note { margin-top: var(--space-4, 4px); font-size: 13px; color: var(--text-feedback-info, #00a8fc); }
 .amiricord-restart { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-12, 12px); margin-top: var(--space-12, 12px); padding: 12px var(--space-16, 16px); border: 1px solid rgb(240 178 50 / 45%); border-radius: 12px; background: rgb(240 178 50 / 10%); font-size: 14px; }

@@ -199,6 +199,25 @@ describe("the Settings plugin in use", () => {
         plugin.settings!.unbind();
     });
 
+    it("drops the oldest notifications of the log at once when the owner chooses a smaller size, and not for a size that is not one of the choices", async () => {
+        const plugin = load();
+        plugin.settings!.bind(new SettingsClient({ schema: 1, plugins: {} }, () => undefined), "Settings");
+        const { ctx, log } = fakeContext();
+        const trims: number[] = [];
+        (ctx.engine as unknown as { notificationLog: { trim(limit: number): void; }; }).notificationLog = { trim: limit => { trims.push(limit); } };
+        await plugin.start!(ctx);
+        const store = (plugin.settings as unknown as { store: Record<string, unknown>; }).store;
+        store.notificationLogSize = 25;
+        store.notificationLogSize = 200;
+        assert.deepEqual(trims, [25, 200]);
+        assert.throws(() => { store.notificationLogSize = 30; }, TypeError, "a size that is not offered is refused by the settings store");
+        assert.deepEqual(trims, [25, 200]);
+        for (const undo of log.disposers.splice(0)) undo();
+        store.notificationLogSize = 50;
+        assert.deepEqual(trims, [25, 200], "after the plugin stops nothing is listening");
+        plugin.settings!.unbind();
+    });
+
     it("refuses to start without the engine and the plugin cards that only a core plugin gets", async () => {
         const { ctx } = fakeContext({ withEngine: false });
         await assert.rejects(async () => { await load().start!(ctx); }, /needs the engine and plugin cards/);

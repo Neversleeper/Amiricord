@@ -10,18 +10,18 @@ import { describe, it } from "node:test";
 import { defaultButtonGroups, defaultChoices, defaultQuickActions, defaultSettings } from "../src/plugins/Settings/mainItems";
 
 describe("the lists of the main tab", () => {
-    it("have the six tiles in order, and only the five that exist have an action; only the relaunch asks first", () => {
+    it("have the six tiles in order, every one with an action; only the relaunch asks first", () => {
         const calls: string[] = [];
         const items = defaultQuickActions({
-            openDataFolder: () => { calls.push("folder"); }, openCssEditor: () => { calls.push("css"); }, openHealthReport: () => { calls.push("health"); }, openSourceCode: () => { calls.push("source"); }, restart: () => { calls.push("restart"); }
+            openDataFolder: () => { calls.push("folder"); }, openNotificationLog: () => { calls.push("log"); }, openNotificationOptions: () => { calls.push("options"); }, openCssEditor: () => { calls.push("css"); }, openHealthReport: () => { calls.push("health"); }, openSourceCode: () => { calls.push("source"); }, restart: () => { calls.push("restart"); }
         });
         assert.deepEqual(items.map(item => item.id), ["notification-log", "quick-css", "relaunch", "data-folder", "health-report", "source-code"]);
-        assert.deepEqual(items.filter(item => item.run).map(item => item.id), ["quick-css", "relaunch", "data-folder", "health-report", "source-code"]);
-        assert.deepEqual(items.filter(item => item.soon).map(item => item.id), ["notification-log"]);
+        assert.deepEqual(items.filter(item => item.run).map(item => item.id), ["notification-log", "quick-css", "relaunch", "data-folder", "health-report", "source-code"]);
+        assert.deepEqual(items.filter(item => item.soon).map(item => item.id), []);
         assert.ok(items.every(item => !(item.soon && item.run)), "an entry is either soon or working, never both");
         assert.deepEqual(items.filter(item => item.confirm).map(item => item.id), ["relaunch"]);
-        for (const id of ["relaunch", "data-folder", "health-report", "source-code", "quick-css"]) items.find(item => item.id === id)!.run!();
-        assert.deepEqual(calls, ["restart", "folder", "health", "source", "css"]);
+        for (const id of ["relaunch", "data-folder", "health-report", "source-code", "quick-css", "notification-log"]) items.find(item => item.id === id)!.run!();
+        assert.deepEqual(calls, ["restart", "folder", "health", "source", "css", "log"]);
     });
 
     it("have seven switches that wait for their feature, with the five window options marked as needing a restart; none is about privacy, which has its own tab", () => {
@@ -46,21 +46,25 @@ describe("the lists of the main tab", () => {
     });
 
     it("keep every id unique inside its list, and every entry with a title and a text", () => {
-        const lists = [defaultQuickActions({ openDataFolder: () => undefined, openCssEditor: () => undefined, openHealthReport: () => undefined, openSourceCode: () => undefined, restart: () => undefined }), defaultSettings(), defaultChoices(), defaultButtonGroups()];
+        const none = { openNotificationLog: () => undefined, openNotificationOptions: () => undefined };
+        const lists = [defaultQuickActions({ ...none, openDataFolder: () => undefined, openCssEditor: () => undefined, openHealthReport: () => undefined, openSourceCode: () => undefined, restart: () => undefined }), defaultSettings(), defaultChoices(), defaultButtonGroups(none)];
         for (const list of lists) {
             assert.equal(new Set(list.map(item => item.id)).size, list.length);
             for (const item of list) assert.ok(item.title.length > 0);
         }
-        for (const item of [...defaultSettings(), ...defaultChoices(), ...defaultButtonGroups()]) assert.ok(item.description.length > 20, item.id);
+        for (const item of [...defaultSettings(), ...defaultChoices(), ...defaultButtonGroups(none)]) assert.ok(item.description.length > 20, item.id);
     });
 
-    it("have the Windows background material choices, None first, and the Notifications group with two buttons that wait", () => {
+    it("have the Windows background material choices, None first, and the Notifications group with two buttons that work", () => {
         const [material] = defaultChoices();
         assert.equal(material.choices[0], "None");
         assert.equal(material.choices.length, 4);
         assert.equal(material.restart, true);
-        const [group] = defaultButtonGroups();
+        const calls: string[] = [];
+        const [group] = defaultButtonGroups({ openNotificationLog: () => { calls.push("log"); }, openNotificationOptions: () => { calls.push("options"); } });
         assert.deepEqual(group.buttons.map(button => button.title), ["Notification options", "Open the log"]);
-        assert.ok(group.buttons.every(button => button.soon && !button.run));
+        assert.ok(group.buttons.every(button => !button.soon && button.run));
+        for (const button of group.buttons) button.run!();
+        assert.deepEqual(calls, ["options", "log"]);
     });
 });

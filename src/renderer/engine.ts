@@ -23,6 +23,7 @@ import { locateMenuParts, type MenuParts } from "../api/menuParts";
 import { buildModals, PluginModals } from "../api/modals";
 import { buildNative, PluginNativeCaller } from "../api/native";
 import { type NativeMenuHub, nativeMenus } from "../api/nativeMenus";
+import { createNotificationLog, logSizeOf, type NotificationLog } from "../api/notificationLog";
 import { createNotificationLayer, type PluginNotifications } from "../api/notifications";
 import { buildPluginCards, PluginCard, PluginSource } from "../api/pluginCards";
 import { describeSettings, isPluginSettings, PluginSettingsAnswer, PluginSettingsComponent } from "../api/pluginSettings";
@@ -134,6 +135,8 @@ export interface EnginePluginContext extends PluginContext {
         openSourceCode(): void;
         /** Turn safe mode off for the next start (the caller restarts Discord after). */
         leaveSafeMode(): void;
+        /** The notifications plugins showed in this session, kept in memory only (the Notification Log of the main tab). See `src/api/notificationLog.ts`. */
+        notificationLog: NotificationLog;
         /** The read-only snapshot of the Privacy & Security tab from the main process (null when it did not answer or the answer was not in the expected form). */
         privacy(): Promise<PrivacyAnswer | null>;
         /** "Test now" for one provider by id. Asks the provider a question and applies nothing. */
@@ -446,6 +449,8 @@ export function startEngine(options: EngineOptions): Engine {
         }
     };
     refreshNetwork();
+    // The notifications plugins showed in this session, in memory only (the Notification Log of the main tab). Made here because the engine's API for core plugins hands it out.
+    const notificationLog = createNotificationLog();
     const engineApi = {
         status: (): EngineStatus => (refreshNetwork(), {
             version: PROJECT_VERSION, discordBuild: build, safeMode: info.safeMode, safeModeReason: info.safeModeReason,
@@ -457,6 +462,7 @@ export function startEngine(options: EngineOptions): Engine {
             dns
         }),
         openDataFolder: () => { bridge.openDataFolder(); },
+        notificationLog,
         openHealthReport: () => { bridge.openOwn?.("health"); },
         openSourceCode: () => { bridge.openOwn?.("source"); },
         leaveSafeMode: () => { bridge.leaveSafeMode?.(); },
@@ -592,8 +598,14 @@ export function startEngine(options: EngineOptions): Engine {
         native: options.nativeMenus ?? nativeMenus,
         menuParts: findMenuParts
     });
+    // The log keeps what plugins showed, in memory, up to the size the owner chose; the Settings plugin keeps the three choices (cards, log, size). Missing means the default.
+    const notificationChoice = (key: string) => settingsClient.getValue("Settings", key);
     const notificationLayer = createNotificationLayer({
         document: pageDocument,
+        enabled: () => notificationChoice("notificationCards") !== false,
+        record: (plugin, title, body) => {
+            if (notificationChoice("notificationLog") !== false) notificationLog.add(plugin, title, body, logSizeOf(notificationChoice("notificationLogSize")));
+        },
         setTimeout: (work, ms) => setTimeout(work, ms),
         clearTimeout: timer => { clearTimeout(timer as ReturnType<typeof setTimeout>); },
         addStyle: css => { addPageStyle(css, "notifications", "notification styles"); }

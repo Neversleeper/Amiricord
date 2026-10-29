@@ -14,6 +14,7 @@ import banner from "../../../assets/amiricord-banner.webp";
 import logo from "../../../assets/amiricord-logo.webp";
 import patchNotes from "../../../NEWS.json";
 import { currentReact } from "../../api/jsxRuntime";
+import { DEFAULT_LOG_SIZE, LOG_SIZE_CHOICES, logSizeOf } from "../../api/notificationLog";
 import type { PluginCard } from "../../api/pluginCards";
 import { definePluginSettings } from "../../api/pluginSettings";
 import type { EnginePluginContext, PluginCode } from "../../renderer/engine";
@@ -28,6 +29,8 @@ import { makeSidebarIcon, PluginsIcon, PrivacyIcon, UpdaterIcon } from "./icon";
 import { buildLayoutWithSection, FALLBACK_TYPES, readTypes, TYPE_NAMES } from "./layout";
 import { defaultButtonGroups, defaultChoices, defaultQuickActions, defaultSettings, type LiveSwitch } from "./mainItems";
 import { makeMainTab } from "./MainTab";
+import { makeNotificationLogWindow } from "./NotificationLogWindow";
+import { makeNotificationOptionsWindow } from "./NotificationOptionsWindow";
 import { cardsForPerson } from "./pluginsModel";
 import { makePluginsTab } from "./PluginsTab";
 import { PLUGINS_TAB_CSS, PLUGINS_TAB_STYLE_NAME } from "./pluginsTabStyles";
@@ -44,7 +47,10 @@ const registry = new EntryRegistry();
 const settings = definePluginSettings({
     tabLayout: { type: "string", default: "", maxLength: LAYOUT_MAX_CHARS, description: "Which tabs of the Amiricord section are hidden, their order and the pinned ones (saved by Editor Mode)." },
     customCss: { type: "string", default: "", maxLength: CUSTOM_CSS_MAX, description: "Your own style sheet (saved by Edit Custom CSS)." },
-    customCssOn: { type: "boolean", default: false, description: "Whether your own style sheet is applied to Discord." }
+    customCssOn: { type: "boolean", default: false, description: "Whether your own style sheet is applied to Discord." },
+    notificationCards: { type: "boolean", default: true, description: "Whether the notifications of plugins are drawn as cards in the corner of Discord's window." },
+    notificationLog: { type: "boolean", default: true, description: "Whether the notifications of plugins are kept in the Notification Log (in memory, for this session)." },
+    notificationLogSize: { type: "select", default: DEFAULT_LOG_SIZE, options: LOG_SIZE_CHOICES.map(size => ({ label: String(size), value: size })), description: "How many notifications the Notification Log keeps." }
 });
 let context: EnginePluginContext | undefined;
 let nodeTypes: { get(): unknown; } | undefined;
@@ -130,13 +136,15 @@ const plugin: PluginCode & { buildLayout(builder: { key?: unknown; buildLayout()
                 quickActions: defaultQuickActions({
                     openDataFolder: () => { engine.openDataFolder(); },
                     openCssEditor: () => { openCssEditor(); },
+                    openNotificationLog: () => { openNotificationLog(); },
+                    openNotificationOptions: () => { openNotificationOptions(); },
                     openHealthReport: () => { engine.openHealthReport(); },
                     openSourceCode: () => { engine.openSourceCode(); },
                     restart: () => { plugins.restart(); }
                 }),
                 settings: defaultSettings({ "custom-css": customCssSwitch }),
                 choices: defaultChoices(),
-                buttonGroups: defaultButtonGroups(),
+                buttonGroups: defaultButtonGroups({ openNotificationLog: () => { openNotificationLog(); }, openNotificationOptions: () => { openNotificationOptions(); } }),
                 logo,
                 banner,
                 editor: guarded("The tab editor", makeTabsEditor({
@@ -202,6 +210,44 @@ const plugin: PluginCode & { buildLayout(builder: { key?: unknown; buildLayout()
                 const Safe = boundary();
                 return <Safe label="The plugin window"><Window id={card.id} onClose={() => { props.onClose(); }} /></Safe>;
             }) !== undefined;
+        };
+
+        // The Notification Log keeps only as many as the size the owner chose: a smaller size drops the oldest ones at once.
+        ctx.onDispose(settings.onChange("notificationLogSize", size => { engine.notificationLog.trim(logSizeOf(size)); }));
+
+        // The two windows of the notifications: the log (what plugins showed in this session) and its options. Each is made once per opening, like the other windows.
+        const openInWindow = (what: string, make: (parts: WindowParts) => (props: { onClose(): void; }) => unknown): void => {
+            const parts = windowParts();
+            if (!parts) {
+                ctx.reportError(what, new Error("Discord's window pieces were not found, so the window cannot open"));
+                return;
+            }
+            const Window = make(parts) as (props: { onClose(): void; }) => never;
+            ctx.modals.open(props => {
+                const Safe = boundary();
+                return <Safe label={what}><Window onClose={() => { props.onClose(); }} /></Safe>;
+            });
+        };
+        const openNotificationLog = () => {
+            openInWindow("The Notification Log window", parts => makeNotificationLogWindow({
+                list: () => engine.notificationLog.list(), clear: () => { engine.notificationLog.clear(); },
+                subscribe: listener => engine.notificationLog.subscribe(listener), version: () => engine.notificationLog.version(), parts
+            }));
+        };
+        const openNotificationOptions = () => {
+            openInWindow("The notification options window", parts => makeNotificationOptionsWindow({
+                read: () => ({ cards: settings.store.notificationCards, log: settings.store.notificationLog, size: logSizeOf(settings.store.notificationLogSize) }),
+                set: change => {
+                    try {
+                        if (change.cards !== undefined) settings.store.notificationCards = change.cards;
+                        if (change.log !== undefined) settings.store.notificationLog = change.log;
+                        if (change.size !== undefined) settings.store.notificationLogSize = logSizeOf(change.size) as (typeof LOG_SIZE_CHOICES)[number];
+                    } catch (error) {
+                        ctx.reportError("saving the notification options", error);
+                    }
+                },
+                parts
+            }));
         };
 
         // The Custom CSS editor: a window with the engine's pieces, made once per opening so Discord drawing the layer again does not lose what is typed.

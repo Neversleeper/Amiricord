@@ -1242,6 +1242,50 @@ describe("what the engine offers to plugins besides the cards", () => {
         assert.deepEqual(t.owns(), ["health", "source"]);
     });
 
+    it("keeps what plugins show in the notification log, with the plugin that showed it, and hands the log only to core plugins", async () => {
+        let log: { list(): Array<{ plugin: string; title: string; body: string; }>; } | undefined;
+        let plainSees: unknown = "not set";
+        const t = setup([plugin("Core", { core: true }), plugin("Other")], {
+            Core: { start(ctx) { log = ctx.engine!.notificationLog; ctx.notifications.show({ title: "from core", body: "one" }); } },
+            Other: { start(ctx) { plainSees = ctx.engine; ctx.notifications.show({ title: "from other" }); } }
+        });
+        t.boot();
+        t.dom();
+        await t.engine.done;
+        assert.equal(plainSees, undefined, "a plugin that is not core gets no engine API");
+        const kept = log!.list().map(entry => [entry.plugin, entry.title, entry.body]).sort();
+        assert.deepEqual(kept, [["Core", "from core", "one"], ["Other", "from other", ""]]);
+    });
+
+    it("does not keep notifications when the owner turned the log off, and keeps as many as the saved size says (or the default for a size that is not one of the choices)", async () => {
+        const run = async (values: Record<string, unknown>, count: number) => {
+            let log: { list(): unknown[]; } | undefined;
+            const t = setup([plugin("Core", { core: true })], {
+                Core: { start(ctx) { log = ctx.engine!.notificationLog; for (let i = 0; i < count; i++) ctx.notifications.show({ title: `n${i}` }); } }
+            }, { boot: { settings: { schema: 1, plugins: { Settings: { values: values as Record<string, never> } } } } });
+            t.boot();
+            t.dom();
+            await t.engine.done;
+            return log!.list().length;
+        };
+        assert.equal(await run({}, 3), 3, "on by default");
+        assert.equal(await run({ notificationLog: false }, 3), 0, "off: nothing is kept");
+        assert.equal(await run({ notificationLogSize: 25 }, 30), 25);
+        assert.equal(await run({ notificationLogSize: 200 }, 130), 130);
+        assert.equal(await run({ notificationLogSize: 30 }, 120), 100, "30 is not one of the choices: the default size");
+    });
+
+    it("lets the cards be switched off without losing the notification: it is still in the log", async () => {
+        let log: { list(): unknown[]; } | undefined;
+        const t = setup([plugin("Core", { core: true })], {
+            Core: { start(ctx) { log = ctx.engine!.notificationLog; ctx.notifications.show({ title: "kept" }); } }
+        }, { boot: { settings: { schema: 1, plugins: { Settings: { values: { notificationCards: false } } } } } });
+        t.boot();
+        t.dom();
+        await t.engine.done;
+        assert.equal(log!.list().length, 1);
+    });
+
     it("lets any plugin report an error of its own, attributed to it, with the source named", async () => {
         const t = setup([plugin("Any"), plugin("Other")], {
             Any: { start(ctx) { ctx.reportError("main tab", new Error("could not draw")); ctx.reportError("plain text", "just text"); } }

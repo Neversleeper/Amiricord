@@ -140,9 +140,9 @@ function mainTab(extra: Partial<MainTabDeps> = {}, hooks: { initial?: unknown[];
     const deps: MainTabDeps = {
         status: () => status(), leaveSafeMode: () => { log.push("leave-safe-mode"); }, cards: () => [],
         quickActions: defaultQuickActions({
-            openDataFolder: () => { log.push("folder"); }, openCssEditor: () => { log.push("css"); }, openHealthReport: () => { log.push("health"); }, openSourceCode: () => { log.push("source"); }, restart: () => { log.push("restart"); }
+            openDataFolder: () => { log.push("folder"); }, openNotificationLog: () => { log.push("log"); }, openNotificationOptions: () => { log.push("options"); }, openCssEditor: () => { log.push("css"); }, openHealthReport: () => { log.push("health"); }, openSourceCode: () => { log.push("source"); }, restart: () => { log.push("restart"); }
         }),
-        settings: defaultSettings(), choices: defaultChoices(), buttonGroups: defaultButtonGroups(),
+        settings: defaultSettings(), choices: defaultChoices(), buttonGroups: defaultButtonGroups({ openNotificationLog: () => { log.push("log"); }, openNotificationOptions: () => { log.push("options"); } }),
         logo: "data:image/webp;base64,AAAA", editor: () => ({ type: "div", props: { className: "editor-stub" }, children: [] }), ...extra
     };
     const tree = render(makeMainTab(deps)()) as El;
@@ -230,13 +230,13 @@ describe("the main tab", () => {
         assert.equal(findAll(mainTab({ logo: "" }).tree, el => hasClass(el, "amiricord-logo-fallback")).length, 1);
     });
 
-    it("has the six tiles in the order of TestCord's grid; the five that work are live and the rest look the same, do nothing and name why on hover", () => {
+    it("has the six tiles in the order of TestCord's grid; all six work now; an entry that does not yet work looks the same, does nothing and names why on hover", () => {
         const t = mainTab();
         const [actions] = findAll(t.tree, el => hasClass(el, "amiricord-actions"));
         const tiles = findAll(actions, el => el.type === "button");
         assert.deepEqual(tiles.map(textOf), ["Notification Log", "Edit Custom CSS", "Relaunch Discord", "Open Settings Folder", "Health Report", "View Source Code"]);
         const soon = tiles.filter(tile => hasClass(tile, "amiricord-soon"));
-        assert.deepEqual(soon.map(textOf), ["Notification Log"]);
+        assert.deepEqual(soon.map(textOf), []);
         for (const tile of soon) {
             assert.equal(tile.props["aria-disabled"], "true");
             assert.equal(tile.props["data-soon"], "Coming soon");
@@ -246,12 +246,12 @@ describe("the main tab", () => {
         assert.equal(hasClass(open, "amiricord-soon"), false);
         (open.props.onClick as () => void)();
         assert.deepEqual(t.log, ["folder"]);
-        for (const name of ["Health Report", "View Source Code", "Edit Custom CSS"]) {
+        for (const name of ["Health Report", "View Source Code", "Edit Custom CSS", "Notification Log"]) {
             const tile = tiles.find(candidate => textOf(candidate) === name)!;
             assert.equal(hasClass(tile, "amiricord-soon"), false, name);
             (tile.props.onClick as () => void)();
         }
-        assert.deepEqual(t.log, ["folder", "health", "source", "css"]);
+        assert.deepEqual(t.log, ["folder", "health", "source", "css", "log"]);
     });
 
     it("draws a working switch from its feature, flips it on a click or the Enter and space keys, and keeps listening for changes made elsewhere", () => {
@@ -300,7 +300,8 @@ describe("the main tab", () => {
     });
 
     it("has the window background drop-down and the Notifications buttons after the switches", () => {
-        const { tree } = mainTab();
+        const t = mainTab();
+        const { tree } = t;
         const [choice] = findAll(tree, el => hasClass(el, "amiricord-choice"));
         assert.match(textOf(choice), /Window background effect/);
         assert.match(textOf(choice), /Coming soon/);
@@ -311,7 +312,10 @@ describe("the main tab", () => {
         assert.match(textOf(group), /Discord's own message notifications are not affected/);
         const buttons = findAll(group, el => el.type === "button");
         assert.deepEqual(buttons.map(textOf), ["Notification options", "Open the log"]);
-        assert.ok(buttons.every(button => button.props["aria-disabled"] === "true" && button.props.onClick === undefined));
+        assert.ok(buttons.every(button => button.props["aria-disabled"] === undefined && typeof button.props.onClick === "function"), "both work now");
+        const before = t.log.length;
+        for (const button of buttons) (button.props.onClick as () => void)();
+        assert.deepEqual(t.log.slice(before), ["options", "log"]);
     });
 
     it("turns an entry live when its feature exists: no tag, an active switch, a working tile and a working button", () => {

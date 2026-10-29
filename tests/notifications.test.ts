@@ -368,3 +368,64 @@ describe("without a page", () => {
         assert.equal(body.all(el => el.has("amiricord-notification")).length, 1);
     });
 });
+
+describe("the log and the switch for cards", () => {
+    function make(extra: Partial<Parameters<typeof createNotificationLayer>[0]> = {}) {
+        const body = new FakeElement("body");
+        const recorded: string[][] = [];
+        const errors: string[] = [];
+        const layer = createNotificationLayer({
+            document: { createElement: tag => new FakeElement(tag), body },
+            setTimeout: () => 0, clearTimeout: () => undefined, addStyle: () => undefined,
+            record: (plugin, title, text) => { recorded.push([plugin, title, text]); },
+            ...extra
+        });
+        const notifications = layer.forPlugin("P", () => undefined, (source, error) => { errors.push(`${source}: ${error instanceof Error ? error.message : String(error)}`); });
+        const cards = () => body.all(el => el.has("amiricord-notification"));
+        return { notifications, recorded, errors, cards };
+    }
+
+    it("tells the record about every notification that has text, with the plugin and the text as it is shown, and not about one with neither title nor body", () => {
+        const t = make();
+        t.notifications.show({ title: "  Hello  ", body: "World" });
+        t.notifications.show({ title: "", body: "" });
+        t.notifications.show({ title: "Only a title" });
+        assert.deepEqual(t.recorded, [["P", "Hello", "World"], ["P", "Only a title", ""]]);
+    });
+
+    it("records a notification when cards are off, and draws no card for it: the handle does nothing", () => {
+        const t = make({ enabled: () => false });
+        const handle = t.notifications.show({ title: "T", body: "B" });
+        assert.deepEqual(t.recorded, [["P", "T", "B"]]);
+        assert.equal(t.cards().length, 0);
+        assert.doesNotThrow(() => handle.close());
+    });
+
+    it("draws the card as before when cards are on, or when nothing says otherwise", () => {
+        const on = make({ enabled: () => true });
+        on.notifications.show({ title: "T" });
+        assert.equal(on.cards().length, 1);
+        const plain = make();
+        plain.notifications.show({ title: "T" });
+        assert.equal(plain.cards().length, 1);
+    });
+
+    it("reads the switch each time a notification is shown, so the owner can change it while Discord runs", () => {
+        let on = true;
+        const t = make({ enabled: () => on });
+        t.notifications.show({ title: "one" });
+        on = false;
+        t.notifications.show({ title: "two" });
+        on = true;
+        t.notifications.show({ title: "three" });
+        assert.equal(t.cards().length, 2);
+        assert.equal(t.recorded.length, 3);
+    });
+
+    it("reports a record that throws, and still shows the card", () => {
+        const t = make({ record: () => { throw new Error("log is broken"); } });
+        t.notifications.show({ title: "T" });
+        assert.deepEqual(t.errors, ["notification log: log is broken"]);
+        assert.equal(t.cards().length, 1);
+    });
+});
