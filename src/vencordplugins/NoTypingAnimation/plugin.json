@@ -1,0 +1,33 @@
+{
+    "schema": 1,
+    "id": "NoTypingAnimation",
+    "name": "No Typing Animation",
+    "version": "1.0.0",
+    "description": "Turns off the typing dots animation, which uses CPU.",
+    "origin": "vencord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        {
+            "name": "AutumnVN",
+            "role": "original author"
+        },
+        {
+            "name": "Neversleeper",
+            "role": "Amiricord port"
+        }
+    ],
+    "credits": [
+        {
+            "name": "Vendicated and contributors (Vencord), plugin NoTypingAnimation",
+            "license": "GPL-3.0-or-later",
+            "url": "https://github.com/Vendicated/Vencord"
+        }
+    ],
+    "tags": ["ui"],
+    "enabledByDefault": false,
+    "startAt": "init",
+    "entry": {
+        "renderer": "index.ts"
+    },
+    "permissions": {}
+}
