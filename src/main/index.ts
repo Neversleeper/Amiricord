@@ -22,9 +22,10 @@ trace(dataDir, `main part running (process type ${process.type ?? "unknown"}, el
 // Best effort: it can never stop Discord from starting.
 const DISCORD_FOLDERS: Record<string, string> = { stable: "discord", canary: "discordcanary", ptb: "discordptb" };
 try {
+    // From APPDATA, not from the data folder's own path: that folder may be a link to another drive, and its real path is then somewhere else.
     const folder = DISCORD_FOLDERS[basename(dataDir)];
-    if (folder) {
-        const devtools = enableDiscordDevTools(join(dirname(dirname(dataDir)), folder));
+    if (folder && process.env.APPDATA) {
+        const devtools = enableDiscordDevTools(join(process.env.APPDATA, folder));
         for (const line of [...devtools.changed, ...devtools.problems]) trace(dataDir, `developer tools: ${line}`);
     }
 } catch (error) {
