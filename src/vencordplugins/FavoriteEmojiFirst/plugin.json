@@ -1,0 +1,27 @@
+{
+    "schema": 1,
+    "id": "FavoriteEmojiFirst",
+    "name": "Favorite Emoji First",
+    "version": "1.0.0",
+    "description": "Puts your favourite emoji first in the emoji autocomplete, and lets you give an emoji a short name (an alias) that the autocomplete finds and that turns into the emoji when you send. /emoji-aliases manages the aliases.",
+    "origin": "vencord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        { "name": "Aria", "role": "original author" },
+        { "name": "Ven", "role": "original author" },
+        { "name": "justjxke", "role": "emoji aliases in TestCord's copy" },
+        { "name": "Neversleeper", "role": "Amiricord port" }
+    ],
+    "credits": [
+        {
+            "name": "Vendicated and contributors (Vencord), plugin FavoriteEmojiFirst",
+            "license": "GPL-3.0-or-later",
+            "url": "https://github.com/Vendicated/Vencord"
+        }
+    ],
+    "tags": ["chat", "utility"],
+    "enabledByDefault": false,
+    "startAt": "webpackReady",
+    "entry": { "renderer": "index.ts" },
+    "permissions": {}
+}
