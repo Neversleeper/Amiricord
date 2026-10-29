@@ -75,8 +75,13 @@ export interface SettingsEntry {
     icon?: () => unknown;
 }
 
-/** One sidebar item with its panel, one category and one custom node that draws the tab. */
-export function makeEntryNode(types: LayoutTypes, entry: SettingsEntry): LayoutNode {
+/**
+ * One sidebar item with its panel, one category and one custom node that draws the tab.
+ * An entry without an icon gets `fallbackIcon` when one is given: Discord draws the icon of a sidebar item as a component, so an item
+ * with none would make it draw `undefined` (React error 130) when the settings open.
+ */
+export function makeEntryNode(types: LayoutTypes, entry: SettingsEntry, fallbackIcon?: () => unknown): LayoutNode {
+    const icon = entry.icon ?? fallbackIcon;
     const panel: LayoutNode = {
         key: `${entry.key}_panel`,
         type: types.PANEL,
@@ -96,13 +101,13 @@ export function makeEntryNode(types: LayoutTypes, entry: SettingsEntry): LayoutN
         key: entry.key,
         type: types.SIDEBAR_ITEM,
         useTitle: () => entry.title,
-        ...(entry.icon ? { icon: entry.icon } : {}),
+        ...(icon ? { icon } : {}),
         buildLayout: () => [panel]
     };
 }
 
-export function makeSectionNode(types: LayoutTypes, entries: readonly SettingsEntry[]): LayoutNode {
-    const items = entries.map(entry => makeEntryNode(types, entry));
+export function makeSectionNode(types: LayoutTypes, entries: readonly SettingsEntry[], fallbackIcon?: () => unknown): LayoutNode {
+    const items = entries.map(entry => makeEntryNode(types, entry, fallbackIcon));
     return { key: SECTION_KEY, type: types.SECTION, useTitle: () => SECTION_TITLE, buildLayout: () => items };
 }
 
@@ -120,6 +125,8 @@ export interface SectionDeps {
     types(): LayoutTypes;
     /** The tabs to show, in order; called every time so tabs added later appear. */
     entries(): readonly SettingsEntry[];
+    /** The icon of a tab that brings none (a tab added by a plugin may have no icon). */
+    fallbackIcon?: () => unknown;
     /** Told about anything that went wrong in our part (never thrown into Discord's code). */
     onError(error: unknown): void;
 }
@@ -136,7 +143,7 @@ export function buildLayoutWithSection(builder: { key?: unknown; buildLayout(): 
         if (layout.some(node => isNode(node) && node.key === SECTION_KEY)) return layout;
         const entries = deps.entries();
         if (entries.length === 0) return layout;
-        return insertSection(layout, makeSectionNode(deps.types(), entries));
+        return insertSection(layout, makeSectionNode(deps.types(), entries, deps.fallbackIcon));
     } catch (error) {
         try {
             deps.onError(error);

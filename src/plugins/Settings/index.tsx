@@ -112,6 +112,8 @@ const plugin: PluginCode & { buildLayout(builder: { key?: unknown; buildLayout()
         return buildLayoutWithSection(builder, {
             types: () => readTypes(nodeTypes?.get()) ?? FALLBACK_TYPES,
             entries: () => (context ? visibleTabs(allEntries(), parseLayout(settings.store.tabLayout)) : []),
+            // A tab a plugin added without an icon gets this one; Discord cannot draw a sidebar item that has none.
+            fallbackIcon: PluginsIcon,
             onError: error => { context?.reportError("settings layout", error); }
         });
     },

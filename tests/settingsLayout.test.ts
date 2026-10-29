@@ -63,6 +63,15 @@ describe("the nodes", () => {
         assert.equal(panel.useTitle?.(), "Title plain");
     });
 
+    it("gives an entry with no icon the fallback icon when one is given, and keeps the icon an entry has", () => {
+        const fallback = () => "fallback";
+        const own = () => "own";
+        assert.equal(makeEntryNode(types, entry("plain"), fallback).icon, fallback);
+        assert.equal(makeEntryNode(types, entry("own", { icon: own }), fallback).icon, own);
+        const section = makeSectionNode(types, [entry("a"), entry("b", { icon: own })], fallback);
+        assert.deepEqual((section.buildLayout!() as LayoutNode[]).map(node => node.icon), [fallback, own]);
+    });
+
     it("makes the section with the marker key, the title and one item per entry in the order given", () => {
         const section = makeSectionNode(types, [entry("a"), entry("b")]);
         assert.deepEqual([section.key, section.type, section.useTitle?.()], [SECTION_KEY, 11, SECTION_TITLE]);
@@ -111,6 +120,15 @@ describe("buildLayoutWithSection: what the patch calls", () => {
         const t = setup();
         const result = buildLayoutWithSection(t.builder(ROOT_KEY, sections("user_section", ANCHOR_KEY)), t.deps);
         assert.deepEqual(keysOf(result), ["user_section", SECTION_KEY, ANCHOR_KEY]);
+        assert.deepEqual(t.errors, []);
+    });
+
+    it("gives a tab without an icon the fallback icon of its deps, so the sidebar item always has one", () => {
+        const fallback = () => "fallback";
+        const t = setup({ entries: [entry("amiricord"), entry("autoRedeem:logs")] });
+        const result = buildLayoutWithSection(t.builder(ROOT_KEY, sections("user_section", ANCHOR_KEY)), { ...t.deps, fallbackIcon: fallback });
+        const section = (result as LayoutNode[])[1];
+        assert.deepEqual((section.buildLayout!() as LayoutNode[]).map(node => node.icon), [fallback, fallback]);
         assert.deepEqual(t.errors, []);
     });
 
