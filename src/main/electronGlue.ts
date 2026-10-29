@@ -106,7 +106,7 @@ export function startMain(options: MainOptions): MainController | null {
         if (anyCreationChoice(creation) && !controller.bootInfo().safeMode) {
             hookBrowserWindow({ resolve: id => require.resolve(id), cache: require.cache }, creation, text => { trace(dataDir, text); });
             // Discord's crash screen keeps its error to itself, so while these options are on the red errors of its page are copied to the boot trace (src/main/consoleErrors.ts).
-            app.on("browser-window-created", (_event, win) => {
+            if (creation.nativeTitleBar || creation.transparent) app.on("browser-window-created", (_event, win) => {
                 try {
                     win.webContents.on("console-message", makeConsoleErrorListener(text => { trace(dataDir, text); }) as never);
                     if (creation.nativeTitleBar) probeTopBar(win.webContents, text => { trace(dataDir, text); });

@@ -15,17 +15,23 @@ export interface CreationChoices {
     nativeTitleBar: boolean;
     /** Make the window see-through. */
     transparent: boolean;
+    /** Build the window with no minimum size. Asking for it afterwards (`windowOptions.ts`) is not enough once the window is built by this hook: the minimum Discord gave at creation came back. */
+    noMinimumSize: boolean;
 }
 
-export const CREATION_KEYS = { nativeTitleBar: "nativeTitleBar", transparent: "transparentWindow" } as const;
+export const CREATION_KEYS = { nativeTitleBar: "nativeTitleBar", transparent: "transparentWindow", noMinimumSize: "removeMinimumSize" } as const;
 
 /** What is saved, checked: a switch is on only when it is exactly `true`. */
 export function creationChoicesOf(read: (key: string) => unknown): CreationChoices {
-    return { nativeTitleBar: read(CREATION_KEYS.nativeTitleBar) === true, transparent: read(CREATION_KEYS.transparent) === true };
+    return {
+        nativeTitleBar: read(CREATION_KEYS.nativeTitleBar) === true,
+        transparent: read(CREATION_KEYS.transparent) === true,
+        noMinimumSize: read(CREATION_KEYS.noMinimumSize) === true
+    };
 }
 
 export function anyCreationChoice(choices: CreationChoices): boolean {
-    return choices.nativeTitleBar || choices.transparent;
+    return choices.nativeTitleBar || choices.transparent || choices.noMinimumSize;
 }
 
 type Options = Record<string, unknown>;
@@ -57,6 +63,11 @@ export function adjustCreation(options: unknown, choices: CreationChoices, trace
         delete adjusted.titleBarStyle;
         delete adjusted.titleBarOverlay;
         trace("window options: a window is built with the Windows title bar");
+    }
+    if (choices.noMinimumSize) {
+        adjusted.minWidth = 0;
+        adjusted.minHeight = 0;
+        trace("window options: a window is built with no minimum size");
     }
     return adjusted;
 }

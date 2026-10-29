@@ -9,7 +9,7 @@ import { describe, it } from "node:test";
 
 import { adjustCreation, anyCreationChoice, CREATION_KEYS, type CreationChoices, creationChoicesOf, hookBrowserWindow, isDiscordWindow, type ModuleHost } from "../src/main/windowHook";
 
-const off: CreationChoices = { nativeTitleBar: false, transparent: false };
+const off: CreationChoices = { nativeTitleBar: false, transparent: false, noMinimumSize: false };
 const discord = () => ({ title: "Discord", frame: false, titleBarStyle: "hidden", titleBarOverlay: true, width: 900, webPreferences: { preload: "C:\\x\\preload.js" } });
 
 describe("reading the two creation options", () => {
@@ -17,9 +17,9 @@ describe("reading the two creation options", () => {
         assert.deepEqual(creationChoicesOf(() => undefined), off);
         assert.equal(anyCreationChoice(off), false);
         for (const odd of ["true", 1, "yes", null, {}, [true]]) assert.deepEqual(creationChoicesOf(() => odd), off, String(odd));
-        const saved: Record<string, unknown> = { [CREATION_KEYS.nativeTitleBar]: true, [CREATION_KEYS.transparent]: true };
-        assert.deepEqual(creationChoicesOf(key => saved[key]), { nativeTitleBar: true, transparent: true });
-        assert.deepEqual(CREATION_KEYS, { nativeTitleBar: "nativeTitleBar", transparent: "transparentWindow" });
+        const saved: Record<string, unknown> = { [CREATION_KEYS.nativeTitleBar]: true, [CREATION_KEYS.transparent]: true, [CREATION_KEYS.noMinimumSize]: true };
+        assert.deepEqual(creationChoicesOf(key => saved[key]), { nativeTitleBar: true, transparent: true, noMinimumSize: true });
+        assert.deepEqual(CREATION_KEYS, { nativeTitleBar: "nativeTitleBar", transparent: "transparentWindow", noMinimumSize: "removeMinimumSize" });
     });
 });
 
@@ -38,12 +38,12 @@ describe("adjusting the options of a window", () => {
         const options = discord();
         assert.equal(adjustCreation(options, off, quiet), options);
         const other = { frame: false };
-        assert.equal(adjustCreation(other, { nativeTitleBar: true, transparent: true }, quiet), other);
+        assert.equal(adjustCreation(other, { nativeTitleBar: true, transparent: true, noMinimumSize: false }, quiet), other);
     });
 
     it("the Windows title bar takes away the frame settings and nothing else, without changing the given object", () => {
         const options = discord();
-        const result = adjustCreation(options, { nativeTitleBar: true, transparent: false }, quiet) as Record<string, unknown>;
+        const result = adjustCreation(options, { nativeTitleBar: true, transparent: false, noMinimumSize: false }, quiet) as Record<string, unknown>;
         assert.equal("frame" in result, false);
         assert.equal("titleBarStyle" in result, false);
         assert.equal("titleBarOverlay" in result, false);
@@ -52,8 +52,20 @@ describe("adjusting the options of a window", () => {
         assert.deepEqual(options, discord(), "the original is untouched");
     });
 
+    it("no minimum size builds the window with a minimum of zero, so the one Discord gave does not come back, and changes no other option", () => {
+        const options = { ...discord(), minWidth: 940, minHeight: 500 };
+        const result = adjustCreation(options, { ...off, noMinimumSize: true }, quiet) as Record<string, unknown>;
+        assert.equal(result.minWidth, 0);
+        assert.equal(result.minHeight, 0);
+        assert.equal(result.frame, false);
+        assert.equal(result.width, 900);
+        assert.equal(options.minWidth, 940, "the original is untouched");
+        const other = { minWidth: 940 };
+        assert.equal(adjustCreation(other, { ...off, noMinimumSize: true }, quiet), other, "a window that is not Discord's is left alone");
+    });
+
     it("transparent makes a frameless see-through window", () => {
-        const result = adjustCreation(discord(), { nativeTitleBar: false, transparent: true }, quiet) as Record<string, unknown>;
+        const result = adjustCreation(discord(), { nativeTitleBar: false, transparent: true, noMinimumSize: false }, quiet) as Record<string, unknown>;
         assert.equal(result.transparent, true);
         assert.equal(result.frame, false);
         assert.equal(result.backgroundColor, "#00000000");
@@ -62,7 +74,7 @@ describe("adjusting the options of a window", () => {
 
     it("transparent wins when both are on, and the trace says so", () => {
         const lines: string[] = [];
-        const result = adjustCreation(discord(), { nativeTitleBar: true, transparent: true }, text => { lines.push(text); }) as Record<string, unknown>;
+        const result = adjustCreation(discord(), { nativeTitleBar: true, transparent: true, noMinimumSize: false }, text => { lines.push(text); }) as Record<string, unknown>;
         assert.equal(result.transparent, true);
         assert.equal(result.frame, false);
         assert.equal(lines.length, 1);
@@ -92,7 +104,7 @@ describe("putting the window constructor in place", () => {
 
     it("swaps BrowserWindow for modules that ask for electron afterwards, keeps everything else of Electron, and keeps the static functions", () => {
         const t = fakeHost();
-        assert.equal(hookBrowserWindow(t.host, { nativeTitleBar: true, transparent: false }, () => undefined), true);
+        assert.equal(hookBrowserWindow(t.host, { nativeTitleBar: true, transparent: false, noMinimumSize: false }, () => undefined), true);
         const swapped = t.entry.exports as { BrowserWindow: new (o?: unknown) => object; app: string; };
         assert.equal(swapped.app, "the app");
         assert.deepEqual((swapped.BrowserWindow as unknown as { getAllWindows(): string[]; }).getAllWindows(), ["all"]);
@@ -104,7 +116,7 @@ describe("putting the window constructor in place", () => {
 
     it("builds a window that is not Discord's with exactly the options it was given", () => {
         const t = fakeHost();
-        hookBrowserWindow(t.host, { nativeTitleBar: true, transparent: true }, () => undefined);
+        hookBrowserWindow(t.host, { nativeTitleBar: true, transparent: true, noMinimumSize: false }, () => undefined);
         const given = { frame: false, width: 3 };
         new (t.entry.exports as { BrowserWindow: new (o?: unknown) => object; }).BrowserWindow(given);
         assert.equal(t.built[0], given);
@@ -112,15 +124,15 @@ describe("putting the window constructor in place", () => {
 
     it("says so in the trace and leaves things alone when Electron is not loaded or has no BrowserWindow", () => {
         const lines: string[] = [];
-        assert.equal(hookBrowserWindow(fakeHost({ missing: true }).host, { nativeTitleBar: true, transparent: false }, text => { lines.push(text); }), false);
-        assert.equal(hookBrowserWindow(fakeHost({ exports: {} }).host, { nativeTitleBar: true, transparent: false }, text => { lines.push(text); }), false);
+        assert.equal(hookBrowserWindow(fakeHost({ missing: true }).host, { nativeTitleBar: true, transparent: false, noMinimumSize: false }, text => { lines.push(text); }), false);
+        assert.equal(hookBrowserWindow(fakeHost({ exports: {} }).host, { nativeTitleBar: true, transparent: false, noMinimumSize: false }, text => { lines.push(text); }), false);
         assert.equal(lines.length, 2);
     });
 
     it("never throws: a cache that fails is written in the trace", () => {
         const lines: string[] = [];
         const host: ModuleHost = { resolve: () => { throw new Error("cannot resolve"); }, cache: {} };
-        assert.equal(hookBrowserWindow(host, { nativeTitleBar: true, transparent: false }, text => { lines.push(text); }), false);
+        assert.equal(hookBrowserWindow(host, { nativeTitleBar: true, transparent: false, noMinimumSize: false }, text => { lines.push(text); }), false);
         assert.match(lines[0], /could not be put in place: cannot resolve/);
     });
 });
