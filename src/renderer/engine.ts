@@ -9,6 +9,7 @@
 // It never touches Electron or the DOM directly (they come in through options), so it is tested with fakes.
 // Design: docs/design-02-core.md sections 4 to 8.
 
+import { buildChatBar, ChatBarHub, type ChatBarPage, type PluginChatBar } from "../api/chatBar";
 import { buildCommands, commandHub, type PluginCommands } from "../api/commands";
 import type { ReactLike } from "../api/common";
 import { buildCommon, PluginCommon } from "../api/commonStores";
@@ -159,6 +160,8 @@ export interface EnginePluginContext extends PluginContext {
     settingsTabs: PluginSettingsTabs;
     /** Slash commands. They go when the plugin stops. See `src/api/commands.ts`. */
     commands: PluginCommands;
+    /** Buttons in the row at the right of the message box. They go when the plugin stops. See `src/api/chatBar.ts`. */
+    chatBar: PluginChatBar;
     /** A short message at the bottom of the page. See `src/api/toasts.ts`. */
     toasts: PluginToasts;
     /** Opens Discord's dialogs and closes what this plugin left open when it stops. See `src/api/modals.ts`. */
@@ -607,6 +610,9 @@ export function startEngine(options: EngineOptions): Engine {
     const menuHub = havePage
         ? new ContextMenuHub(globalThis as unknown as MenuPage, css => { addCommonStyle(css, "context-menus"); }, (plugin, source, error) => { send({ type: "runtime-error", plugin, source, error: describe(error) }); })
         : undefined;
+    const chatBarHub = havePage && (globalThis as unknown as Partial<ChatBarPage>).setTimeout !== undefined
+        ? new ChatBarHub(globalThis as unknown as ChatBarPage, (css, name) => { addCommonStyle(css, name); }, (plugin, source, error) => { send({ type: "runtime-error", plugin, source, error: describe(error) }); })
+        : undefined;
     const makeRuntime = (id: string): PluginRuntime => {
         const info = byId.get(id)!;
         const context = (ctx: PluginContext): EnginePluginContext => {
@@ -621,6 +627,7 @@ export function startEngine(options: EngineOptions): Engine {
                 userArea: buildUserArea(userArea, id, ctx.onDispose),
                 settingsTabs: buildSettingsTabs(settingsTabs, id, ctx.onDispose),
                 commands: buildCommands(commandHub, id, ctx.onDispose, reportError),
+                chatBar: chatBarHub ? buildChatBar(chatBarHub, id, ctx.onDispose) : { add: () => false, refresh: () => undefined },
                 toasts: havePage ? buildToasts(globalThis as unknown as ToastPage, css => { addCommonStyle(css, "toasts"); }, ctx.onDispose) : { show: () => undefined },
                 modals: buildModals(pluginFinders, ctx.onDispose, reportError),
                 notifications: notificationLayer.forPlugin(id, ctx.onDispose, reportError),

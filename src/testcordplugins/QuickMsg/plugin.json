@@ -1,0 +1,24 @@
+{
+    "schema": 1,
+    "id": "QuickMsg",
+    "name": "Quick Msg",
+    "version": "1.0.0",
+    "description": "Adds a button next to the message box that sends the text you typed and deletes that message right away (after the delay you set). It sends and deletes in the chat that is open, so read the card: the people there may still see the message for a moment.",
+    "origin": "testcord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        { "name": "x2b", "role": "original author" },
+        { "name": "Neversleeper", "github": "https://github.com/Neversleeper", "role": "Amiricord port" }
+    ],
+    "credits": [
+        { "name": "Vendicated and contributors (Vencord), plugin QuickMsg by x2b", "license": "GPL-3.0-or-later", "url": "https://github.com/TestcordDev/TestCord" }
+    ],
+    "tags": ["chat", "privacy"],
+    "enabledByDefault": false,
+    "startAt": "webpackReady",
+    "entry": { "renderer": "index.ts" },
+    "permissions": {
+        "messages": { "send": true },
+        "account": { "write": ["delete-own-messages"] }
+    }
+}
