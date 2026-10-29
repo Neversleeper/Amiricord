@@ -25,6 +25,7 @@ import { CUSTOM_CSS_ELEMENT_ID, CUSTOM_CSS_MAX, keepLast, makeCustomCss } from "
 import { makeCustomCssWindow } from "./CustomCssWindow";
 import { EntryRegistry } from "./entries";
 import { makeErrorBoundary } from "./ErrorBoundary";
+import { makeHomeLogo } from "./homeLogo";
 import { makeSidebarIcon, PluginsIcon, PrivacyIcon, UpdaterIcon } from "./icon";
 import { buildLayoutWithSection, FALLBACK_TYPES, readTypes, TYPE_NAMES } from "./layout";
 import { defaultButtonGroups, defaultChoices, defaultQuickActions, defaultSettings, type LiveSwitch } from "./mainItems";
@@ -48,6 +49,7 @@ const settings = definePluginSettings({
     tabLayout: { type: "string", default: "", maxLength: LAYOUT_MAX_CHARS, description: "Which tabs of the Amiricord section are hidden, their order and the pinned ones (saved by Editor Mode)." },
     customCss: { type: "string", default: "", maxLength: CUSTOM_CSS_MAX, description: "Your own style sheet (saved by Edit Custom CSS)." },
     customCssOn: { type: "boolean", default: false, description: "Whether your own style sheet is applied to Discord." },
+    showAmiricordLogo: { type: "boolean", default: false, description: "Whether the Discord logo of the Home button is swapped for the Amiricord logo." },
     notificationCards: { type: "boolean", default: true, description: "Whether the notifications of plugins are drawn as cards in the corner of Discord's window." },
     notificationLog: { type: "boolean", default: true, description: "Whether the notifications of plugins are kept in the Notification Log (in memory, for this session)." },
     notificationLogSize: { type: "select", default: DEFAULT_LOG_SIZE, options: LOG_SIZE_CHOICES.map(size => ({ label: String(size), value: size })), description: "How many notifications the Notification Log keeps." }
@@ -113,17 +115,32 @@ const plugin: PluginCode & { buildLayout(builder: { key?: unknown; buildLayout()
         ctx.onDispose(settings.onChange("customCss", () => { customCss.apply(); }));
         ctx.onDispose(settings.onChange("customCssOn", () => { customCss.apply(); }));
         ctx.onDispose(customCss.stop);
-        const customCssSwitch: LiveSwitch = {
-            get: () => settings.store.customCssOn,
+        // A switch of the main tab that is one saved true or false of this plugin: read, written (a refusal goes to the health report) and heard when it changes elsewhere.
+        const liveSwitch = (key: "customCssOn" | "showAmiricordLogo", what: string): LiveSwitch => ({
+            get: () => settings.store[key],
             set: on => {
                 try {
-                    settings.store.customCssOn = on;
+                    settings.store[key] = on;
                 } catch (error) {
-                    ctx.reportError("saving the Custom CSS switch", error);
+                    ctx.reportError(`saving the ${what} switch`, error);
                 }
             },
-            subscribe: listener => settings.onChange("customCssOn", () => { listener(); })
-        };
+            subscribe: listener => settings.onChange(key, () => { listener(); })
+        });
+        const customCssSwitch = liveSwitch("customCssOn", "Custom CSS");
+
+        // The Amiricord logo in the place of Discord's in the Home button: a style, added while the switch is on.
+        const homeLogo = makeHomeLogo({
+            logo,
+            read: () => settings.store.showAmiricordLogo,
+            add: (css, name) => ctx.addStyle(css, name),
+            safeMode: () => engine.status().safeMode,
+            report: (source, error) => { ctx.reportError(source, error); }
+        });
+        homeLogo.apply();
+        ctx.onDispose(settings.onChange("showAmiricordLogo", () => { homeLogo.apply(); }));
+        ctx.onDispose(homeLogo.stop);
+        const homeLogoSwitch = liveSwitch("showAmiricordLogo", "Amiricord logo");
 
         const removeMain = registry.register({
             key: "amiricord",
@@ -142,7 +159,7 @@ const plugin: PluginCode & { buildLayout(builder: { key?: unknown; buildLayout()
                     openSourceCode: () => { engine.openSourceCode(); },
                     restart: () => { plugins.restart(); }
                 }),
-                settings: defaultSettings({ "custom-css": customCssSwitch }),
+                settings: defaultSettings({ "custom-css": customCssSwitch, "amiricord-icon": homeLogoSwitch }),
                 choices: defaultChoices(),
                 buttonGroups: defaultButtonGroups({ openNotificationLog: () => { openNotificationLog(); }, openNotificationOptions: () => { openNotificationOptions(); } }),
                 logo,

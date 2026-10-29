@@ -218,6 +218,41 @@ describe("the Settings plugin in use", () => {
         plugin.settings!.unbind();
     });
 
+    it("swaps the logo of the Home button when the switch is on, follows the switch, and takes the style out when it stops; nothing by default", async () => {
+        const plugin = load();
+        const run = async (values: Record<string, unknown>) => {
+            plugin.settings!.bind(new SettingsClient({ schema: 1, plugins: { Settings: { values: values as Record<string, never> } } }, () => undefined), "Settings");
+            const { ctx, log } = fakeContext();
+            const sheets = new Map<string, string>();
+            (ctx as unknown as { addStyle(css: string, name?: string): unknown; }).addStyle = (css, name = "?") => {
+                if (name === "amiricord-logo") sheets.set(name, css);
+                return { update: () => undefined, remove: () => { sheets.delete(name); } };
+            };
+            await plugin.start!(ctx);
+            return { ctx, log, sheets };
+        };
+        const off = await run({});
+        assert.equal(off.sheets.size, 0, "off by default");
+        for (const undo of off.log.disposers.splice(0)) undo();
+        await plugin.stop!(off.ctx);
+        plugin.settings!.unbind();
+
+        const on = await run({ showAmiricordLogo: true });
+        const css = on.sheets.get("amiricord-logo") ?? "";
+        assert.match(css, /guildsnav___home/);
+        assert.match(css, /url\("data:image\/webp;base64,/, "the logo the plugin carries, as an image given in the address");
+        const store = (plugin.settings as unknown as { store: Record<string, unknown>; }).store;
+        store.showAmiricordLogo = false;
+        assert.equal(on.sheets.size, 0, "switching it off takes the style out");
+        store.showAmiricordLogo = true;
+        assert.equal(on.sheets.size, 1);
+        for (const undo of on.log.disposers.splice(0)) undo();
+        assert.equal(on.sheets.size, 0, "stopping the plugin takes it out");
+        assert.deepEqual(on.log.errors, []);
+        await plugin.stop!(on.ctx);
+        plugin.settings!.unbind();
+    });
+
     it("refuses to start without the engine and the plugin cards that only a core plugin gets", async () => {
         const { ctx } = fakeContext({ withEngine: false });
         await assert.rejects(async () => { await load().start!(ctx); }, /needs the engine and plugin cards/);
