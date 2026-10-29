@@ -1,0 +1,37 @@
+{
+    "schema": 1,
+    "id": "ServerListIndicators",
+    "name": "Server List Indicators",
+    "version": "1.0.0",
+    "description": "Adds the number of online friends and/or servers to the top of the server list.",
+    "origin": "vencord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        {
+            "name": "Rini",
+            "role": "original author"
+        },
+        {
+            "name": "Panniku",
+            "role": "original author"
+        },
+        {
+            "name": "Neversleeper",
+            "role": "Amiricord port"
+        }
+    ],
+    "credits": [
+        {
+            "name": "Vendicated and contributors (Vencord), plugin ServerListIndicators",
+            "license": "GPL-3.0-or-later",
+            "url": "https://github.com/Vendicated/Vencord"
+        }
+    ],
+    "tags": ["ui"],
+    "enabledByDefault": false,
+    "startAt": "webpackReady",
+    "entry": {
+        "renderer": "index.tsx"
+    },
+    "permissions": {}
+}
