@@ -1,0 +1,25 @@
+{
+    "schema": 1,
+    "id": "ProfilePresets",
+    "name": "Profile Presets",
+    "version": "1.0.0",
+    "description": "Saves your whole profile as a preset (picture, banner, display name, pronouns, bio, colours, custom status with its emoji, game widgets and server tag) and puts any saved preset back on your account with one press. Presets live only in this Discord on this computer. Applying one changes your real profile, so by default the plugin first saves what you have now as a backup preset.",
+    "origin": "amiricord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        { "name": "Neversleeper", "github": "https://github.com/Neversleeper" }
+    ],
+    "credits": [
+        { "name": "x2b and nnenaza, plugin ProfileCopyButton (the status and widget request shapes)", "license": "GPL-3.0-or-later", "url": "https://github.com/TestcordDev/TestCord" }
+    ],
+    "tags": ["utility", "ui"],
+    "enabledByDefault": false,
+    "startAt": "webpackReady",
+    "entry": { "renderer": "index.tsx" },
+    "permissions": {
+        "network": [
+            { "host": "cdn.discordapp.com", "from": "renderer", "why": "download your own picture and banner to keep them inside the preset" }
+        ],
+        "account": { "write": ["profile-picture", "profile-banner", "profile-name", "profile-bio", "profile-pronouns", "profile-colours", "profile-server-tag", "custom-status", "game-widgets"] }
+    }
+}
