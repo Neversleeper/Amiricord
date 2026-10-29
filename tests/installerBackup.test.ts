@@ -10,7 +10,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, beforeEach, describe, it } from "node:test";
 
-import { BACKUP_MANIFEST, createBackup, listBackups, readBackup, timestamp, verifyBackup } from "../src/installer/backup";
+import { BACKUP_MANIFEST, createBackup, listBackups, MAX_BACKUP_NAME_TRIES, readBackup, timestamp, verifyBackup } from "../src/installer/backup";
 import { hashFile } from "../src/installer/hash";
 
 let root: string;
@@ -58,6 +58,22 @@ describe("createBackup", () => {
         await assert.rejects(createBackup(args({ copy: corrupting })), /does not match the original/);
         assert.deepEqual(existsSync(backups) ? readdirSync(backups) : [], []);
         assert.equal(readFileSync(join(resources, "app.asar"), "utf8"), "original");
+    });
+
+    it("gives up with a clear message when every folder name looks taken, instead of trying for ever (a data folder that is a link can answer that)", async () => {
+        writeFileSync(join(resources, "app.asar"), "original");
+        let tries = 0;
+        const alwaysTaken = async () => { tries++; throw Object.assign(new Error("EEXIST: file already exists"), { code: "EEXIST" }); };
+        await assert.rejects(createBackup(args({ makeDir: alwaysTaken })), /every name looked taken/);
+        assert.equal(tries, MAX_BACKUP_NAME_TRIES);
+    });
+
+    it("takes the next name when one is really taken, and passes on any other error", async () => {
+        writeFileSync(join(resources, "app.asar"), "original");
+        const takenTwice = (() => { let left = 2; return async (dir: string) => { if (left-- > 0) throw Object.assign(new Error("taken"), { code: "EEXIST" }); mkdirSync(dir); }; })();
+        assert.match((await createBackup(args({ makeDir: takenTwice }))).dir, /-3$/);
+        const denied = async () => { throw Object.assign(new Error("no permission"), { code: "EPERM" }); };
+        await assert.rejects(createBackup(args({ makeDir: denied })), /no permission/);
     });
 
     it("never writes over an earlier backup, even one made in the same second", async () => {

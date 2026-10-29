@@ -7,6 +7,7 @@
 // Usage: pnpm installer [command] [options]     (pnpm installer --help)
 // Windows only for now. Reads LOCALAPPDATA and APPDATA, and the project's `dist` folder (run `pnpm build` first).
 
+import { realpathSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -26,9 +27,14 @@ if (!localAppData || !appData) {
     process.exit(1);
 }
 
+// The data folder may be a link to another drive (a link made by some tools answers "already exists" when a folder is made through it), so the real folder is used.
+const linkedDataDir = join(appData, PROJECT_NAME);
+const realDataDir = (() => { try { return realpathSync(linkedDataDir); } catch { return linkedDataDir; } })();
+
 const ctx: Context = {
     localAppData,
-    dataDir: join(appData, PROJECT_NAME),
+    roamingDir: appData,
+    dataDir: realDataDir,
     distSource: resolve(projectRoot, "dist"),
     platform: windowsPlatform
 };

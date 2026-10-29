@@ -37,6 +37,8 @@ export class InstallerError extends Error {
 export interface Context {
     /** `%LOCALAPPDATA%` */
     localAppData: string;
+    /** `%APPDATA%`: where Discord keeps its own settings (`discord`, `discordcanary`, `discordptb`). When missing it is the parent of `dataDir`; `dataDir` may be the real path of a linked folder, which is somewhere else. */
+    roamingDir?: string;
     /** `%APPDATA%\Amiricord`: the shared parent. Each Discord has its own folder inside it (`stable`, `canary`, `ptb`) for its engine and data; the backups stay here. */
     dataDir: string;
     /** The project's `dist` folder, where `pnpm build` writes. */
@@ -345,7 +347,7 @@ async function patch(ctx: Context, opts: Options, command: "inject" | "repair"):
 
         res.stateAfter = (await classifyResources(app.resources)).state;
         // Developer tools are on by default (docs/decisions.md). Discord is closed here, so its own files are not being written. Never stops the install.
-        const devtools = enableDiscordDevTools(join(dirname(ctx.dataDir), BRANCH_DIRS[branch]));
+        const devtools = enableDiscordDevTools(join(ctx.roamingDir ?? dirname(ctx.dataDir), BRANCH_DIRS[branch]));
         res.messages.push(...devtools.changed);
         res.warnings.push(...devtools.problems);
         res.messages.push(`${command === "repair" ? "Repaired" : "Patched"} ${app.name}. Backup: ${backup.dir}`);
