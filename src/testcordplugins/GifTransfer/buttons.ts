@@ -5,7 +5,7 @@
  */
 
 // The Export, Import and Verify buttons that GifTransfer adds to the tab bar of Discord's GIF picker, and the watching that keeps them there only while the GIF tab is
-// open. Plain page elements (no React). Adapted for Amiricord (2026) from the plugin GifTransfer (authors nnenaza and x2b) as found in TestCord (commit af92dba).
+// open. Plain page elements (no React). Adapted for Amiricord (2026) from the plugin GifTransfer (by Neversleeper, who was called nnenaza) as found in TestCord (commit af92dba).
 
 export const BUTTONS_ID = "gif-transfer-buttons";
 export const POLL_MS = 10_000;

@@ -1,0 +1,24 @@
+{
+    "schema": 1,
+    "id": "TokenLogin",
+    "name": "Token Login",
+    "version": "1.0.0",
+    "description": "Keeps a list of your own accounts and logs in as any of them with one press (Discord reloads). Each account shows its picture and name so they can be told apart. A token is the key to an account: here it is kept in plain text in Discord's storage on this computer, and it is sent only to Discord (once, when you add the account or press Refresh pictures, to get the picture and name). Only add tokens of accounts that are yours.",
+    "origin": "testcord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        { "name": "Neversleeper", "discordId": "1564847328794382408", "github": "https://github.com/Neversleeper" }
+    ],
+    "credits": [
+        { "name": "Vendicated and contributors (Vencord), plugin TokenLoginManager by Neversleeper (under her earlier name nnenaza), as found in TestCord", "license": "GPL-3.0-or-later", "url": "https://github.com/TestcordDev/TestCord" }
+    ],
+    "tags": ["utility", "privacy"],
+    "enabledByDefault": false,
+    "startAt": "domReady",
+    "entry": { "renderer": "index.ts" },
+    "permissions": {
+        "network": [
+            { "host": "discord.com", "from": "renderer", "why": "ask Discord who an account is (its picture and name), once when you add it and when you press Refresh pictures; the token goes to Discord only" }
+        ]
+    }
+}

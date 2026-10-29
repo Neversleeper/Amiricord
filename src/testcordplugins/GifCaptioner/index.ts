@@ -146,6 +146,7 @@ function frameDeps(ctx: EnginePluginContext): FrameDeps {
         deps: { fail: encode.fail },
         sleep: ms => new Promise(resolve => { setTimeout(resolve, ms); }),
         renderer: (frames, width, height, transform) => new GifRenderer(encode, { frames, width, height, transform }),
+        decodePicture: (buffer, contentType) => createImageBitmap(new Blob([buffer], { type: contentType })),
         setTimer: (run, ms) => setTimeout(run, ms),
         clearTimer: handle => { clearTimeout(handle as ReturnType<typeof setTimeout>); }
     };

@@ -29,6 +29,8 @@ export interface FrameDeps {
     renderer(frames: number, width: number, height: number, transform: CaptionTransform): Pick<GifRenderer, "addGifFrame" | "addVideoFrame" | "render">;
     setTimer(run: () => void, ms: number): unknown;
     clearTimer(handle: unknown): void;
+    /** Opens a still picture (PNG, JPEG, WebP...) so it can be drawn; without it a still picture cannot be captioned. */
+    decodePicture?(buffer: ArrayBuffer, contentType: string): Promise<{ width: number; height: number; close?(): void; }>;
 }
 
 /** What the video code needs from a `<video>`. */
@@ -128,8 +130,33 @@ export async function captionVideo(frameDeps: FrameDeps, transform: CaptionTrans
     }
 }
 
-/** A GIF is read frame by frame; anything else is played as a video. */
+/** A still picture becomes a GIF of one frame under the caption (a favourite or a message picture is often a PNG or a JPEG, not a video). */
+export async function captionPicture(frameDeps: FrameDeps, media: CaptionMedia, transform: CaptionTransform): Promise<void> {
+    const fail = (message: string) => { frameDeps.deps.fail(message); };
+    if (!frameDeps.decodePicture) { fail("Failed to load picture."); return; }
+    let picture: Awaited<ReturnType<NonNullable<FrameDeps["decodePicture"]>>>;
+    try {
+        picture = await frameDeps.decodePicture(media.buffer, media.contentType);
+    } catch {
+        fail("Failed to load picture.");
+        return;
+    }
+    try {
+        const width = transform.width || picture.width;
+        const height = transform.height || picture.height;
+        if (!width || !height) { fail("Failed to read picture size."); return; }
+        if (width * height > MAX_PIXELS) { fail("Picture is too large to caption safely."); return; }
+        const renderer = frameDeps.renderer(1, width, height, transform);
+        renderer.addVideoFrame(picture, 100);
+        renderer.render();
+    } finally {
+        picture.close?.();
+    }
+}
+
+/** A GIF is read frame by frame, a video is played, and anything else is a still picture. */
 export async function captionMedia(frameDeps: FrameDeps, media: CaptionMedia, transform: CaptionTransform): Promise<void> {
     if (looksLikeGif(media)) await captionGif(frameDeps, media, transform);
-    else await captionVideo(frameDeps, transform);
+    else if (media.isVideo) await captionVideo(frameDeps, transform);
+    else await captionPicture(frameDeps, media, transform);
 }

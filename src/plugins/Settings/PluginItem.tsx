@@ -11,7 +11,7 @@
 // The card only draws and reports clicks; what happens is decided in `PluginsTab.tsx` and the words come from `pluginsModel.ts`.
 
 import type { PluginCard } from "../../api/pluginCards";
-import { GearIcon, InfoIcon } from "./icon";
+import { GearIcon, InfoIcon, RefreshIcon } from "./icon";
 import { cardFooter, cardStatus, compatibilityNote, isOn, type Outcome, warningText } from "./pluginsModel";
 
 export const CORE_LOCK_TEXT = "Core plugins keep Amiricord working and are always on";
@@ -114,9 +114,12 @@ export function PluginItem({ card, note, pending, question, onSwitch, onConfirm,
                 </div>
             )}
             <div className="amiricord-plugin-footer">
-                <span className="amiricord-plugin-source">{footer.source}</span>
+                <span className="amiricord-plugin-source" data-origin={card.origin}>{footer.source}</span>
                 <div className="amiricord-plugin-tags">
-                    {footer.marks.map((badge, index) => <span key={`${index}:${badge.text}`} className={`amiricord-plugin-badge amiricord-plugin-badge-${badge.tone}`}>{badge.text}</span>)}
+                    {footer.marks.map((badge, index) => badge.tone === "info"
+                        // "Restart to change" is on most cards, so it is a small icon with its words on hover, not a pill that fills the footer.
+                        ? <span key={`${index}:${badge.text}`} className="amiricord-plugin-badge amiricord-plugin-badge-info amiricord-plugin-badge-icon" title={badge.text} aria-label={badge.text} role="img"><RefreshIcon /></span>
+                        : <span key={`${index}:${badge.text}`} className={`amiricord-plugin-badge amiricord-plugin-badge-${badge.tone}`}>{badge.text}</span>)}
                     {footer.tags.map(tag => <span key={tag} className="amiricord-plugin-tag">{tag}</span>)}
                     {footer.moreTags.length > 0 && <span className="amiricord-plugin-tag" title={footer.moreTags.join(", ")}>+{footer.moreTags.length}</span>}
                 </div>

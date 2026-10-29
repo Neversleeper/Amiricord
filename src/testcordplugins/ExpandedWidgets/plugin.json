@@ -1,0 +1,21 @@
+{
+    "schema": 1,
+    "id": "ExpandedWidgets",
+    "name": "Expanded Widgets",
+    "version": "1.0.0",
+    "description": "Lets you pick more than one option in the widgets list of a server's settings (checkboxes instead of radio buttons).",
+    "origin": "testcord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        { "name": "x2b", "role": "original author" },
+        { "name": "Neversleeper", "github": "https://github.com/Neversleeper", "role": "Amiricord port" }
+    ],
+    "credits": [
+        { "name": "Vendicated and contributors (Vencord), plugin ExpandedWidgets by x2b", "license": "GPL-3.0-or-later", "url": "https://github.com/TestcordDev/TestCord" }
+    ],
+    "tags": ["ui"],
+    "enabledByDefault": false,
+    "startAt": "init",
+    "entry": { "renderer": "index.ts" },
+    "permissions": {}
+}

@@ -1,0 +1,22 @@
+{
+    "schema": 1,
+    "id": "ChatsScrapper",
+    "name": "Chats Scrapper",
+    "version": "1.0.0",
+    "description": "/chats-scrapper closes every one-to-one direct-message chat except the people in a keep list (user ids in its settings), after asking. Closing only hides a chat; the messages stay. /chats-scrapper-stop stops it.",
+    "origin": "testcord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        { "name": "x2b" }
+    ],
+    "credits": [
+        { "name": "Vendicated and contributors (Vencord), plugin ChatsScrapper by x2b", "license": "GPL-3.0-or-later", "url": "https://github.com/TestcordDev/TestCord" }
+    ],
+    "tags": ["chat", "utility"],
+    "enabledByDefault": false,
+    "startAt": "webpackReady",
+    "entry": { "renderer": "index.ts" },
+    "permissions": {
+        "account": { "write": ["close-chats"] }
+    }
+}

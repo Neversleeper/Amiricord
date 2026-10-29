@@ -1,0 +1,23 @@
+{
+    "schema": 1,
+    "id": "AutoLanguageBlock",
+    "name": "Auto Language Block",
+    "version": "1.0.0",
+    "description": "Blocks people who write in the language you pick, by looking for words of that language in their messages. Blocking changes your account and the plugin cannot undo it: unblock a person in Discord. It never blocks your friends or yourself.",
+    "origin": "testcord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        { "name": "Neversleeper", "discordId": "1564847328794382408", "github": "https://github.com/Neversleeper" }
+    ],
+    "credits": [
+        { "name": "Vendicated and contributors (Vencord), plugin AutoLanguageBlock by Neversleeper (under her earlier name soriita), as found in TestCord", "license": "GPL-3.0-or-later", "url": "https://github.com/TestcordDev/TestCord" }
+    ],
+    "tags": ["chat", "utility"],
+    "enabledByDefault": false,
+    "startAt": "webpackReady",
+    "entry": { "renderer": "index.ts" },
+    "permissions": {
+        "account": { "write": ["blocked-users"] },
+        "messages": { "read": "all-channels", "send": false }
+    }
+}

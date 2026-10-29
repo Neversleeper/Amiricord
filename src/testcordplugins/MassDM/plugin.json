@@ -1,0 +1,22 @@
+{
+    "schema": 1,
+    "id": "MassDM",
+    "name": "Mass DM",
+    "version": "1.0.0",
+    "description": "/massdm sends one message, as a direct message, to your friends or to everyone you have an open chat with (optionally only to or except a list of ids). Made to tell your friends the name of your new account. It asks first and waits at least a second between messages; /massdm-stop stops it.",
+    "origin": "testcord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        { "name": "Neversleeper", "discordId": "1564847328794382408", "github": "https://github.com/Neversleeper" }
+    ],
+    "credits": [
+        { "name": "Vendicated and contributors (Vencord), plugin MassDM by Neversleeper (under her earlier name nnenaza), as found in TestCord", "license": "GPL-3.0-or-later", "url": "https://github.com/TestcordDev/TestCord" }
+    ],
+    "tags": ["chat", "utility"],
+    "enabledByDefault": false,
+    "startAt": "webpackReady",
+    "entry": { "renderer": "index.ts" },
+    "permissions": {
+        "messages": { "read": "none", "send": true }
+    }
+}

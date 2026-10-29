@@ -1,0 +1,22 @@
+{
+    "schema": 1,
+    "id": "CloseAllDms",
+    "name": "Close All DMs",
+    "version": "1.0.0",
+    "description": "/close-all-dms closes every one-to-one direct-message chat (group chats are kept) after asking. Closing only hides a chat from your list; the messages stay. /close-all-dms-stop stops it.",
+    "origin": "testcord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        { "name": "x2b" }
+    ],
+    "credits": [
+        { "name": "Vendicated and contributors (Vencord), plugin CloseAllDms by x2b", "license": "GPL-3.0-or-later", "url": "https://github.com/TestcordDev/TestCord" }
+    ],
+    "tags": ["chat", "utility"],
+    "enabledByDefault": false,
+    "startAt": "webpackReady",
+    "entry": { "renderer": "index.ts" },
+    "permissions": {
+        "account": { "write": ["close-chats"] }
+    }
+}

@@ -1,0 +1,22 @@
+{
+    "schema": 1,
+    "id": "BulkFriendRemove",
+    "name": "Bulk Friend Remove",
+    "version": "1.0.0",
+    "description": "/friends-remove removes several friends at once (you give their user ids) after showing their names and asking. /friends-list shows how many friends you have and writes their ids in the console. /friends-remove-stop stops it.",
+    "origin": "testcord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        { "name": "Nightcord" }
+    ],
+    "credits": [
+        { "name": "Vendicated and contributors (Vencord), plugin BulkFriendRemove by Nightcord", "license": "GPL-3.0-or-later", "url": "https://github.com/TestcordDev/TestCord" }
+    ],
+    "tags": ["utility"],
+    "enabledByDefault": false,
+    "startAt": "webpackReady",
+    "entry": { "renderer": "index.ts" },
+    "permissions": {
+        "account": { "write": ["friends"] }
+    }
+}

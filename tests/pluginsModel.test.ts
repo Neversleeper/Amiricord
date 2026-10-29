@@ -10,7 +10,7 @@ import { describe, it } from "node:test";
 import type { PluginCard } from "../src/api/pluginCards";
 import {
     applyFilter, cardBadges, cardFooter, cardStatus, compatibilityNote, countCards, DEFAULT_FILTER, emptyText, filterOptions, hasProblem, isFilterActive, isOn, matchesSearch,
-    originLabel, outcomeOf, type PluginsFilter, reasonText, statusText, waitingForRestart, warningBeforeEnabling, warningText
+    originLabel, outcomeOf, type PluginsFilter, reasonText, sortPlugins, statusText, waitingForRestart, warningBeforeEnabling, warningText
 } from "../src/plugins/Settings/pluginsModel";
 
 type Overrides = Partial<Omit<PluginCard, "state" | "risk">> & { state?: Partial<PluginCard["state"]>; risk?: Partial<PluginCard["risk"]>; };
@@ -123,6 +123,44 @@ describe("applyFilter", () => {
         assert.deepEqual(ids(applyFilter(list, filter({ search: "an", state: "on" })).plugins), ["danger"]);
         assert.deepEqual(ids(applyFilter(list, filter({ search: "zet", state: "on" })).plugins), [], "zeta matches the search but is off");
         assert.deepEqual(ids(applyFilter(list, filter({ search: "mid", origin: "amiricord" })).plugins), []);
+    });
+});
+
+describe("sortPlugins", () => {
+    const off = { wanted: false, running: false, reason: undefined };
+    const list = [
+        card({ id: "a", origin: "amiricord", state: off }),
+        card({ id: "b", origin: "equicord" }),
+        card({ id: "c", origin: "vencord", state: off }),
+        card({ id: "d", origin: "vencord" }),
+        card({ id: "e", origin: "testcord" }),
+        card({ id: "f", origin: "equicord", state: off })
+    ];
+    const none = { onFirst: false, byOrigin: false };
+
+    it("keeps the order it was given when nothing is asked", () => {
+        assert.deepEqual(ids(sortPlugins(list, none)), ["a", "b", "c", "d", "e", "f"]);
+    });
+
+    it("puts the plugins that are on first and keeps the order inside each group", () => {
+        assert.deepEqual(ids(sortPlugins(list, { ...none, onFirst: true })), ["b", "d", "e", "a", "c", "f"]);
+    });
+
+    it("groups by origin (Vencord, Equicord, TestCord, Amiricord) and keeps the order inside each origin", () => {
+        assert.deepEqual(ids(sortPlugins(list, { ...none, byOrigin: true })), ["c", "d", "b", "f", "e", "a"]);
+    });
+
+    it("with both, groups by origin and puts the ones that are on first inside each origin", () => {
+        assert.deepEqual(ids(sortPlugins(list, { onFirst: true, byOrigin: true })), ["d", "c", "b", "f", "e", "a"]);
+    });
+
+    it("puts an origin it does not know last, returns a new list and leaves the given one alone", () => {
+        const strange = [card({ id: "x", origin: "somewhere" as PluginCard["origin"] }), card({ id: "y", origin: "amiricord" })];
+        assert.deepEqual(ids(sortPlugins(strange, { ...none, byOrigin: true })), ["y", "x"]);
+        const result = sortPlugins(list, { onFirst: true, byOrigin: true });
+        assert.notEqual(result, list);
+        assert.deepEqual(ids(list), ["a", "b", "c", "d", "e", "f"]);
+        assert.deepEqual(sortPlugins([], { onFirst: true, byOrigin: true }), []);
     });
 });
 

@@ -7,12 +7,10 @@
     "origin": "testcord",
     "license": "GPL-3.0-or-later",
     "authors": [
-        { "name": "x2b", "role": "original author" },
-        { "name": "nnenaza", "role": "original author" },
-        { "name": "Neversleeper", "role": "Amiricord port" }
+        { "name": "Neversleeper", "discordId": "1564847328794382408", "github": "https://github.com/Neversleeper", "role": "author" }
     ],
     "credits": [
-        { "name": "x2b and nnenaza, plugin ProfileCopyButton", "license": "GPL-3.0-or-later", "url": "https://github.com/TestcordDev/TestCord" }
+        { "name": "Neversleeper (under her earlier name nnenaza), plugin ProfileCopyButton", "license": "GPL-3.0-or-later", "url": "https://github.com/TestcordDev/TestCord" }
     ],
     "tags": ["utility", "ui"],
     "enabledByDefault": false,

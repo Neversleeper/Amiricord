@@ -1,0 +1,24 @@
+{
+    "schema": 1,
+    "id": "MutualServerMembers",
+    "name": "Mutual Server Members",
+    "version": "1.0.0",
+    "description": "Compare two of your servers and see which members are in both. Right-click a server's icon, or use /mutual-servers. It only uses the members Discord already has in memory, so open the member list of both servers first.",
+    "origin": "testcord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        { "name": "Neversleeper", "discordId": "1564847328794382408", "github": "https://github.com/Neversleeper" }
+    ],
+    "credits": [
+        { "name": "Vendicated and contributors (Vencord), plugin MutualServerMembers by Neversleeper (under her earlier name nnenaza), as found in TestCord", "license": "GPL-3.0-or-later", "url": "https://github.com/TestcordDev/TestCord" }
+    ],
+    "tags": ["utility"],
+    "enabledByDefault": false,
+    "startAt": "webpackReady",
+    "entry": { "renderer": "index.ts" },
+    "permissions": {
+        "network": [
+            { "host": "cdn.discordapp.com", "from": "renderer", "why": "show the pictures of the members found in both servers" }
+        ]
+    }
+}

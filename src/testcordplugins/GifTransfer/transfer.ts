@@ -6,7 +6,7 @@
 
 // The part of GifTransfer that does not touch the page: reading and writing the file of favourite GIFs, and the import with its retries, its checking passes and the
 // watch that puts back what Discord takes away. Everything it needs (the list, the way to add one, waiting, messages) is handed to it, so it is tested with fakes.
-// Adapted for Amiricord (2026) from the plugin GifTransfer (authors nnenaza and x2b) as found in TestCord (commit af92dba of its public repository).
+// Adapted for Amiricord (2026) from the plugin GifTransfer (by Neversleeper, who was called nnenaza) as found in TestCord (commit af92dba of its public repository).
 
 export interface GifEntry {
     url: string;

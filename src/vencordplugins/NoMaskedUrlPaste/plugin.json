@@ -1,0 +1,21 @@
+{
+    "schema": 1,
+    "id": "NoMaskedUrlPaste",
+    "name": "No Masked URL Paste",
+    "version": "1.0.0",
+    "description": "Pasting a link while text is selected pastes the link as plain text instead of turning the selection into a masked link.",
+    "origin": "vencord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        { "name": "CatNoir", "role": "original author" },
+        { "name": "Neversleeper", "github": "https://github.com/Neversleeper", "role": "Amiricord port" }
+    ],
+    "credits": [
+        { "name": "Vendicated and contributors (Vencord), plugin NoMaskedUrlPaste by CatNoir", "license": "GPL-3.0-or-later", "url": "https://github.com/Vendicated/Vencord" }
+    ],
+    "tags": ["chat", "utility"],
+    "enabledByDefault": false,
+    "startAt": "init",
+    "entry": { "renderer": "index.ts" },
+    "permissions": {}
+}

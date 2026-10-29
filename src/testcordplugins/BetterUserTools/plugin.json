@@ -1,0 +1,24 @@
+{
+    "schema": 1,
+    "id": "BetterUserTools",
+    "name": "Better User Tools",
+    "version": "1.0.0",
+    "description": "/offtheradar switches Off The Radar on or off: while it is on your status is Idle and Discord does not show your game; off puts both back. (The mic test of the original is the plugin Mic Loopback Tester.)",
+    "origin": "testcord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        { "name": "Benjii" },
+        { "name": "x2b" },
+        { "name": "nnenaza" }
+    ],
+    "credits": [
+        { "name": "Vendicated and contributors (Vencord), plugin BetterUserTools by Benjii, x2b and nnenaza", "license": "GPL-3.0-or-later", "url": "https://github.com/TestcordDev/TestCord" }
+    ],
+    "tags": ["privacy", "utility"],
+    "enabledByDefault": false,
+    "startAt": "webpackReady",
+    "entry": { "renderer": "index.ts" },
+    "permissions": {
+        "account": { "write": ["status"] }
+    }
+}

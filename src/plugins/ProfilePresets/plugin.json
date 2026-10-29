@@ -7,10 +7,10 @@
     "origin": "amiricord",
     "license": "GPL-3.0-or-later",
     "authors": [
-        { "name": "Neversleeper", "github": "https://github.com/Neversleeper" }
+        { "name": "Neversleeper", "discordId": "1564847328794382408", "github": "https://github.com/Neversleeper" }
     ],
     "credits": [
-        { "name": "x2b and nnenaza, plugin ProfileCopyButton (the status and widget request shapes)", "license": "GPL-3.0-or-later", "url": "https://github.com/TestcordDev/TestCord" }
+        { "name": "Neversleeper (under her earlier name nnenaza), plugin ProfileCopyButton (the status and widget request shapes)", "license": "GPL-3.0-or-later", "url": "https://github.com/TestcordDev/TestCord" }
     ],
     "tags": ["utility", "ui"],
     "enabledByDefault": false,

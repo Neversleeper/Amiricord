@@ -93,7 +93,7 @@ function draw(over: Draw = {}) {
     const react: ReactLike = {
         createElement: (type, props, ...children) => ({ type, props: (props ?? {}) as Record<string, unknown>, children } satisfies El),
         Fragment: Symbol("fragment"),
-        useState: ((_start: unknown) => { const index = slot++; return [initial[index], (value: unknown) => { bySetter[index].push(value); }]; }) as ReactLike["useState"],
+        useState: ((_start: unknown) => { const index = slot++; return [index in initial ? initial[index] : typeof _start === "function" ? (_start as () => unknown)() : _start, (value: unknown) => { bySetter[index].push(value); }]; }) as ReactLike["useState"],
         useEffect: () => undefined,
         useSyncExternalStore: (_subscribe, getSnapshot) => getSnapshot(),
         Component: class { props: unknown; state: unknown = {}; constructor(props: unknown) { this.props = props; } setState(next: unknown) { this.state = next; } }

@@ -1,0 +1,21 @@
+{
+    "schema": 1,
+    "id": "UnlockedAvatarZoom",
+    "name": "Unlocked Avatar Zoom",
+    "version": "1.0.0",
+    "description": "Lets you zoom the picture you are cropping for your avatar much further than Discord allows. You choose how far.",
+    "origin": "vencord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        { "name": "nakoyasha", "role": "original author" },
+        { "name": "Neversleeper", "github": "https://github.com/Neversleeper", "role": "Amiricord port" }
+    ],
+    "credits": [
+        { "name": "Vendicated and contributors (Vencord), plugin UnlockedAvatarZoom by nakoyasha", "license": "GPL-3.0-or-later", "url": "https://github.com/Vendicated/Vencord" }
+    ],
+    "tags": ["ui"],
+    "enabledByDefault": false,
+    "startAt": "init",
+    "entry": { "renderer": "index.ts" },
+    "permissions": {}
+}

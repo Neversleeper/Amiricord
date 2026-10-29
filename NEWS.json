@@ -1,5 +1,19 @@
 [
     {
+        "version": "0.6.0",
+        "date": "2026-10-29",
+        "title": "Themes, Token Login Manager and many more plugins",
+        "author": "Neversleeper",
+        "notes": [
+            "The settings panels now use Discord's own colours. The Plugins tab remembers its On/Off and By origin buttons and saves what you type in a plugin's settings when you close the window.",
+            "New Themes tab: Quick CSS, your themes, and a library of themes with pictures to look at before you add one. New Token Login Manager tab that shows a picture and name for each saved account.",
+            "New plugins, all off until you switch them on: Gif Collections, Clickable Roles, Word Count (also counts while you type), New User Indicator, Avatar Grabber, Profile Command and Self Forward.",
+            "More new plugins: Expanded Widgets, Double Emoji, Image Link, No Mosaic, Bypass Pin Prompt, No Masked URL Paste, Unlocked Avatar Zoom and text commands (bold, clap, leet, small caps, vaporwave, space out, starify, annoil, vibe, ship).",
+            "Fixes: Profile Copy Button copies the banner and no longer copies shop items you do not own, and Gif Captioner works with favourite pictures that are not animated.",
+            "Slash commands may now take a user, a channel or a role as an option."
+        ]
+    },
+    {
         "version": "0.5.0",
         "date": "2026-10-29",
         "title": "Profile presets and 30 more plugins",

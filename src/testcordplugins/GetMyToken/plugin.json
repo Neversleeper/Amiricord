@@ -1,0 +1,24 @@
+{
+    "schema": 1,
+    "id": "GetMyToken",
+    "name": "Get My Token",
+    "version": "1.0.0",
+    "description": "/gettoken shows the token of the account you are using in a window only you can see (hidden until you press Show, with a Copy button), so you can keep it, for example in Token Login. A token is the key to your account: never share it.",
+    "origin": "testcord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        { "name": "Sami", "role": "original author" },
+        { "name": "Neversleeper", "discordId": "1564847328794382408", "github": "https://github.com/Neversleeper", "role": "Amiricord port" }
+    ],
+    "credits": [
+        { "name": "Vendicated and contributors (Vencord), plugin getMyToken by Sami", "license": "GPL-3.0-or-later", "url": "https://github.com/TestcordDev/TestCord" }
+    ],
+    "tags": ["utility", "developer"],
+    "enabledByDefault": false,
+    "startAt": "webpackReady",
+    "entry": { "renderer": "index.ts" },
+    "permissions": {
+        "token": true,
+        "system": { "clipboard": true }
+    }
+}

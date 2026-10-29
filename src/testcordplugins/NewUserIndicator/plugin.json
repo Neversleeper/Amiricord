@@ -1,0 +1,21 @@
+{
+    "schema": 1,
+    "id": "NewUserIndicator",
+    "name": "New User Indicator",
+    "version": "1.0.0",
+    "description": "Puts a small mark (❗) next to the name of a person whose account was made recently (30 days by default), above their messages and in the member list. The age comes from the person's id; nothing is sent anywhere.",
+    "origin": "testcord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        { "name": "x2b", "role": "original author" },
+        { "name": "Neversleeper", "role": "Amiricord port" }
+    ],
+    "credits": [
+        { "name": "Vendicated and contributors (Vencord), x2b (TestCord), plugin NewUserIndicator", "license": "GPL-3.0-or-later", "url": "https://github.com/TestcordDev/TestCord" }
+    ],
+    "tags": ["chat", "utility"],
+    "enabledByDefault": false,
+    "startAt": "domReady",
+    "entry": { "renderer": "index.ts" },
+    "permissions": {}
+}

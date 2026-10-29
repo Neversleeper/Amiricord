@@ -1,0 +1,21 @@
+{
+    "schema": 1,
+    "id": "NoMosaic",
+    "name": "No Mosaic",
+    "version": "1.0.0",
+    "description": "Shows each picture and video of a message on its own, full size, instead of Discord's grid of pictures.",
+    "origin": "vencord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        { "name": "AutumnVN", "role": "original author" },
+        { "name": "Neversleeper", "github": "https://github.com/Neversleeper", "role": "Amiricord port" }
+    ],
+    "credits": [
+        { "name": "Vendicated and contributors (Vencord), plugin NoMosaic by AutumnVN", "license": "GPL-3.0-or-later", "url": "https://github.com/Vendicated/Vencord" }
+    ],
+    "tags": ["chat", "media"],
+    "enabledByDefault": false,
+    "startAt": "init",
+    "entry": { "renderer": "index.ts" },
+    "permissions": {}
+}
