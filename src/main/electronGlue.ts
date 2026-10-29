@@ -46,6 +46,7 @@ import { TokenHosts, tokenHostsFromRegistry } from "./tokenHosts";
 import { trace } from "./trace";
 import { createUpdater } from "./updater";
 import { answerUpdateRequest, type FetchLike as UpdateFetch, makeFetchBytes, realFiles } from "./updatesGlue";
+import { anyWindowOption, applyWindowOptions, type WindowLike, windowOptionsOf } from "./windowOptions";
 
 export interface MainOptions {
     /** Absolute path of our preload script. */
@@ -81,6 +82,20 @@ export function startMain(options: MainOptions): MainController | null {
 
     const controller = new MainController({ dataDir });
     controller.start(options.build ?? null);
+
+    // The window options of the main tab (no minimum size, Ctrl+Q to close, the Windows background effect): read once now, applied to each window as Discord creates it. Nothing is
+    // done when none is on or when Discord is in safe mode, and a failure here is only written in the boot trace: it must never keep Discord from starting or from opening a window.
+    try {
+        const windowChoices = windowOptionsOf(key => controller.pluginValue("Settings", key));
+        if (anyWindowOption(windowChoices) && !controller.bootInfo().safeMode) {
+            const applyToWindow = (win: unknown) => { applyWindowOptions(win as WindowLike, windowChoices, text => { trace(dataDir, text); }); };
+            app.on("browser-window-created", (_event, win) => { applyToWindow(win); });
+            for (const win of BrowserWindow.getAllWindows()) applyToWindow(win);
+            trace(dataDir, `window options: on (minimum size ${windowChoices.removeMinimumSize ? "removed" : "kept"}, Ctrl+Q ${windowChoices.ctrlQ ? "on" : "off"}, background effect ${windowChoices.material})`);
+        }
+    } catch (error) {
+        trace(dataDir, `window options: FAILED ${error instanceof Error ? error.message : String(error)}`);
+    }
 
     ipcMain.on(IPC.bootInfo, event => {
         event.returnValue = isTrustedSender(senderUrl(event)) ? controller.bootInfo() : null;

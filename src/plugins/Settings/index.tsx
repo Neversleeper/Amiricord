@@ -20,6 +20,7 @@ import { definePluginSettings } from "../../api/pluginSettings";
 import type { EnginePluginContext, PluginCode } from "../../renderer/engine";
 import { OWNER_ONLY_PLUGINS, OWNERS, PROJECT_VERSION } from "../../shared/project";
 import { releasedNews } from "../../shared/updates";
+import { MATERIALS } from "../../shared/windowChoices";
 import { type AuthorInfo, authorInfo, type RawDiscordUser } from "./authorModel";
 import { CUSTOM_CSS_ELEMENT_ID, CUSTOM_CSS_MAX, keepLast, makeCustomCss } from "./customCss";
 import { makeCustomCssWindow } from "./CustomCssWindow";
@@ -28,7 +29,7 @@ import { makeErrorBoundary } from "./ErrorBoundary";
 import { makeHomeLogo } from "./homeLogo";
 import { makeSidebarIcon, PluginsIcon, PrivacyIcon, UpdaterIcon } from "./icon";
 import { buildLayoutWithSection, FALLBACK_TYPES, readTypes, TYPE_NAMES } from "./layout";
-import { defaultButtonGroups, defaultChoices, defaultQuickActions, defaultSettings, type LiveSwitch } from "./mainItems";
+import { defaultButtonGroups, defaultChoices, defaultQuickActions, defaultSettings, type LiveChoice, type LiveSwitch } from "./mainItems";
 import { makeMainTab } from "./MainTab";
 import { makeNotificationLogWindow } from "./NotificationLogWindow";
 import { makeNotificationOptionsWindow } from "./NotificationOptionsWindow";
@@ -50,6 +51,9 @@ const settings = definePluginSettings({
     customCss: { type: "string", default: "", maxLength: CUSTOM_CSS_MAX, description: "Your own style sheet (saved by Edit Custom CSS)." },
     customCssOn: { type: "boolean", default: false, description: "Whether your own style sheet is applied to Discord." },
     showAmiricordLogo: { type: "boolean", default: false, description: "Whether the Discord logo of the Home button is swapped for the Amiricord logo." },
+    removeMinimumSize: { type: "boolean", default: false, restartNeeded: true, description: "Whether the Discord window may be made smaller than the size Discord normally allows." },
+    ctrlQToQuit: { type: "boolean", default: false, restartNeeded: true, description: "Whether Ctrl+Q closes the Discord window, as Alt+F4 does." },
+    backgroundMaterial: { type: "select", default: "none", restartNeeded: true, options: MATERIALS.map(name => ({ label: name, value: name })), description: "The Windows background effect of the Discord window (none, mica, tabbed or acrylic)." },
     notificationCards: { type: "boolean", default: true, description: "Whether the notifications of plugins are drawn as cards in the corner of Discord's window." },
     notificationLog: { type: "boolean", default: true, description: "Whether the notifications of plugins are kept in the Notification Log (in memory, for this session)." },
     notificationLogSize: { type: "select", default: DEFAULT_LOG_SIZE, options: LOG_SIZE_CHOICES.map(size => ({ label: String(size), value: size })), description: "How many notifications the Notification Log keeps." }
@@ -116,7 +120,7 @@ const plugin: PluginCode & { buildLayout(builder: { key?: unknown; buildLayout()
         ctx.onDispose(settings.onChange("customCssOn", () => { customCss.apply(); }));
         ctx.onDispose(customCss.stop);
         // A switch of the main tab that is one saved true or false of this plugin: read, written (a refusal goes to the health report) and heard when it changes elsewhere.
-        const liveSwitch = (key: "customCssOn" | "showAmiricordLogo", what: string): LiveSwitch => ({
+        const liveSwitch = (key: "customCssOn" | "showAmiricordLogo" | "removeMinimumSize" | "ctrlQToQuit", what: string): LiveSwitch => ({
             get: () => settings.store[key],
             set: on => {
                 try {
@@ -142,6 +146,23 @@ const plugin: PluginCode & { buildLayout(builder: { key?: unknown; buildLayout()
         ctx.onDispose(homeLogo.stop);
         const homeLogoSwitch = liveSwitch("showAmiricordLogo", "Amiricord logo");
 
+        // The window options are read by the main process when Discord starts (src/main/windowOptions.ts), so changing one only saves it; the page says "Restart" next to each.
+        const noMinimumSizeSwitch = liveSwitch("removeMinimumSize", "minimum window size");
+        const ctrlQSwitch = liveSwitch("ctrlQToQuit", "Ctrl+Q");
+        const materialChoice: LiveChoice = {
+            get: () => Math.max(0, MATERIALS.indexOf(settings.store.backgroundMaterial)),
+            set: index => {
+                const name = MATERIALS[index];
+                if (name === undefined) return;
+                try {
+                    settings.store.backgroundMaterial = name;
+                } catch (error) {
+                    ctx.reportError("saving the window background effect", error);
+                }
+            },
+            subscribe: listener => settings.onChange("backgroundMaterial", () => { listener(); })
+        };
+
         const removeMain = registry.register({
             key: "amiricord",
             title: "Amiricord",
@@ -159,8 +180,8 @@ const plugin: PluginCode & { buildLayout(builder: { key?: unknown; buildLayout()
                     openSourceCode: () => { engine.openSourceCode(); },
                     restart: () => { plugins.restart(); }
                 }),
-                settings: defaultSettings({ "custom-css": customCssSwitch, "amiricord-icon": homeLogoSwitch }),
-                choices: defaultChoices(),
+                settings: defaultSettings({ "custom-css": customCssSwitch, "amiricord-icon": homeLogoSwitch, "no-min-size": noMinimumSizeSwitch, "ctrl-q": ctrlQSwitch }),
+                choices: defaultChoices({ "background-material": materialChoice }),
                 buttonGroups: defaultButtonGroups({ openNotificationLog: () => { openNotificationLog(); }, openNotificationOptions: () => { openNotificationOptions(); } }),
                 logo,
                 banner,

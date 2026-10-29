@@ -280,6 +280,27 @@ describe("the main tab", () => {
         assert.ok(others.every(candidate => textOf(candidate).includes("Coming soon")), "the rest still wait");
     });
 
+    it("draws a working drop-down from its feature, keeps the pick when another is chosen, and ignores a position that is not one of the choices", () => {
+        const picks: number[] = [];
+        const live = { get: () => 2, set: (index: number) => { picks.push(index); }, subscribe: () => () => undefined };
+        const t = mainTab({ choices: defaultChoices({ "background-material": live }) });
+        const [choice] = findAll(t.tree, el => hasClass(el, "amiricord-choice"));
+        assert.match(textOf(choice), /Window background effect/);
+        assert.ok(!textOf(choice).includes("Coming soon"));
+        assert.equal(hasClass(choice, "amiricord-soon"), false);
+        const [select] = findAll(choice, el => el.type === "select");
+        assert.equal(select.props.value, "2", "the position the feature says is picked");
+        assert.deepEqual(findAll(select, el => el.type === "option").map(option => option.props.value), ["0", "1", "2", "3"]);
+        const change = (value: string) => (select.props.onChange as (event: { target: { value: string; }; }) => void)({ target: { value } });
+        change("3");
+        change("4");
+        change("-1");
+        change("1.5");
+        change("abc");
+        assert.deepEqual(picks, [3]);
+        assert.equal(findAll(choice, el => el.props.role === "combobox").length, 0, "no dead drop-down next to the working one");
+    });
+
     it("lists the window and behavior settings: seven switches, all off and marked, with a note that says they are not built yet; telemetry is not here, it belongs to Privacy & Security", () => {
         const { tree } = mainTab();
         const rows = findAll(tree, el => hasClass(el, "amiricord-switch-row"));

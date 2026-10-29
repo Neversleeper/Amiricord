@@ -8,6 +8,7 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
 import { defaultButtonGroups, defaultChoices, defaultQuickActions, defaultSettings } from "../src/plugins/Settings/mainItems";
+import { MATERIALS } from "../src/shared/windowChoices";
 
 describe("the lists of the main tab", () => {
     it("have the six tiles in order, every one with an action; only the relaunch asks first", () => {
@@ -43,6 +44,22 @@ describe("the lists of the main tab", () => {
         assert.equal(custom.live, live);
         assert.ok(settings.filter(item => item.id !== "custom-css").every(item => item.soon === true && item.live === undefined));
         assert.ok(defaultSettings().every(item => item.soon === true && item.live === undefined), "without anything given, every switch waits");
+    });
+
+    it("turn the background effect drop-down into a working one only when its feature gives it a way to be read and changed, and only that one", () => {
+        const live = { get: () => 1, set: () => undefined, subscribe: () => () => undefined };
+        const [material] = defaultChoices({ "background-material": live, "no-such-choice": live });
+        assert.equal(defaultChoices({ "no-such-choice": live }).length, 1, "an id that is not in the list adds nothing");
+        assert.equal(material.soon, undefined);
+        assert.equal(material.live, live);
+        const [waiting] = defaultChoices();
+        assert.equal(waiting.soon, true, "without anything given, it waits");
+        assert.equal(waiting.live, undefined);
+    });
+
+    it("list the background effects in the order the main process knows them, so the position picked is the effect asked for", () => {
+        const [material] = defaultChoices();
+        assert.deepEqual(material.choices.map(label => label.split(" ")[0].toLowerCase()), [...MATERIALS]);
     });
 
     it("keep every id unique inside its list, and every entry with a title and a text", () => {

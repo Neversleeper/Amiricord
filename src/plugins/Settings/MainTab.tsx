@@ -130,6 +130,11 @@ function SwitchRow({ item }: { item: SettingItem; }) {
 }
 
 function ChoiceRow({ item }: { item: ChoiceItem; }) {
+    const react = currentReact();
+    const live = item.live;
+    const [picked, setPicked] = react.useState(live ? live.get() : 0);
+    // Heard from somewhere else, so the page never shows an old answer.
+    react.useEffect(() => (live ? live.subscribe(() => setPicked(live.get())) : undefined), [live]);
     return (
         <div className={`amiricord-choice${item.soon ? " amiricord-soon" : ""}`}>
             <div className="amiricord-switch-title">
@@ -138,7 +143,21 @@ function ChoiceRow({ item }: { item: ChoiceItem; }) {
                 {item.restart && <Tag>{RESTART_TEXT}</Tag>}
             </div>
             <div className="amiricord-switch-desc">{item.description}</div>
-            <div className="amiricord-select" role="combobox" aria-disabled={item.soon ? "true" : "false"} aria-expanded="false" aria-label={item.title}>{item.choices[0]}</div>
+            {live
+                ? (
+                    <select
+                        className="amiricord-plugins-select" aria-label={item.title} value={String(picked)}
+                        onChange={(event: { target: { value: string; }; }) => {
+                            const next = Number(event.target.value);
+                            if (!Number.isInteger(next) || next < 0 || next >= item.choices.length) return;
+                            setPicked(next);
+                            live.set(next);
+                        }}
+                    >
+                        {item.choices.map((label, index) => <option key={label} value={String(index)}>{label}</option>)}
+                    </select>
+                )
+                : <div className="amiricord-select" role="combobox" aria-disabled={item.soon ? "true" : "false"} aria-expanded="false" aria-label={item.title}>{item.choices[0]}</div>}
         </div>
     );
 }

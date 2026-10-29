@@ -54,6 +54,15 @@ export interface ChoiceItem {
     choices: string[];
     restart?: boolean;
     soon?: boolean;
+    /** A drop-down that works: which choice is picked, how to pick another, and how to hear about a change made elsewhere. Given by `defaultChoices`, never together with `soon`. */
+    live?: LiveChoice;
+}
+
+/** What makes a drop-down of the main tab work: the position of the picked choice (0 is the first). */
+export interface LiveChoice {
+    get(): number;
+    set(index: number): void;
+    subscribe(listener: () => void): () => void;
 }
 
 /** A titled group of buttons under the settings (the notifications). */
@@ -129,9 +138,9 @@ function withLive(items: SettingItem[], live: Readonly<Record<string, LiveSwitch
     });
 }
 
-/** The drop-downs that follow the switches. */
-export function defaultChoices(): ChoiceItem[] {
-    return [{
+/** The drop-downs that follow the switches. A drop-down whose feature is built is given its `LiveChoice` by id and stops being `soon`. */
+export function defaultChoices(live: Readonly<Record<string, LiveChoice | undefined>> = {}): ChoiceItem[] {
+    return withLiveChoices([{
         id: "background-material", title: "Window background effect", restart: true, soon: true,
         description: "Gives the window one of the Windows background looks. It needs a theme that supports transparency, and Discord must restart after you change it.",
         choices: [
@@ -140,7 +149,16 @@ export function defaultChoices(): ChoiceItem[] {
             "Tabbed (Mica with a stronger tint)",
             "Acrylic (blurs whatever is behind the window)"
         ]
-    }];
+    }], live);
+}
+
+function withLiveChoices(items: ChoiceItem[], live: Readonly<Record<string, LiveChoice | undefined>>): ChoiceItem[] {
+    return items.map(item => {
+        const found = live[item.id];
+        if (!found) return item;
+        const { soon: _soon, ...rest } = item;
+        return { ...rest, live: found };
+    });
 }
 
 /** The groups of buttons at the end of the settings. */
