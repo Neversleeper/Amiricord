@@ -1,5 +1,14 @@
 [
     {
+        "version": "0.3.4",
+        "date": "2026-10-29",
+        "title": "Developer tools ready after an update",
+        "notes": [
+            "Discord's developer tools and the console's paste choice are now set up every time Discord starts, so updating from the Updates tab is enough; you no longer need to install again.",
+            "Reminder: the console's warning against pasting code is off, so only paste what you understand."
+        ]
+    },
+    {
         "version": "0.3.3",
         "date": "2026-10-29",
         "title": "A new look for the settings, and developer tools ready to use",

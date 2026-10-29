@@ -10,7 +10,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, beforeEach, describe, it } from "node:test";
 
-import { DEVTOOLS_FLAG, enableDiscordDevTools, PASTE_WARNING_KEY } from "../src/installer/discordDevTools";
+import { DEVTOOLS_FLAG, enableDiscordDevTools, PASTE_WARNING_KEY } from "../src/main/discordDevTools";
 
 describe("developer tools on by default", () => {
     let folder: string;
@@ -22,7 +22,7 @@ describe("developer tools on by default", () => {
     it("sets the flag and the paste choice and keeps everything else in both files", async () => {
         await writeFile(join(folder, "settings.json"), JSON.stringify({ IS_MAXIMIZED: true, WINDOW_BOUNDS: { x: 1 } }));
         await writeFile(join(folder, "Preferences"), JSON.stringify({ spellcheck: { a: 1 }, electron: { devtools: { preferences: { "panel-selected-tab": "\"console\"" } } } }));
-        const result = await enableDiscordDevTools(folder);
+        const result = enableDiscordDevTools(folder);
         assert.equal(result.changed.length, 2);
         assert.deepEqual(result.problems, []);
         const settings = await read("settings.json");
@@ -38,23 +38,23 @@ describe("developer tools on by default", () => {
     it("builds the missing parts of Preferences, and changes nothing when both are already on", async () => {
         await writeFile(join(folder, "settings.json"), JSON.stringify({ [DEVTOOLS_FLAG]: true }));
         await writeFile(join(folder, "Preferences"), JSON.stringify({ other: 1 }));
-        assert.equal((await enableDiscordDevTools(folder)).changed.length, 1);
+        assert.equal(enableDiscordDevTools(folder).changed.length, 1);
         assert.equal(((await read("Preferences")).electron as { devtools: { preferences: Record<string, string>; }; }).devtools.preferences[PASTE_WARNING_KEY], "true");
-        assert.deepEqual((await enableDiscordDevTools(folder)).changed, []);
+        assert.deepEqual(enableDiscordDevTools(folder).changed, []);
     });
 
     it("leaves a file it cannot read alone and says so", async () => {
         await writeFile(join(folder, "settings.json"), "{ not json");
-        const result = await enableDiscordDevTools(folder);
+        const result = enableDiscordDevTools(folder);
         assert.equal(result.changed.length, 0);
         assert.match(result.problems[0], /settings\.json could not be changed/);
         assert.equal(await readFile(join(folder, "settings.json"), "utf8"), "{ not json");
     });
 
     it("creates nothing when Discord's folder or files are not there", async () => {
-        const missing = await enableDiscordDevTools(join(folder, "nope"));
+        const missing = enableDiscordDevTools(join(folder, "nope"));
         assert.match(missing.problems[0], /was not found/);
-        const empty = await enableDiscordDevTools(folder);
+        const empty = enableDiscordDevTools(folder);
         assert.equal(empty.changed.length, 0);
         assert.match(empty.problems[0], /settings\.json was not found/);
         await assert.rejects(readFile(join(folder, "Preferences"), "utf8"));
