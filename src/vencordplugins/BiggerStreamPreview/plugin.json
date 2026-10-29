@@ -1,0 +1,33 @@
+{
+    "schema": 1,
+    "id": "BiggerStreamPreview",
+    "name": "Bigger Stream Preview",
+    "version": "1.0.0",
+    "description": "Lets you enlarge the preview picture of a stream from the right-click menu.",
+    "origin": "vencord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        {
+            "name": "phil",
+            "role": "original author"
+        },
+        {
+            "name": "Neversleeper",
+            "role": "Amiricord port"
+        }
+    ],
+    "credits": [
+        {
+            "name": "Vendicated and contributors (Vencord), plugin BiggerStreamPreview",
+            "license": "GPL-3.0-or-later",
+            "url": "https://github.com/Vendicated/Vencord"
+        }
+    ],
+    "tags": ["media"],
+    "enabledByDefault": false,
+    "startAt": "webpackReady",
+    "entry": {
+        "renderer": "index.ts"
+    },
+    "permissions": {}
+}
