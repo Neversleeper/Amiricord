@@ -1,0 +1,21 @@
+{
+    "schema": 1,
+    "id": "UniversalMention",
+    "name": "Universal Mention",
+    "version": "1.0.0",
+    "description": "Mention any user in the autocomplete, whatever channel they can see. The option to list users from every server can slow Discord down and fills the list with a lot of people.",
+    "origin": "equicord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        { "name": "justjxke", "role": "original author" },
+        { "name": "Neversleeper", "role": "Amiricord port" }
+    ],
+    "credits": [
+        { "name": "Vendicated and contributors (Vencord), justjxke (Equicord), plugin UniversalMention", "license": "GPL-3.0-or-later", "url": "https://github.com/Equicord/Equicord" }
+    ],
+    "tags": ["chat", "utility"],
+    "enabledByDefault": false,
+    "startAt": "webpackReady",
+    "entry": { "renderer": "index.tsx" },
+    "permissions": {}
+}
