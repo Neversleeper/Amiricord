@@ -68,6 +68,8 @@ export interface Bridge {
     restart(): void;
     /** Ask the main process to open the data folder in the file explorer. Only core plugins reach it, through `ctx.engine.openDataFolder`. */
     openDataFolder(): void;
+    /** Ask the main process to open the health report file (`place` "health") or the project's page in the browser (`place` "source"). Only core plugins reach it, through `ctx.engine`. */
+    openOwn?(place: "health" | "source"): void;
     /** Ask the main process to turn safe mode off for the next start. Only core plugins reach it, through `ctx.engine.leaveSafeMode`. */
     leaveSafeMode?(): void;
     /** Ask the main process how many requests its firewall cancelled. Read only; the answer is checked field by field before it is used. */
@@ -126,6 +128,10 @@ export interface EnginePluginContext extends PluginContext {
     engine?: {
         status(): EngineStatus;
         openDataFolder(): void;
+        /** Show the health report file in the file explorer. */
+        openHealthReport(): void;
+        /** Open the project's page in the browser. */
+        openSourceCode(): void;
         /** Turn safe mode off for the next start (the caller restarts Discord after). */
         leaveSafeMode(): void;
         /** The read-only snapshot of the Privacy & Security tab from the main process (null when it did not answer or the answer was not in the expected form). */
@@ -451,6 +457,8 @@ export function startEngine(options: EngineOptions): Engine {
             dns
         }),
         openDataFolder: () => { bridge.openDataFolder(); },
+        openHealthReport: () => { bridge.openOwn?.("health"); },
+        openSourceCode: () => { bridge.openOwn?.("source"); },
         leaveSafeMode: () => { bridge.leaveSafeMode?.(); },
         privacy: async (): Promise<PrivacyAnswer | null> => {
             try {

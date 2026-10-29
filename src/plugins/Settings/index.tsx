@@ -95,7 +95,12 @@ const plugin: PluginCode & { buildLayout(builder: { key?: unknown; buildLayout()
                 leaveSafeMode: () => { engine.leaveSafeMode(); plugins.restart(); },
                 status: () => engine.status(),
                 cards: () => plugins.cards(),
-                quickActions: defaultQuickActions({ openDataFolder: () => { engine.openDataFolder(); }, restart: () => { plugins.restart(); } }),
+                quickActions: defaultQuickActions({
+                    openDataFolder: () => { engine.openDataFolder(); },
+                    openHealthReport: () => { engine.openHealthReport(); },
+                    openSourceCode: () => { engine.openSourceCode(); },
+                    restart: () => { plugins.restart(); }
+                }),
                 settings: defaultSettings(),
                 choices: defaultChoices(),
                 buttonGroups: defaultButtonGroups(),

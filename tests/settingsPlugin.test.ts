@@ -48,7 +48,7 @@ function fakeContext(options: { types?: unknown; withEngine?: boolean; } = {}) {
         finders: { byProps: () => ({ get: () => options.types }) },
         engine: options.withEngine === false ? undefined : {
             status: () => ({ version: "0.1.0", discordBuild: 650101, safeMode: false, safeModeReason: null, enteredSafeMode: false, quarantine: [], devMode: false, problems: [] }),
-            openDataFolder: () => { log.folders++; }
+            openDataFolder: () => { log.folders++; }, openHealthReport: () => undefined, openSourceCode: () => undefined
         },
         plugins: options.withEngine === false ? undefined : { cards: () => [], card: () => undefined, toggle: async () => ({ status: "unchanged" }), restart: () => { log.restarts++; } }
     } as unknown as EnginePluginContext;

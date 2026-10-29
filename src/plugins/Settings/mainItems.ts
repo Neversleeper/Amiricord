@@ -56,10 +56,12 @@ export interface ButtonGroupItem {
 
 export interface QuickActionActions {
     openDataFolder(): void;
+    openHealthReport(): void;
+    openSourceCode(): void;
     restart(): void;
 }
 
-/** The six tiles, in the order they are drawn. The two that work are wired to what the engine offers. */
+/** The six tiles, in the order they are drawn. The four that work are wired to what the engine offers. */
 export function defaultQuickActions(actions: QuickActionActions): QuickActionItem[] {
     return [
         { id: "notification-log", title: "Notification Log", Icon: LogIcon, soon: true },
@@ -69,8 +71,8 @@ export function defaultQuickActions(actions: QuickActionActions): QuickActionIte
             confirm: { text: "Relaunching closes any call and loses messages you have not sent.", button: "Relaunch now" }
         },
         { id: "data-folder", title: "Open Settings Folder", Icon: FolderIcon, run: actions.openDataFolder },
-        { id: "health-report", title: "Health Report", Icon: HealthIcon, soon: true },
-        { id: "source-code", title: "View Source Code", Icon: SourceIcon, soon: true }
+        { id: "health-report", title: "Health Report", Icon: HealthIcon, run: actions.openHealthReport },
+        { id: "source-code", title: "View Source Code", Icon: SourceIcon, run: actions.openSourceCode }
     ];
 }
 

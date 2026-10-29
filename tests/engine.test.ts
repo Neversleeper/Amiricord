@@ -51,6 +51,7 @@ function setup(plugins: ReturnType<typeof plugin>[], codes: Record<string, Plugi
     const changes: unknown[] = [];
     let restarts = 0;
     let folderOpens = 0;
+    const owns: string[] = [];
     const bridge: Bridge = {
         bootInfo: { ...quiet, ...extra.boot },
         sendHealth: e => { events.push(e); },
@@ -59,6 +60,7 @@ function setup(plugins: ReturnType<typeof plugin>[], codes: Record<string, Plugi
         devDump: (name, text) => { dumps.push({ name, text }); },
         restart: () => { restarts++; },
         openDataFolder: () => { folderOpens++; },
+        openOwn: (place: string) => { owns.push(place); },
         ...(extra.firewall ? { firewallStatus: extra.firewall } : {}),
         ...(extra.native ? { native: extra.native } : {}),
         ...(extra.secret ? { secret: extra.secret } : {}),
@@ -97,6 +99,7 @@ function setup(plugins: ReturnType<typeof plugin>[], codes: Record<string, Plugi
         cleanBoots: () => cleanBoots,
         restarts: () => restarts,
         folderOpens: () => folderOpens,
+        owns: () => owns,
         boot: (modules: Record<string, unknown> = {}, exposeCache = true) => makeWreq(hookTarget, modules, exposeCache),
         dom: () => domGo()
     };
@@ -1229,6 +1232,14 @@ describe("what the engine offers to plugins besides the cards", () => {
         t.dom();
         await t.engine.done;
         assert.equal(t.folderOpens(), 2);
+    });
+
+    it("passes the requests to show the health report and to open the project's page to the main process as two fixed words, only for core plugins", async () => {
+        const t = setup([plugin("Core", { core: true }), plugin("Any")], { Core: { start(ctx) { ctx.engine!.openHealthReport(); ctx.engine!.openSourceCode(); } }, Any: { start(ctx) { assert.equal(ctx.engine, undefined); } } });
+        t.boot();
+        t.dom();
+        await t.engine.done;
+        assert.deepEqual(t.owns(), ["health", "source"]);
     });
 
     it("lets any plugin report an error of its own, attributed to it, with the source named", async () => {

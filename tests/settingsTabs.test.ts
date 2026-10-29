@@ -139,7 +139,9 @@ function mainTab(extra: Partial<MainTabDeps> = {}, hooks: { initial?: unknown[];
     const log: string[] = [];
     const deps: MainTabDeps = {
         status: () => status(), leaveSafeMode: () => { log.push("leave-safe-mode"); }, cards: () => [],
-        quickActions: defaultQuickActions({ openDataFolder: () => { log.push("folder"); }, restart: () => { log.push("restart"); } }),
+        quickActions: defaultQuickActions({
+            openDataFolder: () => { log.push("folder"); }, openHealthReport: () => { log.push("health"); }, openSourceCode: () => { log.push("source"); }, restart: () => { log.push("restart"); }
+        }),
         settings: defaultSettings(), choices: defaultChoices(), buttonGroups: defaultButtonGroups(),
         logo: "data:image/webp;base64,AAAA", editor: () => ({ type: "div", props: { className: "editor-stub" }, children: [] }), ...extra
     };
@@ -228,13 +230,13 @@ describe("the main tab", () => {
         assert.equal(findAll(mainTab({ logo: "" }).tree, el => hasClass(el, "amiricord-logo-fallback")).length, 1);
     });
 
-    it("has the six tiles in the order of TestCord's grid; the two that work are live and the rest look the same, do nothing and name why on hover", () => {
+    it("has the six tiles in the order of TestCord's grid; the four that work are live and the rest look the same, do nothing and name why on hover", () => {
         const t = mainTab();
         const [actions] = findAll(t.tree, el => hasClass(el, "amiricord-actions"));
         const tiles = findAll(actions, el => el.type === "button");
         assert.deepEqual(tiles.map(textOf), ["Notification Log", "Edit Custom CSS", "Relaunch Discord", "Open Settings Folder", "Health Report", "View Source Code"]);
         const soon = tiles.filter(tile => hasClass(tile, "amiricord-soon"));
-        assert.deepEqual(soon.map(textOf), ["Notification Log", "Edit Custom CSS", "Health Report", "View Source Code"]);
+        assert.deepEqual(soon.map(textOf), ["Notification Log", "Edit Custom CSS"]);
         for (const tile of soon) {
             assert.equal(tile.props["aria-disabled"], "true");
             assert.equal(tile.props["data-soon"], "Coming soon");
@@ -244,6 +246,12 @@ describe("the main tab", () => {
         assert.equal(hasClass(open, "amiricord-soon"), false);
         (open.props.onClick as () => void)();
         assert.deepEqual(t.log, ["folder"]);
+        for (const name of ["Health Report", "View Source Code"]) {
+            const tile = tiles.find(candidate => textOf(candidate) === name)!;
+            assert.equal(hasClass(tile, "amiricord-soon"), false, name);
+            (tile.props.onClick as () => void)();
+        }
+        assert.deepEqual(t.log, ["folder", "health", "source"]);
     });
 
     it("lists the window and behavior settings: seven switches, all off and marked, with a note that says they are not built yet; telemetry is not here, it belongs to Privacy & Security", () => {

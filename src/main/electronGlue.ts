@@ -34,6 +34,7 @@ import { nativeModules } from "./nativeModules";
 import { type NativeTable, nativeTableFromRegistry } from "./nativeTable";
 import { nativeWindowOf } from "./nativeWindow";
 import { openDataFolder } from "./openFolder";
+import { openOwn } from "./openOwn";
 import { makePause } from "./pause";
 import { buildPrivacyAnswer, makeProviderTester } from "./privacyAnswer";
 import { makePrivacyChanger, weakensTelemetry } from "./privacyChange";
@@ -143,6 +144,17 @@ export function startMain(options: MainOptions): MainController | null {
     ipcMain.handle(IPC.privacyChange, (event, change: unknown) => (isTrustedSender(senderUrl(event)) ? privacyChange(change) : null));
     ipcMain.on(IPC.leaveSafeMode, event => {
         if (isTrustedSender(senderUrl(event))) controller.leaveSafeMode();
+    });
+    ipcMain.on(IPC.openOwn, (event, place: unknown) => {
+        // Only a fixed word: the file and the address are ours (`src/main/openOwn.ts`).
+        if (!isTrustedSender(senderUrl(event))) return;
+        void openOwn(place, {
+            folder: dataDir,
+            open: path => shell.openPath(path),
+            reveal: path => { shell.showItemInFolder(path); },
+            openExternal: url => shell.openExternal(url),
+            trace: text => { trace(dataDir, text); }
+        });
     });
     ipcMain.on(IPC.openDataFolder, event => {
         // The folder is ours (not sent by the page), so the page cannot make the explorer open anything else.
