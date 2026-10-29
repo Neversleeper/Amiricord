@@ -121,10 +121,6 @@ export function defaultSettings(live: Readonly<Record<string, LiveSwitch | undef
         {
             id: "ctrl-q", title: "Ctrl+Q to quit", restart: true, soon: true,
             description: "Adds Ctrl+Q as a second way to close Discord, besides Alt+F4."
-        },
-        {
-            id: "react-devtools", title: "React Developer Tools", restart: true, soon: true,
-            description: "A tool for people who write plugins. Leave it off if you are not sure."
         }
     ], live);
 }

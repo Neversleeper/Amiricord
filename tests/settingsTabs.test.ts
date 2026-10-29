@@ -276,7 +276,7 @@ describe("the main tab", () => {
         assert.equal(prevented, 1, "only Enter and space are taken");
         assert.deepEqual(t.calls.slice(0, 2), [false, false]);
         const others = findAll(t.tree, el => hasClass(el, "amiricord-switch-row")).filter(candidate => candidate !== row);
-        assert.equal(others.length, 6);
+        assert.equal(others.length, 5);
         assert.ok(others.every(candidate => textOf(candidate).includes("Coming soon")), "the rest still wait");
     });
 
@@ -301,12 +301,12 @@ describe("the main tab", () => {
         assert.equal(findAll(choice, el => el.props.role === "combobox").length, 0, "no dead drop-down next to the working one");
     });
 
-    it("lists the window and behavior settings: seven switches, all off and marked, with a note that says they are not built yet; telemetry is not here, it belongs to Privacy & Security", () => {
+    it("lists the window and behavior settings: six switches, all off and marked, with a note that says they are not built yet; telemetry is not here, it belongs to Privacy & Security", () => {
         const { tree } = mainTab();
         const rows = findAll(tree, el => hasClass(el, "amiricord-switch-row"));
         assert.deepEqual(rows.map(row => textOf(findAll(row, el => hasClass(el, "amiricord-switch-title"))[0]).replace(/Coming soon|Restart/g, "")), [
             "Show the Amiricord logo", "Custom CSS", "Windows title bar",
-            "Transparent window", "Remove minimum window size", "Ctrl+Q to quit", "React Developer Tools"
+            "Transparent window", "Remove minimum window size", "Ctrl+Q to quit"
         ]);
         for (const row of rows) {
             const [toggle] = findAll(row, el => el.props.role === "switch");
@@ -315,7 +315,7 @@ describe("the main tab", () => {
             assert.ok(textOf(row).includes("Coming soon"));
             assert.equal(toggle.props.onClick, undefined);
         }
-        assert.equal(rows.filter(row => textOf(row).includes("Restart")).length, 5, "the five window options say they need a restart");
+        assert.equal(rows.filter(row => textOf(row).includes("Restart")).length, 4, "the four window options say they need a restart");
         assert.equal(findAll(tree, el => hasClass(el, "amiricord-warning")).length, 1, "only transparency carries a warning");
         assert.match(textOf(findAll(tree, el => hasClass(el, "amiricord-notice"))[0]), /not built yet/);
     });

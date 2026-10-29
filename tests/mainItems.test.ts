@@ -25,12 +25,12 @@ describe("the lists of the main tab", () => {
         assert.deepEqual(calls, ["restart", "folder", "health", "source", "css", "log"]);
     });
 
-    it("have seven switches that wait for their feature, with the five window options marked as needing a restart; none is about privacy, which has its own tab", () => {
+    it("have six switches that wait for their feature, with the four window options marked as needing a restart; none is about privacy, which has its own tab", () => {
         const settings = defaultSettings();
-        assert.equal(settings.length, 7);
+        assert.equal(settings.length, 6);
         assert.ok(!settings.some(item => /telemetry|analytics|tracking/i.test(item.id + item.title)));
         assert.ok(settings.every(item => item.soon === true));
-        assert.deepEqual(settings.filter(item => item.restart).map(item => item.id), ["native-title-bar", "transparent", "no-min-size", "ctrl-q", "react-devtools"]);
+        assert.deepEqual(settings.filter(item => item.restart).map(item => item.id), ["native-title-bar", "transparent", "no-min-size", "ctrl-q"]);
         assert.deepEqual(settings.filter(item => item.warning).map(item => item.id), ["transparent"]);
     });
 
@@ -38,7 +38,7 @@ describe("the lists of the main tab", () => {
         const log: string[] = [];
         const live = { get: () => true, set: (on: boolean) => { log.push(String(on)); }, subscribe: () => () => undefined };
         const settings = defaultSettings({ "custom-css": live, "no-such-switch": live });
-        assert.equal(settings.length, 7, "an id that is not in the list adds nothing");
+        assert.equal(settings.length, 6, "an id that is not in the list adds nothing");
         const custom = settings.find(item => item.id === "custom-css")!;
         assert.equal(custom.soon, undefined);
         assert.equal(custom.live, live);
