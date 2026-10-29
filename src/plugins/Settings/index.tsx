@@ -20,11 +20,13 @@ import type { EnginePluginContext, PluginCode } from "../../renderer/engine";
 import { OWNER_ONLY_PLUGINS, OWNERS, PROJECT_VERSION } from "../../shared/project";
 import { releasedNews } from "../../shared/updates";
 import { type AuthorInfo, authorInfo, type RawDiscordUser } from "./authorModel";
+import { CUSTOM_CSS_ELEMENT_ID, CUSTOM_CSS_MAX, keepLast, makeCustomCss } from "./customCss";
+import { makeCustomCssWindow } from "./CustomCssWindow";
 import { EntryRegistry } from "./entries";
 import { makeErrorBoundary } from "./ErrorBoundary";
 import { makeSidebarIcon, PluginsIcon, PrivacyIcon, UpdaterIcon } from "./icon";
 import { buildLayoutWithSection, FALLBACK_TYPES, readTypes, TYPE_NAMES } from "./layout";
-import { defaultButtonGroups, defaultChoices, defaultQuickActions, defaultSettings } from "./mainItems";
+import { defaultButtonGroups, defaultChoices, defaultQuickActions, defaultSettings, type LiveSwitch } from "./mainItems";
 import { makeMainTab } from "./MainTab";
 import { cardsForPerson } from "./pluginsModel";
 import { makePluginsTab } from "./PluginsTab";
@@ -40,7 +42,9 @@ const registry = new EntryRegistry();
 
 /** What Editor Mode saved: one JSON text (docs/design-04-editor-mode.md). Read through `parseLayout`, so a damaged value is harmless. */
 const settings = definePluginSettings({
-    tabLayout: { type: "string", default: "", maxLength: LAYOUT_MAX_CHARS, description: "Which tabs of the Amiricord section are hidden, their order and the pinned ones (saved by Editor Mode)." }
+    tabLayout: { type: "string", default: "", maxLength: LAYOUT_MAX_CHARS, description: "Which tabs of the Amiricord section are hidden, their order and the pinned ones (saved by Editor Mode)." },
+    customCss: { type: "string", default: "", maxLength: CUSTOM_CSS_MAX, description: "Your own style sheet (saved by Edit Custom CSS)." },
+    customCssOn: { type: "boolean", default: false, description: "Whether your own style sheet is applied to Discord." }
 });
 let context: EnginePluginContext | undefined;
 let nodeTypes: { get(): unknown; } | undefined;
@@ -87,6 +91,34 @@ const plugin: PluginCode & { buildLayout(builder: { key?: unknown; buildLayout()
         nodeTypes = ctx.finders.byProps(...TYPE_NAMES);
         ctx.addStyle(SETTINGS_CSS, SETTINGS_STYLE_NAME);
 
+        // The owner's own style sheet: applied from the two saved settings now and whenever either changes (the switch of the main tab or the editor window).
+        const customCss = makeCustomCss({
+            read: () => ({ on: settings.store.customCssOn, text: settings.store.customCss }),
+            add: (css, name) => ctx.addStyle(css, name),
+            safeMode: () => engine.status().safeMode,
+            keepLast: () => {
+                const page = (globalThis as { document?: Parameters<typeof keepLast>[0]; MutationObserver?: new (callback: () => void) => ReturnType<Parameters<typeof keepLast>[2]>; });
+                const { document, MutationObserver } = page;
+                return document && MutationObserver ? keepLast(document, CUSTOM_CSS_ELEMENT_ID, callback => new MutationObserver(callback)) : () => undefined;
+            },
+            report: (source, error) => { ctx.reportError(source, error); }
+        });
+        customCss.apply();
+        ctx.onDispose(settings.onChange("customCss", () => { customCss.apply(); }));
+        ctx.onDispose(settings.onChange("customCssOn", () => { customCss.apply(); }));
+        ctx.onDispose(customCss.stop);
+        const customCssSwitch: LiveSwitch = {
+            get: () => settings.store.customCssOn,
+            set: on => {
+                try {
+                    settings.store.customCssOn = on;
+                } catch (error) {
+                    ctx.reportError("saving the Custom CSS switch", error);
+                }
+            },
+            subscribe: listener => settings.onChange("customCssOn", () => { listener(); })
+        };
+
         const removeMain = registry.register({
             key: "amiricord",
             title: "Amiricord",
@@ -97,11 +129,12 @@ const plugin: PluginCode & { buildLayout(builder: { key?: unknown; buildLayout()
                 cards: () => plugins.cards(),
                 quickActions: defaultQuickActions({
                     openDataFolder: () => { engine.openDataFolder(); },
+                    openCssEditor: () => { openCssEditor(); },
                     openHealthReport: () => { engine.openHealthReport(); },
                     openSourceCode: () => { engine.openSourceCode(); },
                     restart: () => { plugins.restart(); }
                 }),
-                settings: defaultSettings(),
+                settings: defaultSettings({ "custom-css": customCssSwitch }),
                 choices: defaultChoices(),
                 buttonGroups: defaultButtonGroups(),
                 logo,
@@ -169,6 +202,33 @@ const plugin: PluginCode & { buildLayout(builder: { key?: unknown; buildLayout()
                 const Safe = boundary();
                 return <Safe label="The plugin window"><Window id={card.id} onClose={() => { props.onClose(); }} /></Safe>;
             }) !== undefined;
+        };
+
+        // The Custom CSS editor: a window with the engine's pieces, made once per opening so Discord drawing the layer again does not lose what is typed.
+        const openCssEditor = () => {
+            const parts = windowParts();
+            if (!parts) {
+                ctx.reportError("the Custom CSS editor", new Error("Discord's window pieces were not found, so the editor cannot open"));
+                return;
+            }
+            const Editor = makeCustomCssWindow({
+                read: () => ({ on: settings.store.customCssOn, text: settings.store.customCss }),
+                save: text => {
+                    try {
+                        settings.store.customCss = text;
+                        return null;
+                    } catch (error) {
+                        return error instanceof Error ? error.message : String(error);
+                    }
+                },
+                setOn: on => { customCssSwitch.set(on); },
+                safeMode: () => engine.status().safeMode,
+                parts
+            });
+            ctx.modals.open(props => {
+                const Safe = boundary();
+                return <Safe label="The Custom CSS window"><Editor onClose={() => { props.onClose(); }} /></Safe>;
+            });
         };
 
         const removePlugins = registry.register({

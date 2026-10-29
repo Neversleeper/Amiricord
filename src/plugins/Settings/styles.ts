@@ -149,6 +149,11 @@ export const SETTINGS_CSS = `
 .amiricord-switch-live { cursor: pointer; }
 .amiricord-switch-live:hover { filter: brightness(1.15); }
 .amiricord-switch-live:focus-visible { outline: 2px solid var(--border-focus, #00a8fc); outline-offset: 2px; }
+.amiricord-css-switch { display: flex; align-items: center; justify-content: space-between; gap: var(--space-16, 16px); margin: var(--space-8, 8px) 0; }
+.amiricord-css-editor { box-sizing: border-box; display: block; width: 100%; height: 45vh; min-height: 260px; margin-top: var(--space-8, 8px); padding: 10px var(--space-12, 12px); border: 1px solid var(--input-border-default, var(--border-subtle, #3f4147)); border-radius: 4px; resize: vertical; overflow: auto; white-space: pre; font-family: Consolas, "Cascadia Mono", "Courier New", monospace; font-size: 13px; line-height: 1.45; tab-size: 4; color: var(--text-default, #dbdee1); background: var(--input-background-default, var(--background-base-lowest, #1e1f22)); outline: none; }
+.amiricord-css-editor:focus { border-color: var(--border-focus, #00a8fc); }
+.amiricord-css-footer-note { flex: 1; min-width: 0; margin-right: var(--space-12, 12px); align-self: center; }
+.amiricord-css-count { margin-top: var(--space-4, 4px); text-align: right; font-size: 12px; color: var(--text-subtle, var(--text-muted, #949ba4)); }
 .amiricord-note { margin-top: var(--space-4, 4px); font-size: 13px; color: var(--text-feedback-info, #00a8fc); }
 .amiricord-restart { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-12, 12px); margin-top: var(--space-12, 12px); padding: 12px var(--space-16, 16px); border: 1px solid rgb(240 178 50 / 45%); border-radius: 12px; background: rgb(240 178 50 / 10%); font-size: 14px; }
 .amiricord-dropdown { position: relative; }

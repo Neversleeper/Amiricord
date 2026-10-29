@@ -11,6 +11,7 @@ import { before, describe, it } from "node:test";
 import { build } from "esbuild";
 
 import { pageOptions } from "../scripts/build/build";
+import { SettingsClient } from "../src/api/settingsClient";
 import type { EnginePluginContext, PluginCode } from "../src/renderer/engine";
 import { compileModule } from "../src/webpack/compileModule";
 
@@ -151,6 +152,51 @@ describe("the Settings plugin in use", () => {
             for (const undo of log.disposers.splice(0).reverse()) undo();
             await plugin.stop!(ctx);
         }
+    });
+
+    it("applies the saved custom CSS when it starts, follows both of its settings, and takes the style out when it stops", async () => {
+        const plugin = load();
+        const saved = { customCssOn: true, customCss: "a { color: red }" };
+        plugin.settings!.bind(new SettingsClient({ schema: 1, plugins: { Settings: { values: saved } } }, () => undefined), "Settings");
+        const { ctx, log } = fakeContext();
+        const sheets = new Map<string, string>();
+        (ctx as unknown as { addStyle(css: string, name?: string): unknown; }).addStyle = (css, name = "?") => {
+            if (name === "custom-css") sheets.set(name, css);
+            else log.styles.push([css, name]);
+            return { update: (next: string) => { sheets.set(name, next); }, remove: () => { sheets.delete(name); } };
+        };
+        await plugin.start!(ctx);
+        assert.equal(sheets.get("custom-css"), "a { color: red }", "applied when it starts");
+        (plugin.settings as unknown as { store: Record<string, unknown>; }).store.customCss = "b { color: blue }";
+        assert.equal(sheets.get("custom-css"), "b { color: blue }", "a new sheet is applied at once");
+        (plugin.settings as unknown as { store: Record<string, unknown>; }).store.customCssOn = false;
+        assert.equal(sheets.has("custom-css"), false, "switching it off takes it out of the page");
+        (plugin.settings as unknown as { store: Record<string, unknown>; }).store.customCssOn = true;
+        assert.equal(sheets.get("custom-css"), "b { color: blue }");
+        for (const undo of log.disposers.splice(0)) undo();
+        assert.equal(sheets.has("custom-css"), false, "stopping the plugin takes it out");
+        assert.deepEqual(log.errors, []);
+        plugin.settings!.unbind();
+    });
+
+    it("applies no custom CSS in safe mode, and none by default", async () => {
+        const plugin = load();
+        plugin.settings!.bind(new SettingsClient({ schema: 1, plugins: { Settings: { values: { customCssOn: true, customCss: "a { color: red }" } } } }, () => undefined), "Settings");
+        const safe = fakeContext();
+        const sheets: string[] = [];
+        (safe.ctx as unknown as { addStyle(css: string, name?: string): unknown; }).addStyle = (css, name) => { if (name === "custom-css") sheets.push(css); return { update: () => undefined, remove: () => undefined }; };
+        (safe.ctx.engine as unknown as { status(): { safeMode: boolean; }; }).status = () => ({ safeMode: true });
+        await plugin.start!(safe.ctx);
+        assert.equal(sheets.length, 0);
+        for (const undo of safe.log.disposers.splice(0)) undo();
+        await plugin.stop!(safe.ctx);
+        plugin.settings!.unbind();
+        plugin.settings!.bind(new SettingsClient({ schema: 1, plugins: {} }, () => undefined), "Settings");
+        const fresh = fakeContext();
+        (fresh.ctx as unknown as { addStyle(css: string, name?: string): unknown; }).addStyle = (css, name) => { if (name === "custom-css") sheets.push(css); return { update: () => undefined, remove: () => undefined }; };
+        await plugin.start!(fresh.ctx);
+        assert.equal(sheets.length, 0);
+        plugin.settings!.unbind();
     });
 
     it("refuses to start without the engine and the plugin cards that only a core plugin gets", async () => {

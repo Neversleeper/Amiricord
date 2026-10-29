@@ -33,6 +33,16 @@ export interface SettingItem {
     warning?: string;
     /** The feature is not built yet: the switch is drawn off and does nothing. */
     soon?: boolean;
+    /** A switch that works: how to read it, change it and hear about changes made elsewhere (the editor window). Given by `defaultSettings`, never together with `soon`. */
+    live?: LiveSwitch;
+}
+
+/** What makes a switch of the main tab work. */
+export interface LiveSwitch {
+    get(): boolean;
+    set(on: boolean): void;
+    /** Be told when it changes from somewhere else. Returns the way to stop listening. */
+    subscribe(listener: () => void): () => void;
 }
 
 /** A drop-down of the settings: a title, a text and the labels of its choices. */
@@ -56,6 +66,7 @@ export interface ButtonGroupItem {
 
 export interface QuickActionActions {
     openDataFolder(): void;
+    openCssEditor(): void;
     openHealthReport(): void;
     openSourceCode(): void;
     restart(): void;
@@ -65,7 +76,7 @@ export interface QuickActionActions {
 export function defaultQuickActions(actions: QuickActionActions): QuickActionItem[] {
     return [
         { id: "notification-log", title: "Notification Log", Icon: LogIcon, soon: true },
-        { id: "quick-css", title: "Edit Custom CSS", Icon: PaintbrushIcon, soon: true },
+        { id: "quick-css", title: "Edit Custom CSS", Icon: PaintbrushIcon, run: actions.openCssEditor },
         {
             id: "relaunch", title: "Relaunch Discord", Icon: RefreshIcon, run: actions.restart,
             confirm: { text: "Relaunching closes any call and loses messages you have not sent.", button: "Relaunch now" }
@@ -76,9 +87,11 @@ export function defaultQuickActions(actions: QuickActionActions): QuickActionIte
     ];
 }
 
-/** The switches of "Client Settings". All of them wait for their feature; each one is its own step of the plan. */
-export function defaultSettings(): SettingItem[] {
-    return [
+/**
+ * The switches of "Client Settings". A switch whose feature is built is given its `LiveSwitch` by id and stops being `soon`; the others wait, and each one is its own step of the plan.
+ */
+export function defaultSettings(live: Readonly<Record<string, LiveSwitch | undefined>> = {}): SettingItem[] {
+    return withLive([
         { id: "amiricord-icon", title: "Show the Amiricord logo", description: "Swaps the Discord logo button for the Amiricord logo.", soon: true },
         { id: "custom-css", title: "Custom CSS", description: "Turn your own style sheet on or off.", soon: true },
         {
@@ -102,7 +115,16 @@ export function defaultSettings(): SettingItem[] {
             id: "react-devtools", title: "React Developer Tools", restart: true, soon: true,
             description: "A tool for people who write plugins. Leave it off if you are not sure."
         }
-    ];
+    ], live);
+}
+
+function withLive(items: SettingItem[], live: Readonly<Record<string, LiveSwitch | undefined>>): SettingItem[] {
+    return items.map(item => {
+        const found = live[item.id];
+        if (!found) return item;
+        const { soon: _soon, ...rest } = item;
+        return { ...rest, live: found };
+    });
 }
 
 /** The drop-downs that follow the switches. */
