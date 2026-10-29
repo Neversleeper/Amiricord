@@ -59,26 +59,36 @@ export interface CreateBackupArgs {
     now?: Date;
     /** How a file is copied. Only tests change this, to make a copy go wrong. */
     copy?: (from: string, to: string) => Promise<void>;
+    /** How a backup folder is made (one level, failing with EEXIST when it is taken). Only tests change this. */
+    makeDir?: (dir: string) => Promise<unknown>;
 }
 
-/** Create a new folder for a backup. A name that is already taken gets `-2`, `-3`...: a backup is never written over another. */
-async function makeUniqueDir(root: string, name: string): Promise<string> {
+/** How many names are tried before giving up. A folder that is really taken has a few neighbours at most; more means the answer "taken" cannot be trusted. */
+export const MAX_BACKUP_NAME_TRIES = 200;
+
+/**
+ * Create a new folder for a backup. A name that is already taken gets `-2`, `-3`...: a backup is never written over another. It gives up after
+ * `MAX_BACKUP_NAME_TRIES` names: a data folder that is a link (to another drive, made by some tools) can answer "already exists" to every name, and without a limit
+ * this looped for ever.
+ */
+async function makeUniqueDir(root: string, name: string, make: (dir: string) => Promise<unknown> = dir => mkdir(dir)): Promise<string> {
     await mkdir(root, { recursive: true });
-    for (let n = 1; ; n++) {
+    for (let n = 1; n <= MAX_BACKUP_NAME_TRIES; n++) {
         const dir = join(root, n === 1 ? name : `${name}-${n}`);
         try {
-            await mkdir(dir);
+            await make(dir);
             return dir;
         } catch (error) {
             if ((error as NodeJS.ErrnoException).code !== "EEXIST") throw error;
         }
     }
+    throw new Error(`no backup folder could be made in ${root}: every name looked taken (${MAX_BACKUP_NAME_TRIES} tried). If this folder is a link to another place, use the real folder`);
 }
 
 /** Copy the files, check the copies, write the manifest. A copy that fails any check is removed and the error is thrown. */
 export async function createBackup(args: CreateBackupArgs): Promise<BackupInfo> {
     const now = args.now ?? new Date();
-    const dir = await makeUniqueDir(args.backupRoot, `${args.branch}-${args.appVersion}-${timestamp(now)}`);
+    const dir = await makeUniqueDir(args.backupRoot, `${args.branch}-${args.appVersion}-${timestamp(now)}`, args.makeDir);
 
     try {
         const files: BackupFile[] = [];
