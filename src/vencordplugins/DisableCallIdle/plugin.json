@@ -1,0 +1,33 @@
+{
+    "schema": 1,
+    "id": "DisableCallIdle",
+    "name": "Disable Call Idle",
+    "version": "1.0.0",
+    "description": "Stops Discord from kicking you out of a DM voice call after 3 minutes alone and moving you to an AFK channel.",
+    "origin": "vencord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        {
+            "name": "Nuckyz",
+            "role": "original author"
+        },
+        {
+            "name": "Neversleeper",
+            "role": "Amiricord port"
+        }
+    ],
+    "credits": [
+        {
+            "name": "Vendicated and contributors (Vencord), plugin DisableCallIdle",
+            "license": "GPL-3.0-or-later",
+            "url": "https://github.com/Vendicated/Vencord"
+        }
+    ],
+    "tags": ["voice"],
+    "enabledByDefault": false,
+    "startAt": "init",
+    "entry": {
+        "renderer": "index.ts"
+    },
+    "permissions": {}
+}
