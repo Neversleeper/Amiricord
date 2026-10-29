@@ -1,0 +1,21 @@
+{
+    "schema": 1,
+    "id": "FriendTags",
+    "name": "Friend Tags",
+    "version": "1.0.0",
+    "description": "Group your friends and direct messages with tags of your own and filter the quick switcher by them: start the search with & and the tag name. Add a person to a tag from their right-click menu.",
+    "origin": "equicord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        { "name": "Samwich", "role": "original author" },
+        { "name": "Neversleeper", "role": "Amiricord port" }
+    ],
+    "credits": [
+        { "name": "Vendicated and contributors (Vencord), Samwich (Equicord), plugin FriendTags", "license": "GPL-3.0-or-later", "url": "https://github.com/Equicord/Equicord" }
+    ],
+    "tags": ["utility", "ui"],
+    "enabledByDefault": false,
+    "startAt": "webpackReady",
+    "entry": { "renderer": "index.tsx" },
+    "permissions": {}
+}
