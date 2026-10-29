@@ -8,8 +8,9 @@
 
 // Adapted for Amiricord (2026) from the plugin ViewIcons (authors Vendicated, TheKodeToad, Nuckyz and nyx) of Vencord. Differences from the original:
 //  - the image opens in a window of Amiricord's own (the original used a Vencord helper that reuses Discord's picture viewer), with a link to the full size;
-//  - only the banner patch is kept. The four patches for avatars (profile picture, group chat icon, the two icons at the top of a direct message) no longer find their text in
-//    Discord's web build 653945: that build opens a profile picture by itself (`onOpenAvatar`) and moved the rest. The banner patch was checked against that build (module with
+//  - the original's four patches for avatars (profile picture, group chat icon, the two icons at the top of a direct message) no longer find their text in Discord's web build
+//    653945. One patch replaces them for the profile picture: Discord's avatar component takes the function that opens the picture (`onOpenAvatar`) and the patch swaps it for the
+//    plugin's window, so a click on a person's picture there shows it with a Save button (the right-click "View Avatar" does the same). The group chat icon is only in the right-click menu; The banner patch was checked against that build (module with
 //    `"--custom-cutout-radius":`) and matches once;
 //  - the entries of the right-click menus use `ctx.contextMenu.addNative` with Vencord's menu names (`user-context`, `guild-context`, `gdm-context`). Those names are NOT in the
 //    readable part of the build (Discord builds them at run time), so if an entry never shows, that is the first place to look. Not tried in a real Discord at the time of writing.
@@ -57,18 +58,52 @@ function openImage(url: string | null | undefined, event?: Clickable) {
     const Root = ctx.components.ModalRoot.get() as any;
     const Content = ctx.components.ModalContent.get() as any;
     const Close = ctx.components.ModalCloseButton.get() as any;
+    const Button = ctx.components.Button.get() as any;
     if (!Root || !Content) return;
     const h = react.createElement;
     ctx.modals.open(props => h(Root, { size: "large", onClose: props.onClose, label: "Image" },
         h(Content, null,
             h("div", { style: { display: "flex", flexDirection: "column", alignItems: "center", gap: "12px", padding: "16px" } },
                 h("img", { src: shown, alt: "", style: { maxWidth: "100%", maxHeight: "70vh", objectFit: "contain" } }),
-                h("a", { href: original, target: "_blank", rel: "noreferrer noopener", style: { color: "var(--text-link, #00a8fc)" } }, "Open the full size"))),
+                h("div", { style: { display: "flex", alignItems: "center", gap: "16px" } },
+                    Button ? h(Button, { variant: "primary", size: "small", onClick: () => { void saveImage(original).then(saved => ctx.toasts.show(saved ? "Image saved" : "Could not save the image", saved ? "success" : "failure")); } }, "Save image") : null,
+                    h("a", { href: original, target: "_blank", rel: "noreferrer noopener", style: { color: "var(--text-link, #00a8fc)" } }, "Open the full size")))),
         Close ? h(Close, { onClick: props.onClose }) : null));
+}
+
+/** Saves a picture to the disk: fetched as a blob so the browser downloads it instead of opening it. */
+async function saveImage(url: string): Promise<boolean> {
+    try {
+        const response = await fetch(url);
+        if (!response.ok) return false;
+        const blob = await response.blob();
+        const name = decodeURIComponent(new URL(url).pathname.split("/").pop() || "image");
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = name;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        setTimeout(() => URL.revokeObjectURL(link.href), 10000);
+        return true;
+    } catch {
+        return false;
+    }
 }
 
 const openAvatar = (url: string, event?: Clickable) => { openImage(url, event); };
 const openBanner = (url: string, event?: Clickable) => { openImage(url, event); };
+
+/** The picture of a person, as shown in a server when they have one there. */
+function openUserAvatar(user: any, guildId?: string | null): void {
+    const utils = icons?.get();
+    if (!utils || !user) return;
+    const memberAvatar = guildId ? members?.get()?.getMember?.(guildId, user.id)?.avatar || null : null;
+    const url = memberAvatar
+        ? utils.getGuildMemberAvatarURLSimple({ userId: user.id, avatar: memberAvatar, guildId, canAnimate: true })
+        : utils.getUserAvatarURL(user, true);
+    openImage(url);
+}
 
 function makeItem(ctx: EnginePluginContext, id: string, label: string, action: () => void): unknown {
     const parts = ctx.contextMenu.parts();
@@ -85,12 +120,21 @@ function addGroup(ctx: EnginePluginContext, children: unknown[], items: unknown[
     children.splice(-1, 0, react.createElement(parts.MenuGroup as any, { key: "amiricord-view-icons" }, ...live));
 }
 
-const plugin: PluginCode & { openAvatar: typeof openAvatar; openBanner: typeof openBanner; } = {
+const plugin: PluginCode & { openAvatar: typeof openAvatar; openBanner: typeof openBanner; openUserAvatar: typeof openUserAvatar; } = {
     settings,
     openAvatar,
     openBanner,
+    openUserAvatar,
 
     patches: [
+        {
+            // Discord's avatar component: the function that opens a picture on click becomes the plugin's window.
+            find: /\{onOpenProfile:[\w$]+,onOpenAvatar:[\w$]+,className:/,
+            replacements: [{
+                match: /(\i)=null!=(\i)\.user\.avatar\|\|\2\.user\.hasAvatarForGuild\((\i)\)\?\i:void 0/,
+                replace: "$1=null!=$2.user.avatar||$2.user.hasAvatarForGuild($3)?()=>$self.openUserAvatar($2.user,$3):void 0"
+            }]
+        },
         {
             // The profile banner. The click opens it large, and the pointer shows it can be clicked.
             find: '"--custom-cutout-radius":',

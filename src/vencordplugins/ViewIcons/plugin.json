@@ -18,7 +18,12 @@
     ],
     "tags": ["media", "ui"],
     "enabledByDefault": false,
-    "startAt": "webpackReady",
+    "startAt": "init",
     "entry": { "renderer": "index.tsx" },
-    "permissions": {}
+    "permissions": {
+        "network": [
+            { "host": "cdn.discordapp.com", "from": "renderer", "why": "downloads the picture when you press Save image" },
+            { "host": "media.discordapp.net", "from": "renderer", "why": "downloads the picture when you press Save image" }
+        ]
+    }
 }
