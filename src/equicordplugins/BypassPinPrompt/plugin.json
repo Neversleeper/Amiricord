@@ -1,0 +1,21 @@
+{
+    "schema": 1,
+    "id": "BypassPinPrompt",
+    "name": "Bypass Pin Prompt",
+    "version": "1.0.0",
+    "description": "Pins and unpins a message straight away, without asking you to confirm.",
+    "origin": "equicord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        { "name": "Equicord", "role": "original author" },
+        { "name": "Neversleeper", "github": "https://github.com/Neversleeper", "role": "Amiricord port" }
+    ],
+    "credits": [
+        { "name": "Vendicated and contributors (Vencord), plugin BypassPinPrompt by Equicord", "license": "GPL-3.0-or-later", "url": "https://github.com/Equicord/Equicord" }
+    ],
+    "tags": ["chat", "utility"],
+    "enabledByDefault": false,
+    "startAt": "init",
+    "entry": { "renderer": "index.ts" },
+    "permissions": {}
+}
