@@ -84,6 +84,11 @@ export class WreqView implements ModuleView {
         return found;
     }
 
+    /** Every module that has run since the hook was installed, with its exports. For the BetterDiscord layer, whose filters read exports directly. */
+    loadedModules(): Array<{ id: string; exports: unknown; }> {
+        return [...this.loaded].map(([id, exports]) => ({ id, exports }));
+    }
+
     ids(): string[] {
         return this.wreq ? Object.keys(this.wreq.m) : [];
     }
