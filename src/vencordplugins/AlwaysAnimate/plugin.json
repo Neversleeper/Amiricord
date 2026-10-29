@@ -1,0 +1,33 @@
+{
+    "schema": 1,
+    "id": "AlwaysAnimate",
+    "name": "Always Animate",
+    "version": "1.0.0",
+    "description": "Animates everything that can be animated: avatars, server icons, banners, status emojis, nameplates and role gradients.",
+    "origin": "vencord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        {
+            "name": "FieryFlames",
+            "role": "original author"
+        },
+        {
+            "name": "Neversleeper",
+            "role": "Amiricord port"
+        }
+    ],
+    "credits": [
+        {
+            "name": "Vendicated and contributors (Vencord), plugin AlwaysAnimate",
+            "license": "GPL-3.0-or-later",
+            "url": "https://github.com/Vendicated/Vencord"
+        }
+    ],
+    "tags": ["ui"],
+    "enabledByDefault": false,
+    "startAt": "init",
+    "entry": {
+        "renderer": "index.ts"
+    },
+    "permissions": {}
+}
