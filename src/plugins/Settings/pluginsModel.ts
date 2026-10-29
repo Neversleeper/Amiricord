@@ -112,6 +112,35 @@ export function applyFilter(cards: readonly PluginCard[], filter: PluginsFilter)
     return { plugins: shown.filter(card => !card.core), core: shown.filter(card => card.core) };
 }
 
+/** The order the origins are listed in when the list is grouped by origin: the plugins we made, then the projects they come from. An unknown origin goes last. */
+export const ORIGIN_ORDER: readonly string[] = ["vencord", "equicord", "testcord", "amiricord", "betterdiscord"];
+
+export interface SortOptions {
+    /** The plugins that will be on come before the ones that will be off. */
+    onFirst: boolean;
+    /** The plugins are grouped by where they come from, in `ORIGIN_ORDER`. */
+    byOrigin: boolean;
+}
+
+const originRank = (origin: string): number => {
+    const at = ORIGIN_ORDER.indexOf(origin);
+    return at === -1 ? ORIGIN_ORDER.length : at;
+};
+
+/**
+ * Reorders a list that is already by name. With `byOrigin` the origin comes first and, inside each origin, with `onFirst` the plugins that are on come
+ * before the ones that are off; whatever is equal keeps the order it came in (by name). Returns a new list.
+ */
+export function sortPlugins<T extends PluginCard>(cards: readonly T[], options: SortOptions): T[] {
+    return [...cards].sort((a, b) => {
+        if (options.byOrigin) {
+            const byOrigin = originRank(a.origin) - originRank(b.origin);
+            if (byOrigin !== 0) return byOrigin;
+        }
+        return options.onFirst ? Number(!isOn(a)) - Number(!isOn(b)) : 0;
+    });
+}
+
 export interface PluginCounts {
     /** Plugins that can be turned off. */
     plugins: number;

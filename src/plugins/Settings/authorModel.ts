@@ -30,6 +30,13 @@ const AVATAR_HASH = /^(a_)?[0-9a-f]{16,40}$/;
 
 export const isDiscordId = (value: unknown): value is string => typeof value === "string" && SNOWFLAKE.test(value);
 
+const GITHUB_PROFILE = /^https:\/\/github\.com\/([A-Za-z0-9](?:[A-Za-z0-9-]{0,37}[A-Za-z0-9])?)\/?$/;
+
+/** The user name in a link to a GitHub profile (`https://github.com/<user>`), or null for anything else: a manifest cannot make the window link to another site. */
+export function githubUser(link: unknown): string | null {
+    return typeof link === "string" ? GITHUB_PROFILE.exec(link)?.[1] ?? null : null;
+}
+
 /** The address of a profile picture on Discord's own image host. A hash that starts with `a_` is an animated picture, so it is a GIF. */
 export function avatarUrl(id: string, hash: unknown): string | null {
     if (!isDiscordId(id) || typeof hash !== "string" || !AVATAR_HASH.test(hash)) return null;

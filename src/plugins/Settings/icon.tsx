@@ -214,3 +214,12 @@ export function GearIcon() {
         </Masked>
     );
 }
+
+/** A key (the Token Login Manager tab). */
+export function KeyIcon() {
+    return (
+        <Solid>
+            <path fillRule="evenodd" d="M15.5 2a6.5 6.5 0 0 0-6.2 8.4L2 17.7V22h4.3v-2.2h2.2v-2.2h2.2l2.2-2.2A6.5 6.5 0 1 0 15.5 2zm1.8 4.2a1.7 1.7 0 1 1 0 3.4 1.7 1.7 0 0 1 0-3.4z" />
+        </Solid>
+    );
+}

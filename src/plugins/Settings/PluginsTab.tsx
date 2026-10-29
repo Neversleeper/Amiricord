@@ -15,7 +15,7 @@ import type { ToggleResult } from "../../api/pluginSwitch";
 import { PluginItem, type Question } from "./PluginItem";
 import {
     applyFilter, countCards, DEFAULT_FILTER, emptyText, filterOptions, isFilterActive, isOn, originLabel, type Outcome, outcomeOf,
-    type PluginsFilter, RISK_FILTERS, type RiskFilter, STATE_FILTERS, type StateFilter, waitingForRestart, warningBeforeEnabling
+    type PluginsFilter, RISK_FILTERS, type RiskFilter, sortPlugins, STATE_FILTERS, type StateFilter, waitingForRestart, warningBeforeEnabling
 } from "./pluginsModel";
 import { NO_WINDOW_TEXT } from "./pluginWindowModel";
 
@@ -59,6 +59,32 @@ function Stat({ title, value, hint, ratio }: { title: string; value: string; hin
     );
 }
 
+const ORDER_KEY = "amiricord.pluginsTab.order";
+interface Order { onFirst: boolean; byOrigin: boolean; }
+let remembered: Order | undefined;
+
+/** The two order buttons as the person left them: kept while Discord runs (the tab is drawn again each time it is opened) and in the page storage for the next start. */
+function rememberedOrder(): Order {
+    if (remembered) return remembered;
+    remembered = { onFirst: false, byOrigin: false };
+    try {
+        const saved = JSON.parse((globalThis as unknown as { localStorage: Storage; }).localStorage.getItem(ORDER_KEY) ?? "{}") as Partial<Order>;
+        remembered = { onFirst: saved.onFirst === true, byOrigin: saved.byOrigin === true };
+    } catch {
+        // no storage or a damaged value: the defaults stay
+    }
+    return remembered;
+}
+
+function rememberOrder(change: Partial<Order>): void {
+    remembered = { ...rememberedOrder(), ...change };
+    try {
+        (globalThis as unknown as { localStorage: Storage; }).localStorage.setItem(ORDER_KEY, JSON.stringify(remembered));
+    } catch {
+        // the choice is still kept until Discord closes
+    }
+}
+
 export function makePluginsTab(deps: PluginsTabDeps): () => unknown {
     return function PluginsTab() {
         const react = currentReact();
@@ -69,11 +95,16 @@ export function makePluginsTab(deps: PluginsTabDeps): () => unknown {
         const [askingRestart, setAskingRestart] = react.useState(false);
         // Changes when a switch ends, so the page reads the cards again.
         const [, setRefresh] = react.useState(0);
+        // Orders the list from the plugins that are on to the ones that are off. Off by default: the list is by name.
+        const [onFirst, setOnFirst] = react.useState(rememberedOrder().onFirst);
+        // Groups the list by where the plugins come from (Vencord, then Equicord, and so on), by name inside each group. Can be combined with the one above.
+        const [byOrigin, setByOrigin] = react.useState(rememberedOrder().byOrigin);
 
         const cards = deps.cards();
         const counts = countCards(cards);
         const waiting = waitingForRestart(cards);
-        const lists = applyFilter(cards, filter);
+        const filtered = applyFilter(cards, filter);
+        const lists = onFirst || byOrigin ? { ...filtered, plugins: sortPlugins(filtered.plugins, { onFirst, byOrigin }) } : filtered;
         const options = filterOptions(cards);
 
         const run = (card: PluginCard, enabled: boolean) => {
@@ -171,18 +202,40 @@ export function makePluginsTab(deps: PluginsTabDeps): () => unknown {
                         value={filter.search}
                         onChange={(event: { target: { value: string; }; }) => update({ search: event.target.value })}
                     />
-                    <div className="amiricord-plugins-chips" role="group" aria-label="Quick filter">
-                        {quick.map(chip => (
+                    <div className="amiricord-plugins-chiprow">
+                        <div className="amiricord-plugins-chips" role="group" aria-label="Quick filter">
+                            {quick.map(chip => (
+                                <button
+                                    key={chip.value}
+                                    type="button"
+                                    className={`amiricord-plugins-chip${filter.state === chip.value ? " amiricord-plugins-chip-on" : ""}`}
+                                    aria-pressed={filter.state === chip.value ? "true" : "false"}
+                                    onClick={() => update({ state: chip.value })}
+                                >
+                                    {chip.label}<span className="amiricord-plugins-chip-count">{chip.count}</span>
+                                </button>
+                            ))}
+                        </div>
+                        <div className="amiricord-plugins-chips" role="group" aria-label="Order">
                             <button
-                                key={chip.value}
                                 type="button"
-                                className={`amiricord-plugins-chip${filter.state === chip.value ? " amiricord-plugins-chip-on" : ""}`}
-                                aria-pressed={filter.state === chip.value ? "true" : "false"}
-                                onClick={() => update({ state: chip.value })}
+                                className={`amiricord-plugins-chip amiricord-plugins-order${onFirst ? " amiricord-plugins-chip-on" : ""}`}
+                                aria-pressed={onFirst ? "true" : "false"}
+                                title="Show the plugins that are on first, then the ones that are off"
+                                onClick={() => { rememberOrder({ onFirst: !onFirst }); setOnFirst(!onFirst); }}
                             >
-                                {chip.label}<span className="amiricord-plugins-chip-count">{chip.count}</span>
+                                On → Off
                             </button>
-                        ))}
+                            <button
+                                type="button"
+                                className={`amiricord-plugins-chip amiricord-plugins-order${byOrigin ? " amiricord-plugins-chip-on" : ""}`}
+                                aria-pressed={byOrigin ? "true" : "false"}
+                                title="Group the plugins by where they come from: Vencord, Equicord, TestCord, Amiricord"
+                                onClick={() => { rememberOrder({ byOrigin: !byOrigin }); setByOrigin(!byOrigin); }}
+                            >
+                                By origin
+                            </button>
+                        </div>
                     </div>
                     <div className="amiricord-plugins-filters">
                         <Choice label="Filter by state" value={filter.state} options={STATE_FILTERS} onChange={value => update({ state: value as StateFilter })} />

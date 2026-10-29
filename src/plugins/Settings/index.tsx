@@ -16,6 +16,7 @@ import patchNotes from "../../../NEWS.json";
 import { currentReact } from "../../api/jsxRuntime";
 import type { PluginCard } from "../../api/pluginCards";
 import { definePluginSettings } from "../../api/pluginSettings";
+import { settingsTabs } from "../../api/settingsTabs";
 import type { EnginePluginContext, PluginCode } from "../../renderer/engine";
 import { OWNER_ONLY_PLUGINS, OWNERS, PROJECT_VERSION } from "../../shared/project";
 import { releasedNews } from "../../shared/updates";
@@ -23,7 +24,7 @@ import { type AuthorInfo, authorInfo, type RawDiscordUser } from "./authorModel"
 import { EntryRegistry } from "./entries";
 import { makeErrorBoundary } from "./ErrorBoundary";
 import { makeSidebarIcon, PluginsIcon, PrivacyIcon, UpdaterIcon } from "./icon";
-import { buildLayoutWithSection, FALLBACK_TYPES, readTypes, TYPE_NAMES } from "./layout";
+import { buildLayoutWithSection, FALLBACK_TYPES, readTypes, type SettingsEntry, TYPE_NAMES } from "./layout";
 import { defaultButtonGroups, defaultChoices, defaultQuickActions, defaultSettings } from "./mainItems";
 import { makeMainTab } from "./MainTab";
 import { cardsForPerson } from "./pluginsModel";
@@ -52,6 +53,14 @@ function boundary() {
     return Boundary;
 }
 
+/** The tabs of the section: Amiricord's own, in the sidebar order, then the ones plugins added (each drawn inside the error boundary, with a plain icon when it brought none). */
+function allTabs(): SettingsEntry[] {
+    const fromPlugins = settingsTabs.list().map(({ key, title, panelTitle, Component, icon }): SettingsEntry => ({
+        key, title, panelTitle, icon: icon ?? PluginsIcon, Component: guarded(`The tab of ${title}`, Component as () => unknown)
+    }));
+    return [...registry.list(), ...fromPlugins];
+}
+
 /** A tab drawn inside the error boundary. */
 function guarded(label: string, Inner: () => unknown) {
     return function Guarded() {
@@ -75,7 +84,7 @@ const plugin: PluginCode & { buildLayout(builder: { key?: unknown; buildLayout()
     buildLayout(builder) {
         return buildLayoutWithSection(builder, {
             types: () => readTypes(nodeTypes?.get()) ?? FALLBACK_TYPES,
-            entries: () => (context ? visibleTabs(registry.list(), parseLayout(settings.store.tabLayout)) : []),
+            entries: () => (context ? visibleTabs(allTabs(), parseLayout(settings.store.tabLayout)) : []),
             onError: error => { context?.reportError("settings layout", error); }
         });
     },
@@ -103,7 +112,7 @@ const plugin: PluginCode & { buildLayout(builder: { key?: unknown; buildLayout()
                 banner,
                 editor: guarded("The tab editor", makeTabsEditor({
                     title: "Amiricord",
-                    tabs: () => registry.list().map(({ key, title, icon }) => ({ key, title, icon })),
+                    tabs: () => allTabs().map(({ key, title, icon }) => ({ key, title, icon })),
                     read: () => settings.store.tabLayout,
                     write: text => {
                         try {
