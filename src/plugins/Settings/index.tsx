@@ -17,6 +17,7 @@ import { currentReact } from "../../api/jsxRuntime";
 import { DEFAULT_LOG_SIZE, LOG_SIZE_CHOICES, logSizeOf } from "../../api/notificationLog";
 import type { PluginCard } from "../../api/pluginCards";
 import { definePluginSettings } from "../../api/pluginSettings";
+import { type SettingsTabEntry, settingsTabs } from "../../api/settingsTabs";
 import type { EnginePluginContext, PluginCode } from "../../renderer/engine";
 import { OWNER_ONLY_PLUGINS, OWNERS, PROJECT_VERSION } from "../../shared/project";
 import { releasedNews } from "../../shared/updates";
@@ -28,7 +29,7 @@ import { EntryRegistry } from "./entries";
 import { makeErrorBoundary } from "./ErrorBoundary";
 import { makeHomeLogo } from "./homeLogo";
 import { makeSidebarIcon, PluginsIcon, PrivacyIcon, UpdaterIcon } from "./icon";
-import { buildLayoutWithSection, FALLBACK_TYPES, readTypes, TYPE_NAMES } from "./layout";
+import { buildLayoutWithSection, FALLBACK_TYPES, readTypes, type SettingsEntry, TYPE_NAMES } from "./layout";
 import { defaultButtonGroups, defaultChoices, defaultQuickActions, defaultSettings, type LiveChoice, type LiveSwitch } from "./mainItems";
 import { makeMainTab } from "./MainTab";
 import { hideDiscordButtons, NATIVE_TITLE_BAR_STYLE_NAME, nativeTitleBarCss } from "./nativeTitleBar";
@@ -79,6 +80,22 @@ function guarded(label: string, Inner: () => unknown) {
     };
 }
 
+/** The tabs other plugins added (`ctx.settingsTabs`), each drawn inside its own error boundary. One wrapper per tab, so drawing it again does not start it over. */
+const pluginTabWrappers = new WeakMap<SettingsTabEntry, SettingsEntry>();
+function pluginTabEntries(): SettingsEntry[] {
+    return settingsTabs.list().map(tab => {
+        let entry = pluginTabWrappers.get(tab);
+        if (!entry) {
+            entry = { key: tab.key, title: tab.title, panelTitle: tab.panelTitle, Component: guarded(`The "${tab.title}" tab of ${tab.plugin}`, tab.Component as () => unknown), icon: tab.icon };
+            pluginTabWrappers.set(tab, entry);
+        }
+        return entry;
+    });
+}
+
+/** Every tab of the section: the core ones in their fixed order, then the ones plugins added, in the order they were added. */
+const allEntries = (): SettingsEntry[] => [...registry.list(), ...pluginTabEntries()];
+
 const plugin: PluginCode & { buildLayout(builder: { key?: unknown; buildLayout(): unknown; }): unknown; } = {
     settings,
 
@@ -94,7 +111,7 @@ const plugin: PluginCode & { buildLayout(builder: { key?: unknown; buildLayout()
     buildLayout(builder) {
         return buildLayoutWithSection(builder, {
             types: () => readTypes(nodeTypes?.get()) ?? FALLBACK_TYPES,
-            entries: () => (context ? visibleTabs(registry.list(), parseLayout(settings.store.tabLayout)) : []),
+            entries: () => (context ? visibleTabs(allEntries(), parseLayout(settings.store.tabLayout)) : []),
             onError: error => { context?.reportError("settings layout", error); }
         });
     },
@@ -201,7 +218,7 @@ const plugin: PluginCode & { buildLayout(builder: { key?: unknown; buildLayout()
                 banner,
                 editor: guarded("The tab editor", makeTabsEditor({
                     title: "Amiricord",
-                    tabs: () => registry.list().map(({ key, title, icon }) => ({ key, title, icon })),
+                    tabs: () => allEntries().map(({ key, title, icon }) => ({ key, title, icon })),
                     read: () => settings.store.tabLayout,
                     write: text => {
                         try {

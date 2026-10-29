@@ -31,6 +31,7 @@ import { PluginSwitch, ToggleResult } from "../api/pluginSwitch";
 import { buildSecrets, PluginSecrets } from "../api/secrets";
 import { buildServerList, type PluginServerList, serverList } from "../api/serverList";
 import { SettingsClient } from "../api/settingsClient";
+import { buildSettingsTabs, type PluginSettingsTabs, settingsTabs } from "../api/settingsTabs";
 import { type AudioLike, createSoundLayer, locateSoundContext, type PluginSounds } from "../api/sounds";
 import { buildStorage, indexedDbBackend, IndexedDbFactory, PluginStorage, StorageBackend } from "../api/storage";
 import { pageStyleHost, StyleHandle, StyleHost, StyleManager } from "../api/styles";
@@ -163,6 +164,8 @@ export interface EnginePluginContext extends PluginContext {
     serverList: PluginServerList;
     /** Buttons in the user panel at the bottom left. They go when the plugin stops. See `src/api/userArea.ts`. */
     userArea: PluginUserArea;
+    /** Tabs in the Amiricord section of Discord's settings (the sidebar). They go when the plugin stops. See `src/api/settingsTabs.ts`. */
+    settingsTabs: PluginSettingsTabs;
     /** Slash commands. They go when the plugin stops. See `src/api/commands.ts`. */
     commands: PluginCommands;
     /** A short message at the bottom of the page. See `src/api/toasts.ts`. */
@@ -636,6 +639,7 @@ export function startEngine(options: EngineOptions): Engine {
                 menuItems: menuHub ? buildContextMenus(menuHub, id, ctx.onDispose) : { add: () => undefined },
                 serverList: buildServerList(serverList, id, ctx.onDispose),
                 userArea: buildUserArea(userArea, id, ctx.onDispose),
+                settingsTabs: buildSettingsTabs(settingsTabs, id, ctx.onDispose, reportError),
                 commands: buildCommands(commandHub, id, ctx.onDispose, reportError),
                 toasts: havePage ? buildToasts(globalThis as unknown as ToastPage, css => { addCommonStyle(css, "toasts"); }, ctx.onDispose) : { show: () => undefined },
                 modals: buildModals(pluginFinders, ctx.onDispose, reportError),
