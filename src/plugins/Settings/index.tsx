@@ -31,6 +31,7 @@ import { makeSidebarIcon, PluginsIcon, PrivacyIcon, UpdaterIcon } from "./icon";
 import { buildLayoutWithSection, FALLBACK_TYPES, readTypes, TYPE_NAMES } from "./layout";
 import { defaultButtonGroups, defaultChoices, defaultQuickActions, defaultSettings, type LiveChoice, type LiveSwitch } from "./mainItems";
 import { makeMainTab } from "./MainTab";
+import { hideDiscordButtons, NATIVE_TITLE_BAR_STYLE_NAME, nativeTitleBarCss } from "./nativeTitleBar";
 import { makeNotificationLogWindow } from "./NotificationLogWindow";
 import { makeNotificationOptionsWindow } from "./NotificationOptionsWindow";
 import { cardsForPerson } from "./pluginsModel";
@@ -146,6 +147,15 @@ const plugin: PluginCode & { buildLayout(builder: { key?: unknown; buildLayout()
         homeLogo.apply();
         ctx.onDispose(settings.onChange("showAmiricordLogo", () => { homeLogo.apply(); }));
         ctx.onDispose(homeLogo.stop);
+
+        // With the standard Windows bar on, Discord's own window buttons would be there twice: hide them. Decided once, at start (see nativeTitleBar.ts).
+        try {
+            if (hideDiscordButtons({ nativeTitleBar: settings.store.nativeTitleBar, transparentWindow: settings.store.transparentWindow, safeMode: engine.status().safeMode })) {
+                ctx.addStyle(nativeTitleBarCss(), NATIVE_TITLE_BAR_STYLE_NAME);
+            }
+        } catch (error) {
+            ctx.reportError("Windows title bar", error);
+        }
         const homeLogoSwitch = liveSwitch("showAmiricordLogo", "Amiricord logo");
 
         // The window options are read by the main process when Discord starts (src/main/windowOptions.ts), so changing one only saves it; the page says "Restart" next to each.
