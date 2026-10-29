@@ -1,0 +1,33 @@
+{
+    "schema": 1,
+    "id": "BetterGifPicker",
+    "name": "Better Gif Picker",
+    "version": "1.0.0",
+    "description": "Makes the GIF picker open on your favorite GIFs by default.",
+    "origin": "vencord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        {
+            "name": "Samwich",
+            "role": "original author"
+        },
+        {
+            "name": "Neversleeper",
+            "role": "Amiricord port"
+        }
+    ],
+    "credits": [
+        {
+            "name": "Vendicated and contributors (Vencord), plugin BetterGifPicker",
+            "license": "GPL-3.0-or-later",
+            "url": "https://github.com/Vendicated/Vencord"
+        }
+    ],
+    "tags": ["media"],
+    "enabledByDefault": false,
+    "startAt": "init",
+    "entry": {
+        "renderer": "index.ts"
+    },
+    "permissions": {}
+}

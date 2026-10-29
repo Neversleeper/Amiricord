@@ -1,0 +1,37 @@
+{
+    "schema": 1,
+    "id": "AlwaysTrust",
+    "name": "Always Trust",
+    "version": "1.0.0",
+    "description": "Removes the untrusted domain and dangerous download popups when opening links, and the server name box when deleting a server.",
+    "origin": "vencord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        {
+            "name": "zt",
+            "role": "original author"
+        },
+        {
+            "name": "Trwy",
+            "role": "original author"
+        },
+        {
+            "name": "Neversleeper",
+            "role": "Amiricord port"
+        }
+    ],
+    "credits": [
+        {
+            "name": "Vendicated and contributors (Vencord), plugin AlwaysTrust",
+            "license": "GPL-3.0-or-later",
+            "url": "https://github.com/Vendicated/Vencord"
+        }
+    ],
+    "tags": ["utility"],
+    "enabledByDefault": false,
+    "startAt": "init",
+    "entry": {
+        "renderer": "index.ts"
+    },
+    "permissions": {}
+}

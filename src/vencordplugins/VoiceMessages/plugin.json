@@ -1,0 +1,30 @@
+{
+    "schema": 1,
+    "id": "VoiceMessages",
+    "name": "Voice Messages",
+    "version": "1.0.0",
+    "description": "Send voice messages like on mobile. Right click the upload button and choose Send Voice Message, or type /voice-message. It records from your microphone only while you press Start, and sends nothing until you press Send.",
+    "origin": "vencord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        { "name": "Ven", "role": "original author" },
+        { "name": "Vap", "role": "original author" },
+        { "name": "Nickyux", "role": "original author" },
+        { "name": "Neversleeper", "role": "Amiricord port" }
+    ],
+    "credits": [
+        {
+            "name": "Vendicated and contributors (Vencord), plugin VoiceMessages",
+            "license": "GPL-3.0-or-later",
+            "url": "https://github.com/Vendicated/Vencord"
+        }
+    ],
+    "tags": ["voice", "chat"],
+    "enabledByDefault": false,
+    "startAt": "webpackReady",
+    "entry": { "renderer": "index.ts" },
+    "permissions": {
+        "messages": { "read": "none", "send": true },
+        "files": "user-chosen"
+    }
+}

@@ -30,7 +30,7 @@ export interface CommandOption {
 export interface CommandArgument { name: string; value: unknown; }
 
 export interface CommandDefinition {
-    /** Lower case letters, digits, `-` and `_`, 1 to 32 characters. */
+    /** Lower case letters, digits, `-` and `_`, 1 to 32 characters; words may be separated by single spaces (like Vencord's `create friend invite`). */
     name: string;
     description: string;
     options?: readonly CommandOption[];
@@ -46,7 +46,8 @@ export interface PluginCommands {
 }
 
 export const MAX_COMMANDS_PER_PLUGIN = 10;
-const COMMAND_NAME = /^[a-z0-9_-]{1,32}$/;
+const COMMAND_NAME = /^[a-z0-9_-]+(?: [a-z0-9_-]+)*$/;
+const COMMAND_NAME_MAX = 32;
 const FIRST_ID = 100;
 
 /** What Discord's code is given: a plain object in the shape of its own built-in commands. */
@@ -82,7 +83,7 @@ export function createCommandHub(): CommandHub {
 
     return {
         add(plugin, definition, onError) {
-            if (!isObject(definition) || typeof definition.name !== "string" || !COMMAND_NAME.test(definition.name)) return false;
+            if (!isObject(definition) || typeof definition.name !== "string" || !COMMAND_NAME.test(definition.name) || definition.name.length > COMMAND_NAME_MAX) return false;
             if (typeof definition.description !== "string" || definition.description.length === 0 || typeof definition.execute !== "function") return false;
             if (commands.some(command => command.name === definition.name)) return false;
             if (commands.filter(command => command.plugin === plugin).length >= MAX_COMMANDS_PER_PLUGIN) return false;

@@ -1,0 +1,33 @@
+{
+    "schema": 1,
+    "id": "ShowHiddenThings",
+    "name": "Show Hidden Things",
+    "version": "1.0.0",
+    "description": "Shows some moderator-only things whatever your permissions: member timeout icons, the paused invites tooltip and the mod view menu item.",
+    "origin": "vencord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        {
+            "name": "Dolfies",
+            "role": "original author"
+        },
+        {
+            "name": "Neversleeper",
+            "role": "Amiricord port"
+        }
+    ],
+    "credits": [
+        {
+            "name": "Vendicated and contributors (Vencord), plugin ShowHiddenThings",
+            "license": "GPL-3.0-or-later",
+            "url": "https://github.com/Vendicated/Vencord"
+        }
+    ],
+    "tags": ["utility"],
+    "enabledByDefault": false,
+    "startAt": "init",
+    "entry": {
+        "renderer": "index.ts"
+    },
+    "permissions": {}
+}

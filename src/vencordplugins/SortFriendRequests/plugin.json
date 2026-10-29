@@ -1,0 +1,37 @@
+{
+    "schema": 1,
+    "id": "SortFriendRequests",
+    "name": "Sort Friend Requests",
+    "version": "1.0.0",
+    "description": "Sorts friend requests by the date they were received, and can show that date.",
+    "origin": "vencord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        {
+            "name": "Megu",
+            "role": "original author"
+        },
+        {
+            "name": "CallMeGii",
+            "role": "original author"
+        },
+        {
+            "name": "Neversleeper",
+            "role": "Amiricord port"
+        }
+    ],
+    "credits": [
+        {
+            "name": "Vendicated and contributors (Vencord), plugin SortFriendRequests",
+            "license": "GPL-3.0-or-later",
+            "url": "https://github.com/Vendicated/Vencord"
+        }
+    ],
+    "tags": ["utility"],
+    "enabledByDefault": false,
+    "startAt": "init",
+    "entry": {
+        "renderer": "index.ts"
+    },
+    "permissions": {}
+}

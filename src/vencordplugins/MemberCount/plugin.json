@@ -1,0 +1,42 @@
+{
+    "schema": 1,
+    "id": "MemberCount",
+    "name": "Member Count",
+    "version": "1.0.0",
+    "description": "Shows the number of online members, total members and people in voice for a server, in the member list and in the server tooltip.",
+    "origin": "vencord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        {
+            "name": "Ven",
+            "role": "original author"
+        },
+        {
+            "name": "Commandtechno",
+            "role": "original author"
+        },
+        {
+            "name": "Apexo",
+            "role": "original author"
+        },
+        {
+            "name": "Neversleeper",
+            "role": "Amiricord port"
+        }
+    ],
+    "credits": [
+        {
+            "name": "Vendicated and contributors (Vencord), plugin MemberCount",
+            "license": "GPL-3.0-or-later",
+            "url": "https://github.com/Vendicated/Vencord"
+        }
+    ],
+    "tags": ["ui",
+        "utility"],
+    "enabledByDefault": false,
+    "startAt": "init",
+    "entry": {
+        "renderer": "index.tsx"
+    },
+    "permissions": {}
+}

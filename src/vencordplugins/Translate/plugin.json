@@ -1,0 +1,36 @@
+{
+    "schema": 1,
+    "id": "Translate",
+    "name": "Translate",
+    "version": "1.0.0",
+    "description": "Translate messages with Google Translate, DeepL or Kagi. Right click a message and choose Translate, or use the button in the chat bar to set the languages and to translate your own messages as you send them. The text you translate is sent to the service you choose.",
+    "origin": "vencord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        { "name": "Ven", "role": "original author" },
+        { "name": "AshtonMemer", "role": "original author" },
+        { "name": "koish1", "role": "original author" },
+        { "name": "Neversleeper", "role": "Amiricord port" }
+    ],
+    "credits": [
+        {
+            "name": "Vendicated and contributors (Vencord), plugin Translate",
+            "license": "GPL-3.0-or-later",
+            "url": "https://github.com/Vendicated/Vencord"
+        }
+    ],
+    "tags": ["chat", "utility"],
+    "enabledByDefault": false,
+    "startAt": "webpackReady",
+    "entry": { "renderer": "index.ts", "main": "native.ts" },
+    "permissions": {
+        "network": [
+            { "host": "translate-pa.googleapis.com", "from": "renderer", "why": "Google Translate: the text you translate is sent here" },
+            { "host": "api-free.deepl.com", "from": "main", "why": "DeepL Free: the text you translate is sent here, with your key" },
+            { "host": "api.deepl.com", "from": "main", "why": "DeepL Pro: the text you translate is sent here, with your key" },
+            { "host": "translate.kagi.com", "from": "main", "why": "Kagi Translate: the text you translate is sent here, with your session" }
+        ],
+        "native": { "functions": ["deepl", "kagi"] }
+    },
+    "secrets": ["deeplApiKey", "kagiSession"]
+}

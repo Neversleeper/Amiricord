@@ -1,0 +1,55 @@
+{
+    "schema": 1,
+    "id": "ExpressionCloner",
+    "name": "Expression Cloner",
+    "version": "1.0.0",
+    "description": "Right click an emoji or sticker and clone it into a server of yours where you may add expressions.",
+    "origin": "vencord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        {
+            "name": "Ven",
+            "role": "original author"
+        },
+        {
+            "name": "Nuckyz",
+            "role": "original author"
+        },
+        {
+            "name": "scattagain",
+            "role": "original author"
+        },
+        {
+            "name": "Neversleeper",
+            "role": "Amiricord port"
+        }
+    ],
+    "credits": [
+        {
+            "name": "Vendicated and contributors (Vencord), plugin ExpressionCloner",
+            "license": "GPL-3.0-or-later",
+            "url": "https://github.com/Vendicated/Vencord"
+        }
+    ],
+    "tags": ["chat",
+        "utility"],
+    "enabledByDefault": false,
+    "startAt": "webpackReady",
+    "entry": {
+        "renderer": "index.ts"
+    },
+    "permissions": {
+        "network": [
+            {
+                "host": "cdn.discordapp.com",
+                "from": "renderer",
+                "why": "downloads the emoji picture you chose to clone"
+            },
+            {
+                "host": "media.discordapp.net",
+                "from": "renderer",
+                "why": "downloads the sticker picture you chose to clone"
+            }
+        ]
+    }
+}

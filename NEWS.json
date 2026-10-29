@@ -1,5 +1,17 @@
 [
     {
+        "version": "0.5.0",
+        "date": "2026-10-29",
+        "title": "Profile presets and 30 more plugins",
+        "author": "Neversleeper",
+        "notes": [
+            "New plugin Profile Presets: save your picture, banner, name, bio, status and games as a preset and put it back with one press. It writes to your account, so read its card.",
+            "30 plugins from Vencord, all off until you switch them on: Translate, Voice Messages, Show Hidden Channels, Open In App, Silent Typing, Image Zoom, Member Count and more.",
+            "Ghosted no longer lags and no longer piles up ghosts when you change account.",
+            "Slash commands may now have spaces in their name."
+        ]
+    },
+    {
         "version": "0.4.1",
         "date": "2026-10-29",
         "title": "A clearer Updates tab",

@@ -1,0 +1,42 @@
+{
+    "schema": 1,
+    "id": "TypingIndicator",
+    "name": "Typing Indicator",
+    "version": "1.0.0",
+    "description": "Shows a small indicator (dots and the avatars of who is typing) next to channels where someone is typing.",
+    "origin": "vencord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        {
+            "name": "Nuckyz",
+            "role": "original author"
+        },
+        {
+            "name": "fawn",
+            "role": "original author"
+        },
+        {
+            "name": "Sqaaakoi",
+            "role": "original author"
+        },
+        {
+            "name": "Neversleeper",
+            "role": "Amiricord port"
+        }
+    ],
+    "credits": [
+        {
+            "name": "Vendicated and contributors (Vencord), plugin TypingIndicator",
+            "license": "GPL-3.0-or-later",
+            "url": "https://github.com/Vendicated/Vencord"
+        }
+    ],
+    "tags": ["chat",
+        "ui"],
+    "enabledByDefault": false,
+    "startAt": "init",
+    "entry": {
+        "renderer": "index.ts"
+    },
+    "permissions": {}
+}

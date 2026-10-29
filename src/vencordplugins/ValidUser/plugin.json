@@ -1,0 +1,38 @@
+{
+    "schema": 1,
+    "id": "ValidUser",
+    "name": "Valid User",
+    "version": "1.0.0",
+    "description": "Fixes mentions of unknown people showing as '@unknown-user': hover the mention and Discord is asked for that person.",
+    "origin": "vencord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        {
+            "name": "Ven",
+            "role": "original author"
+        },
+        {
+            "name": "Dolfies",
+            "role": "original author"
+        },
+        {
+            "name": "Neversleeper",
+            "role": "Amiricord port"
+        }
+    ],
+    "credits": [
+        {
+            "name": "Vendicated and contributors (Vencord), plugin ValidUser",
+            "license": "GPL-3.0-or-later",
+            "url": "https://github.com/Vendicated/Vencord"
+        }
+    ],
+    "tags": ["chat",
+        "utility"],
+    "enabledByDefault": false,
+    "startAt": "init",
+    "entry": {
+        "renderer": "index.ts"
+    },
+    "permissions": {}
+}

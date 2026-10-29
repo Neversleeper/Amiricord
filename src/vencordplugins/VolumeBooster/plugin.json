@@ -1,0 +1,38 @@
+{
+    "schema": 1,
+    "id": "VolumeBooster",
+    "name": "Volume Booster",
+    "version": "1.0.0",
+    "description": "Lets the user and stream volume sliders go above Discord's maximum, up to five times louder.",
+    "origin": "vencord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        {
+            "name": "Nuckyz",
+            "role": "original author"
+        },
+        {
+            "name": "sadan",
+            "role": "original author"
+        },
+        {
+            "name": "Neversleeper",
+            "role": "Amiricord port"
+        }
+    ],
+    "credits": [
+        {
+            "name": "Vendicated and contributors (Vencord), plugin VolumeBooster",
+            "license": "GPL-3.0-or-later",
+            "url": "https://github.com/Vendicated/Vencord"
+        }
+    ],
+    "tags": ["voice",
+        "utility"],
+    "enabledByDefault": false,
+    "startAt": "init",
+    "entry": {
+        "renderer": "index.ts"
+    },
+    "permissions": {}
+}

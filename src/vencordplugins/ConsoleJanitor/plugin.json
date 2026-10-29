@@ -1,0 +1,38 @@
+{
+    "schema": 1,
+    "id": "ConsoleJanitor",
+    "name": "Console Janitor",
+    "version": "1.0.0",
+    "description": "Hides noisy warnings and errors Discord writes to the console, and optionally its loggers.",
+    "origin": "vencord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        {
+            "name": "Nuckyz",
+            "role": "original author"
+        },
+        {
+            "name": "sadan",
+            "role": "original author"
+        },
+        {
+            "name": "Neversleeper",
+            "role": "Amiricord port"
+        }
+    ],
+    "credits": [
+        {
+            "name": "Vendicated and contributors (Vencord), plugin ConsoleJanitor",
+            "license": "GPL-3.0-or-later",
+            "url": "https://github.com/Vendicated/Vencord"
+        }
+    ],
+    "tags": ["developer",
+        "utility"],
+    "enabledByDefault": false,
+    "startAt": "init",
+    "entry": {
+        "renderer": "index.ts"
+    },
+    "permissions": {}
+}

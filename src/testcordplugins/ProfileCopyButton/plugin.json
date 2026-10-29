@@ -21,6 +21,7 @@
     "permissions": {
         "network": [
             { "host": "cdn.discordapp.com", "from": "renderer", "why": "download the picture, banner and emojis of the profile you copy" }
-        ]
+        ],
+        "account": { "write": ["profile-picture", "profile-banner", "profile-name", "profile-bio", "profile-pronouns", "profile-colours", "profile-server-tag", "custom-status", "game-widgets"] }
     }
 }

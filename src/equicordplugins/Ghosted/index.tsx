@@ -78,11 +78,13 @@ async function drain(): Promise<void> {
 function askLastMessage(channelId: string, lastMessageId: string, done: () => void): void {
     if (asked.get(channelId) === lastMessageId) return;
     asked.set(channelId, lastMessageId);
+    const mine = epoch;
     waiting.push(async () => {
         try {
             const answer = await rest?.get()?.get({ url: `/channels/${channelId}/messages`, query: { limit: 1 }, retries: 1 });
             const message = answer?.body?.[0];
-            if (message) {
+            // An answer that arrives after the account changed belongs to the old account.
+            if (message && mine === epoch) {
                 fetched.set(channelId, message);
                 done();
             }
@@ -96,13 +98,51 @@ function askLastMessage(channelId: string, lastMessageId: string, done: () => vo
 const countedChannels = new Set<string>();
 /** Channels the person cleared by hand, with the id of the last message at that moment: a newer message from the other person brings the ghost back. */
 const clearedChannels = new Map<string, string>();
-const clearedListeners = new Set<(channelId: string) => void>();
-const countListeners = new Set<(count: number) => void>();
-let booCount = 0;
+/** The rows drawn in the direct message list, by channel: a row is redrawn only when something about its own chat happens (not on every change of Discord's stores). */
+const rowListeners = new Map<string, Set<() => void>>();
+const countListeners = new Set<() => void>();
+let countTimer: ReturnType<typeof setTimeout> | undefined;
+/** Goes up when the account changes, so the rows count their chats again. */
+let epoch = 0;
+/** The account the counted chats belong to. */
+let owner: string | undefined;
 
-function setBooCount(count: number): void {
-    booCount = count;
-    for (const listener of countListeners) listener(count);
+function pokeRow(channelId: string): void {
+    for (const redraw of rowListeners.get(channelId) ?? []) redraw();
+}
+
+function pokeAllRows(): void {
+    for (const listeners of rowListeners.values()) for (const redraw of listeners) redraw();
+}
+
+/** Tells the counter to redraw, at most once every 50 ms however many chats changed. */
+function notifyCount(): void {
+    if (countTimer !== undefined) return;
+    countTimer = setTimeout(() => {
+        countTimer = undefined;
+        for (const listener of countListeners) listener();
+    }, 50);
+}
+
+/** Forgets everything about the chats of the account that was in use. */
+function resetState(): void {
+    fetched.clear();
+    asked.clear();
+    waiting.length = 0;
+    countedChannels.clear();
+    clearedChannels.clear();
+    epoch++;
+    notifyCount();
+    pokeAllRows();
+}
+
+/** Called when Discord reconnects or the person leaves: another account means another set of chats. */
+function checkOwner(forget: boolean): void {
+    const me: string | undefined = userStore?.get()?.getCurrentUser?.()?.id;
+    if (forget || me !== owner) {
+        owner = me;
+        resetState();
+    }
 }
 
 export function getGhostedChannels(): string[] {
@@ -112,30 +152,16 @@ export function getGhostedChannels(): string[] {
 export function clearChannelFromGhost(channelId: string): void {
     if (!countedChannels.has(channelId)) return;
     countedChannels.delete(channelId);
-    setBooCount(booCount - 1);
+    notifyCount();
     const lastMessage = messageStore?.get()?.getMessages?.(channelId)?.last?.();
     if (lastMessage) clearedChannels.set(channelId, lastMessage.id);
-    for (const listener of clearedListeners) listener(channelId);
+    pokeRow(channelId);
 }
 
 /** Whether a channel is left out, by id or because it is a group chat and group chats are ignored. */
 export function isExempted(exempted: string, ignoreGroups: boolean, channel: { id: string; isGroupDM?(): boolean; }): boolean {
     const ids = exempted.split(",").map(id => id.trim()).filter(id => id.length > 0);
     return ids.includes(channel.id) || (ignoreGroups && Boolean(channel.isGroupDM?.()));
-}
-
-/** Re-draws the caller when one of the stores changes, like Discord's own hook. */
-function useStores<T>(stores: any[], read: () => T): T {
-    const react = currentReact() as any;
-    const [, redraw] = react.useState(0) as [number, (update: (n: number) => number) => void];
-    const value = read();
-    react.useEffect(() => {
-        const listener = () => redraw(n => n + 1);
-        const live = stores.filter(store => typeof store?.addChangeListener === "function");
-        live.forEach(store => store.addChangeListener(listener));
-        return () => live.forEach(store => store.removeChangeListener(listener));
-    }, stores);
-    return value;
 }
 
 function IconGhost({ fill }: { fill: string; }) {
@@ -147,9 +173,11 @@ function IconGhost({ fill }: { fill: string; }) {
 function Boo({ channel }: { channel: any; }) {
     const react = currentReact() as any;
     const id: string = channel.id;
-    const currentUserId: string | undefined = useStores([userStore?.get()], () => userStore?.get()?.getCurrentUser?.()?.id);
-    const stored: any = useStores([messageStore?.get()], () => messageStore?.get()?.getMessages?.(id)?.last?.());
+    // Read when drawn, with no listener on the stores: they change all the time and every row of the list would be redrawn each time. The rows are poked by the events below.
+    const currentUserId: string | undefined = userStore?.get()?.getCurrentUser?.()?.id;
+    const stored: any = messageStore?.get()?.getMessages?.(id)?.last?.();
     const [, redraw] = react.useState(0) as [number, (update: (n: number) => number) => void];
+    const generation = epoch;
     const lastMessageId: string | undefined = channel.lastMessageId ?? undefined;
     const lastMessage: any = stored ?? fetched.get(id);
 
@@ -165,15 +193,20 @@ function Boo({ channel }: { channel: any; }) {
     const left = isExempted(String(settings.store.exemptedChannels), Boolean(settings.store.ignoreGroupDms), channel) || (settings.store.ignoreBots && Boolean(lastMessage?.author?.bot)) || inactive;
 
     react.useEffect(() => {
-        const listener = (changed: string) => { if (changed === id) redraw(n => n + 1); };
-        clearedListeners.add(listener);
-        return () => { clearedListeners.delete(listener); };
+        const listener = () => redraw(n => n + 1);
+        let set = rowListeners.get(id);
+        if (!set) rowListeners.set(id, set = new Set());
+        set.add(listener);
+        return () => {
+            set.delete(listener);
+            if (set.size === 0) rowListeners.delete(id);
+        };
     }, [id]);
 
     react.useEffect(() => {
         if (!lastMessage || !currentUserId) return;
         if (fromMe) {
-            if (countedChannels.delete(id)) setBooCount(booCount - 1);
+            if (countedChannels.delete(id)) notifyCount();
             clearedChannels.delete(id);
             return;
         }
@@ -181,17 +214,17 @@ function Boo({ channel }: { channel: any; }) {
         if (clearedAt !== undefined) {
             if (clearedAt === lastMessage.id) return;
             clearedChannels.delete(id);
-            for (const listener of clearedListeners) listener(id);
+            pokeRow(id);
         }
         if (left) {
-            if (countedChannels.delete(id)) setBooCount(booCount - 1);
+            if (countedChannels.delete(id)) notifyCount();
             return;
         }
         if (!countedChannels.has(id)) {
             countedChannels.add(id);
-            setBooCount(booCount + 1);
+            notifyCount();
         }
-    }, [id, lastMessage?.id, currentUserId, fromMe, left]);
+    }, [id, lastMessage?.id, currentUserId, fromMe, left, generation]);
 
     if (!lastMessage || !currentUserId || fromMe || left || clearedChannels.has(id) || !settings.store.showDmIcons) return null;
     const hasQuestion = String(lastMessage.content ?? "").includes("?");
@@ -245,16 +278,18 @@ function openList(ctx: EnginePluginContext): void {
 
 function BooIndicator() {
     const react = currentReact() as any;
-    const [count, setCount] = react.useState(booCount) as [number, (value: number) => void];
+    const [, redraw] = react.useState(0) as [number, (update: (n: number) => number) => void];
     react.useEffect(() => {
-        countListeners.add(setCount);
-        return () => { countListeners.delete(setCount); };
+        const listener = () => redraw(n => n + 1);
+        countListeners.add(listener);
+        return () => { countListeners.delete(listener); };
     }, []);
-    const ids = getGhostedChannels();
+    // Only chats Discord still has (a chat of another account is never shown).
+    const ids = getGhostedChannels().filter(channelId => channelStore?.get()?.getChannel?.(channelId));
     if (!settings.store.showIndicator || ids.length === 0 || !context) return null;
     const ctx = context;
     const tip = ids.length <= 5 ? ids.map(nameOf).join(", ") : `${ids.length} Ghosted Users`;
-    return react.createElement("div", { id: "vc-boo-container", className: "vc-boo-clickable", title: tip, onClick: () => openList(ctx) }, count, react.createElement(IconGhost, { fill: "currentColor" }));
+    return react.createElement("div", { id: "vc-boo-container", className: "vc-boo-clickable", title: tip, onClick: () => openList(ctx) }, ids.length, react.createElement(IconGhost, { fill: "currentColor" }));
 }
 
 const plugin: PluginCode & { renderBoo(props: { channel: any; }): unknown; } = {
@@ -264,6 +299,15 @@ const plugin: PluginCode & { renderBoo(props: { channel: any; }): unknown; } = {
         find: "PrivateChannel.renderAvatar",
         replacements: [{ match: /\]:\i\|\|\i.{0,50}children:\[/, replace: "$&$self.renderBoo(arguments[0])," }]
     }],
+
+    flux: {
+        // Only the row of the chat that changed is redrawn.
+        MESSAGE_CREATE: (event: any) => { const id = event?.channelId ?? event?.message?.channel_id; if (typeof id === "string" && rowListeners.has(id)) pokeRow(id); },
+        MESSAGE_DELETE: (event: any) => { if (typeof event?.channelId === "string") pokeRow(event.channelId); },
+        LOAD_MESSAGES_SUCCESS: (event: any) => { if (typeof event?.channelId === "string") pokeRow(event.channelId); },
+        CONNECTION_OPEN: () => { checkOwner(false); },
+        LOGOUT: () => { checkOwner(true); }
+    },
 
     renderBoo(props) {
         const react = currentReact() as any;
@@ -278,6 +322,7 @@ const plugin: PluginCode & { renderBoo(props: { channel: any; }): unknown; } = {
         channelActions = ctx.finders.byProps("selectPrivateChannel");
         wrapperClasses = ctx.finders.byProps("muted", "wrapper");
         rest = ctx.finders.byProps("get", "post", "put", "patch", "del", "!Request", "!getXHR");
+        owner = userStore.get()?.getCurrentUser?.()?.id;
         ctx.addStyle(CSS, "ghosted");
         ctx.serverList.add("above", BooIndicator);
 
@@ -299,9 +344,11 @@ const plugin: PluginCode & { renderBoo(props: { channel: any; }): unknown; } = {
         waiting.length = 0;
         countedChannels.clear();
         clearedChannels.clear();
-        clearedListeners.clear();
+        rowListeners.clear();
         countListeners.clear();
-        booCount = 0;
+        clearTimeout(countTimer);
+        countTimer = undefined;
+        owner = undefined;
     }
 };
 

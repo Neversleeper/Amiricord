@@ -40,7 +40,7 @@ let presences: any;
 let presenceFinder: { ready(): Promise<any>; } | undefined;
 let permissions: any;
 
-const toast = (message: string, kind: "success" | "error" | "info" = "info") => { context?.toasts.show(message, kind as never); };
+const toast = (message: string, kind: "success" | "error" | "info" = "info") => { context?.toasts.show(message, kind === "error" ? "failure" : kind); };
 
 function setPending(changes: Record<string, unknown>) {
     dispatcher?.dispatch({ type: "USER_PROFILE_SETTINGS_SET_PENDING_CHANGES", ...changes });

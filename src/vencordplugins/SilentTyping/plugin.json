@@ -1,0 +1,46 @@
+{
+    "schema": 1,
+    "id": "SilentTyping",
+    "name": "Silent Typing",
+    "version": "1.0.0",
+    "description": "Hides that you are typing, everywhere or only in the chats you choose, and can hide other people's typing indicators too.",
+    "origin": "vencord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        {
+            "name": "Ven",
+            "role": "original author"
+        },
+        {
+            "name": "Rini",
+            "role": "original author"
+        },
+        {
+            "name": "ImBanana",
+            "role": "original author"
+        },
+        {
+            "name": "Etorix",
+            "role": "original author"
+        },
+        {
+            "name": "Neversleeper",
+            "role": "Amiricord port"
+        }
+    ],
+    "credits": [
+        {
+            "name": "Vendicated and contributors (Vencord), plugin SilentTyping",
+            "license": "GPL-3.0-or-later",
+            "url": "https://github.com/Vendicated/Vencord"
+        }
+    ],
+    "tags": ["privacy",
+        "chat"],
+    "enabledByDefault": false,
+    "startAt": "init",
+    "entry": {
+        "renderer": "index.ts"
+    },
+    "permissions": {}
+}
