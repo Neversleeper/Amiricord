@@ -1,5 +1,16 @@
 [
     {
+        "version": "0.4.0",
+        "date": "2026-10-29",
+        "title": "Many new plugins, BetterDiscord support and a shortcut for developer tools",
+        "notes": [
+            "New plugins (you switch them on in the Plugins tab; Crash Fixes and the developer tools shortcut start on): Better Invites (who sent an invite and a live countdown to its end), Channel Tabs (tabs for channels, like a browser), Ghosted (a ghost next to chats waiting for your answer and a counter), Friend Tags, Last Active, Cancel Friend Request, Universal Mention, Profile Copy Button, Experiments (can put an account at risk, read its card first), View Icons, More User Tags, Crash Fixes, Home Typing and Mic Loopback Tester.",
+            "View Icons: clicking a profile picture opens it in Discord's own picture viewer, where you can zoom and save it.",
+            "Plugins can now add buttons to the panel at the bottom left of Discord, and the BetterDiscord layer can run BetterDiscord plugins that come bundled with Amiricord.",
+            "A shortcut opens Discord's developer tools."
+        ]
+    },
+    {
         "version": "0.3.4",
         "date": "2026-10-29",
         "title": "Developer tools ready after an update",

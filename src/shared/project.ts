@@ -17,7 +17,7 @@ export interface Owner {
 }
 
 /** The version shown in the settings page. It must equal the `version` of package.json (a test checks it). */
-export const PROJECT_VERSION = "0.3.4";
+export const PROJECT_VERSION = "0.4.0";
 
 /** The GitHub repository whose releases the updater reads (`owner/name`). It must be public for other people to be able to update. */
 export const UPDATE_REPO = "Neversleeper/Amiricord";
