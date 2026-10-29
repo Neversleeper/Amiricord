@@ -1,0 +1,38 @@
+{
+    "schema": 1,
+    "id": "OpenInApp",
+    "name": "Open In App",
+    "version": "1.0.0",
+    "description": "Opens Spotify, Steam, Epic Games, Tidal, Apple Music, VRCX and Telegram links in their own apps instead of your browser. Spotify and Steam short links are looked up from the main process first.",
+    "origin": "vencord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        { "name": "Ven", "role": "original author" },
+        { "name": "surgedevs", "role": "original author" },
+        { "name": "Neversleeper", "role": "Amiricord port" }
+    ],
+    "credits": [
+        {
+            "name": "Vendicated and contributors (Vencord), plugin OpenInApp",
+            "license": "GPL-3.0-or-later",
+            "url": "https://github.com/Vendicated/Vencord"
+        }
+    ],
+    "tags": ["utility"],
+    "enabledByDefault": false,
+    "startAt": "init",
+    "entry": { "renderer": "index.ts", "main": "native.ts" },
+    "permissions": {
+        "network": [
+            { "host": "spotify.link", "from": "main", "why": "finds where a Spotify short link leads" },
+            { "host": "spotify.app.link", "from": "main", "why": "Spotify short links pass through this address" },
+            { "host": "open.spotify.com", "from": "main", "why": "where a Spotify short link ends" },
+            { "host": "s.team", "from": "main", "why": "finds where a Steam short link leads" },
+            { "host": "store.steampowered.com", "from": "main", "why": "where a Steam short link ends" },
+            { "host": "steamcommunity.com", "from": "main", "why": "where a Steam short link ends" },
+            { "host": "help.steampowered.com", "from": "main", "why": "where a Steam short link ends" }
+        ],
+        "native": { "functions": ["resolveRedirect"] },
+        "system": { "spawn": false, "clipboard": false, "listen": [], "openExternal": true, "devtools": false }
+    }
+}
