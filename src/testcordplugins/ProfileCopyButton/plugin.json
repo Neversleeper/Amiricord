@@ -1,0 +1,26 @@
+{
+    "schema": 1,
+    "id": "ProfileCopyButton",
+    "name": "Profile Copy Button",
+    "version": "1.0.0",
+    "description": "Copy another person's profile from the right-click menu of a user or from this plugin's settings: picture, banner, display name, pronouns, bio (its custom emojis are uploaded to a server you pick), colours, custom status with its emoji, game widgets, and the public server behind their server tag (joined and set as your tag). The editor fields wait for your Save; the status, the widgets, the server join and the emoji uploads happen at once.",
+    "origin": "testcord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        { "name": "x2b", "role": "original author" },
+        { "name": "nnenaza", "role": "original author" },
+        { "name": "Neversleeper", "role": "Amiricord port" }
+    ],
+    "credits": [
+        { "name": "x2b and nnenaza, plugin ProfileCopyButton", "license": "GPL-3.0-or-later", "url": "https://github.com/TestcordDev/TestCord" }
+    ],
+    "tags": ["utility", "ui"],
+    "enabledByDefault": false,
+    "startAt": "webpackReady",
+    "entry": { "renderer": "index.tsx" },
+    "permissions": {
+        "network": [
+            { "host": "cdn.discordapp.com", "from": "renderer", "why": "download the picture, banner and emojis of the profile you copy" }
+        ]
+    }
+}
