@@ -9,7 +9,10 @@
 // a button, is a request to the project's GitHub releases (docs/decisions.md, 2026-10-28).
 
 import { currentReact } from "../../api/jsxRuntime";
+import { OWNERS } from "../../shared/project";
 import type { NewsEntry } from "../../shared/updates";
+import type { AuthorInfo } from "./authorModel";
+import { DiscordMarkIcon, GitHubIcon } from "./icon";
 import { RESTART_QUESTION } from "./PluginsTab";
 import { createUpdatesModel, type UpdatesDeps, type UpdatesState } from "./updatesModel";
 
@@ -18,9 +21,39 @@ export interface UpdatesTabDeps extends UpdatesDeps {
     history: NewsEntry[];
     /** Restart Discord now. Only called after the person confirmed. */
     restart(): void;
+    /** The name and picture Discord shows for a person (the same lookup the plugin window uses). Without it only the GitHub name is drawn. */
+    lookupAuthor?(id: string): Promise<AuthorInfo | null>;
 }
 
-function News({ entries }: { entries: NewsEntry[]; }) {
+/** "Published by": the GitHub mark and name (a link to the profile) and, for an owner of the project, the picture and name Discord shows for them. */
+function Publisher({ name, lookupAuthor }: { name: string; lookupAuthor?: UpdatesTabDeps["lookupAuthor"]; }) {
+    const react = currentReact();
+    const owner = OWNERS.find(candidate => candidate.github.toLowerCase() === name.toLowerCase());
+    const [info, setInfo] = react.useState<AuthorInfo | null>(null);
+    react.useEffect(() => {
+        let alive = true;
+        if (owner && lookupAuthor) lookupAuthor(owner.discordId).then(found => { if (alive) setInfo(found); }, () => undefined);
+        return () => { alive = false; };
+    }, [owner?.discordId]);
+    return (
+        <div className="amiricord-updates-publisher">
+            <span className="amiricord-hint">Published by</span>
+            {info?.avatarUrl && <img className="amiricord-updates-avatar" src={info.avatarUrl} alt="" />}
+            <a className="amiricord-updates-chip" href={`https://github.com/${name}`} target="_blank" rel="noreferrer noopener" title="Open the GitHub profile">
+                <GitHubIcon />
+                <span>{name}</span>
+            </a>
+            {info && (
+                <span className="amiricord-updates-chip" title="Discord name">
+                    <DiscordMarkIcon />
+                    <span>{info.displayName}</span>
+                </span>
+            )}
+        </div>
+    );
+}
+
+function News({ entries, lookupAuthor }: { entries: NewsEntry[]; lookupAuthor?: UpdatesTabDeps["lookupAuthor"]; }) {
     return (
         <div className="amiricord-updates-news">
             {entries.map(entry => (
@@ -31,6 +64,7 @@ function News({ entries }: { entries: NewsEntry[]; }) {
                     </div>
                     <div className="amiricord-updates-entry-title">{entry.title}</div>
                     {entry.notes.length > 0 && <ul className="amiricord-updates-entry-notes">{entry.notes.map(note => <li key={note}>{note}</li>)}</ul>}
+                    {entry.author && <Publisher name={entry.author} lookupAuthor={lookupAuthor} />}
                 </div>
             ))}
         </div>
@@ -73,14 +107,14 @@ export function makeUpdatesTab(deps: UpdatesTabDeps): () => unknown {
                 {state.phase === "available" && state.news.length > 0 && (
                     <>
                         <div className="amiricord-heading">What is new</div>
-                        <News entries={state.news} />
+                        <News entries={state.news} lookupAuthor={deps.lookupAuthor} />
                     </>
                 )}
                 {state.phase === "available" && state.news.length === 0 && <p className="amiricord-hint">This version came without a description.</p>}
                 {deps.history.length > 0 && (
                     <>
                         <div className="amiricord-heading">Patch notes</div>
-                        <News entries={deps.history} />
+                        <News entries={deps.history} lookupAuthor={deps.lookupAuthor} />
                     </>
                 )}
             </div>

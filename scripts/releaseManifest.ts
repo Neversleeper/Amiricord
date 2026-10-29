@@ -9,7 +9,7 @@
 
 import { createHash } from "node:crypto";
 
-import { compareVersions, isVersion, MAX_NEWS_ENTRIES, type NewsEntry, parseManifest, parseNewsEntry, UPDATE_FILES, type UpdateManifest } from "../src/shared/updates";
+import { compareVersions, isVersion, MAX_NEWS_ENTRIES, MAX_NEWS_TEXT, type NewsEntry, parseManifest, parseNewsEntry, UPDATE_FILES, type UpdateManifest } from "../src/shared/updates";
 
 export interface ReleaseInput {
     /** The version of package.json. */
@@ -50,6 +50,12 @@ export function makeRelease(input: ReleaseInput): ReleaseResult | string[] {
     const news: NewsEntry[] = [];
     if (Array.isArray(rawNews)) {
         for (const [index, entry] of rawNews.entries()) {
+            const rawNotes = (entry as { notes?: unknown; } | null)?.notes;
+            if (Array.isArray(rawNotes)) {
+                for (const note of rawNotes) {
+                    if (typeof note === "string" && note.trim().length > MAX_NEWS_TEXT) problems.push(`NEWS.json entry ${index + 1} has a note longer than ${MAX_NEWS_TEXT} characters, which the app would cut: "${note.slice(0, 40)}..."`);
+                }
+            }
             const parsed = parseNewsEntry(entry);
             if (!parsed) problems.push(`NEWS.json entry ${index + 1} needs a version (major.minor.patch) and a title`);
             else news.push(parsed);

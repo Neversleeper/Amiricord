@@ -26,6 +26,8 @@ export interface NewsEntry {
     title: string;
     /** Short sentences about what changed, for people. */
     notes: string[];
+    /** The GitHub name of the person who published the version, when the entry says it. */
+    author?: string;
 }
 
 export interface UpdateFile {
@@ -52,6 +54,7 @@ export type UpdateAnswer =
 const VERSION = /^\d{1,4}\.\d{1,4}\.\d{1,4}$/;
 const SHA256 = /^[0-9a-f]{64}$/;
 const DATE = /^\d{4}-\d{2}-\d{2}$/;
+const GITHUB_NAME = /^[A-Za-z0-9](?:[A-Za-z0-9-]{0,37}[A-Za-z0-9])?$/;
 
 const isRecord = (value: unknown): value is Record<string, unknown> => typeof value === "object" && value !== null && !Array.isArray(value);
 const isString = (value: unknown): value is string => typeof value === "string";
@@ -77,7 +80,9 @@ export function parseNewsEntry(value: unknown): NewsEntry | null {
     const title = clean(value.title, 120);
     if (title === "") return null;
     const notes = Array.isArray(value.notes) ? value.notes.map(note => clean(note)).filter(note => note !== "").slice(0, MAX_NEWS_NOTES) : [];
-    return { version: value.version, date: isString(value.date) && DATE.test(value.date) ? value.date : "", title, notes };
+    const entry: NewsEntry = { version: value.version, date: isString(value.date) && DATE.test(value.date) ? value.date : "", title, notes };
+    if (isString(value.author) && GITHUB_NAME.test(value.author)) entry.author = value.author;
+    return entry;
 }
 
 /** The `update.json` of a release, rebuilt with only the known fields, or a sentence saying what is wrong with it. */
