@@ -1,0 +1,41 @@
+{
+    "schema": 1,
+    "id": "VoiceChatDoubleClick",
+    "name": "Voice Chat Double Click",
+    "version": "1.0.0",
+    "description": "Join voice channels with a double click instead of a single click.",
+    "origin": "vencord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        {
+            "name": "Ven",
+            "role": "original author"
+        },
+        {
+            "name": "D3SOX",
+            "role": "original author"
+        },
+        {
+            "name": "sadan",
+            "role": "original author"
+        },
+        {
+            "name": "Neversleeper",
+            "role": "Amiricord port"
+        }
+    ],
+    "credits": [
+        {
+            "name": "Vendicated and contributors (Vencord), plugin VoiceChatDoubleClick",
+            "license": "GPL-3.0-or-later",
+            "url": "https://github.com/Vendicated/Vencord"
+        }
+    ],
+    "tags": ["voice"],
+    "enabledByDefault": false,
+    "startAt": "init",
+    "entry": {
+        "renderer": "index.ts"
+    },
+    "permissions": {}
+}
