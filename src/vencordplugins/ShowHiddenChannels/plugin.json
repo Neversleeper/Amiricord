@@ -1,0 +1,34 @@
+{
+    "schema": 1,
+    "id": "ShowHiddenChannels",
+    "name": "Show Hidden Channels",
+    "version": "1.0.0",
+    "description": "Shows the channels you do not have access to, with a lock or an eye, and opens a page with what Discord tells about the channel (topic, last message, allowed users and roles) instead of its messages.",
+    "origin": "vencord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        { "name": "BigDuck", "role": "original author" },
+        { "name": "AverageReactEnjoyer", "role": "original author" },
+        { "name": "D3SOX", "role": "original author" },
+        { "name": "Ven", "role": "original author" },
+        { "name": "Nuckyz", "role": "original author" },
+        { "name": "Nickyux", "role": "original author" },
+        { "name": "Rini", "role": "original author" },
+        { "name": "Oggetto", "role": "changes in TestCord's copy" },
+        { "name": "Neversleeper", "role": "Amiricord port" }
+    ],
+    "credits": [
+        {
+            "name": "Vendicated and contributors (Vencord), plugin ShowHiddenChannels",
+            "license": "GPL-3.0-or-later",
+            "url": "https://github.com/Vendicated/Vencord"
+        }
+    ],
+    "tags": ["ui", "utility"],
+    "enabledByDefault": false,
+    "startAt": "init",
+    "entry": {
+        "renderer": "index.ts"
+    },
+    "permissions": {}
+}
