@@ -24,7 +24,10 @@ import type { JsonValue } from "../../shared/settings";
 
 const CDN = "https://cdn.discordapp.com";
 /** Stay under the storage limit (1 MB of text per value) with room for the JSON quotes. */
-const MAX_IMAGE_CHARS = 900_000;
+const CHUNK_CHARS = 900_000;
+/** A picture may span several storage values (a moving banner is often over 1 MB). */
+const MAX_CHUNKS = 5;
+const MAX_IMAGE_CHARS = CHUNK_CHARS * MAX_CHUNKS;
 const MAX_PRESETS = 20;
 const BACKUP_NAME = "Backup before the last change";
 const INDEX_KEY = "index";
@@ -56,10 +59,35 @@ interface Preset {
     hasAvatar: boolean;
     avatarAnimated: boolean;
     hasBanner: boolean;
+    /** The display name style (font, effect, colours). Missing in a preset saved before this existed; `null` when the account had none (applying then leaves the style alone). */
+    nameStyle?: NameStyle | null;
+    /** The profile effect and the nameplate, by the id of the item (`sku_id`). Missing in a preset saved before; `null` when the account had none. */
+    effectSkuId?: string | null;
+    nameplateSkuId?: string | null;
+    /** The avatar decoration and the profile frame, by `sku_id` (the frame is the profile's collectible of type 3, the effect is type 1). */
+    decorationSkuId?: string | null;
+    frameSkuId?: string | null;
 }
 
+interface NameStyle {
+    fontId: number;
+    effectId: number;
+    colors: number[];
+}
+
+/** `display_name_styles` as the profile answer holds it (`{font_id, effect_id, colors}`), or null when there is none or it is not in that shape. */
+function readNameStyle(value: unknown): NameStyle | null {
+    if (!isRecord(value)) return null;
+    const { font_id: fontId, effect_id: effectId, colors } = value;
+    if (typeof fontId !== "number" || typeof effectId !== "number" || !Array.isArray(colors) || !colors.every(c => typeof c === "number")) return null;
+    return { fontId, effectId, colors: colors as number[] };
+}
+
+/** The fields Discord's own save sends for the style in `PATCH /users/@me`. */
+const nameStyleBody = (style: NameStyle) => ({ display_name_font_id: style.fontId, display_name_effect_id: style.effectId, display_name_colors: style.colors });
+
 const PARTS = [
-    ["avatar", "Picture"], ["banner", "Banner"], ["name", "Display name"], ["pronouns", "Pronouns"], ["bio", "Bio"],
+    ["avatar", "Picture"], ["banner", "Banner"], ["name", "Display name"], ["nameStyle", "Name style"], ["nameplate", "Nameplate"], ["effect", "Profile effect"], ["decoration", "Avatar decoration"], ["frame", "Profile frame"], ["pronouns", "Pronouns"], ["bio", "Bio"],
     ["colours", "Colours"], ["tag", "Server tag"], ["status", "Status"], ["games", "Games"]
 ] as const;
 type PartId = typeof PARTS[number][0];
@@ -113,10 +141,13 @@ async function toDataUri(url: string): Promise<string | null> {
 
 /** The biggest copy of the picture that fits in one storage value, or `null` when none does. */
 async function fitImage(kind: "avatars" | "banners", id: string, hash: string, sizes: number[]): Promise<string | null> {
-    const ext = hash.startsWith("a_") ? "gif" : "png";
-    for (const size of sizes) {
-        const uri = await toDataUri(`${CDN}/${kind}/${id}/${hash}.${ext}?size=${size}`);
-        if (uri && uri.length <= MAX_IMAGE_CHARS) return uri;
+    // A still picture is tried as PNG and then as WebP (much smaller for a photo); a moving one only as GIF.
+    const formats = hash.startsWith("a_") ? ["gif"] : ["png", "webp"];
+    for (const ext of formats) {
+        for (const size of sizes) {
+            const uri = await toDataUri(`${CDN}/${kind}/${id}/${hash}.${ext}?size=${size}`);
+            if (uri && uri.length <= MAX_IMAGE_CHARS) return uri;
+        }
     }
     return null;
 }
@@ -187,12 +218,56 @@ const writeIndex = async (entries: Entry[]) => { await context?.storage.set(INDE
 async function readPreset(id: string): Promise<Preset | undefined> {
     const value = await context?.storage.get(`p-${id}`);
     const record: unknown = value;
-    return isRecord(record) && typeof record.name === "string" ? record as unknown as Preset : undefined;
+    if (!isRecord(record) || typeof record.name !== "string") return undefined;
+    return { ...record, widgets: unpackWidgets(record.widgets) } as unknown as Preset;
 }
 
+/**
+ * Game widgets nest deeper (preset, widgets, widget, data, games, game, tags) than a storage value may (6 levels), so they are kept as one text and read back here.
+ * A list is accepted too, for a preset saved before this.
+ */
+function packWidgets(widgets: JsonValue[]): string {
+    return JSON.stringify(widgets);
+}
+
+function unpackWidgets(stored: unknown): JsonValue[] {
+    if (Array.isArray(stored)) return stored as JsonValue[];
+    if (typeof stored !== "string") return [];
+    try {
+        const parsed: unknown = JSON.parse(stored);
+        return Array.isArray(parsed) ? parsed as JsonValue[] : [];
+    } catch {
+        return [];
+    }
+}
+
+/** The picture is the value `<kind>-<id>`, followed by `<kind>-<id>.1`, `.2`... when it was too long for one value. */
 async function readImage(kind: "a" | "b", id: string): Promise<string | undefined> {
-    const value = await context?.storage.get(`${kind}-${id}`);
-    return typeof value === "string" ? value : undefined;
+    const first = await context?.storage.get(`${kind}-${id}`);
+    if (typeof first !== "string") return undefined;
+    let text = first;
+    for (let i = 1; i < MAX_CHUNKS; i++) {
+        const more = await context?.storage.get(`${kind}-${id}.${i}`);
+        if (typeof more !== "string") break;
+        text += more;
+    }
+    return text;
+}
+
+async function writeImage(kind: "a" | "b", id: string, uri: string): Promise<void> {
+    const storage = context?.storage;
+    if (!storage) return;
+    for (let i = 0; i < MAX_CHUNKS; i++) {
+        const key = i === 0 ? `${kind}-${id}` : `${kind}-${id}.${i}`;
+        const part = uri.slice(i * CHUNK_CHARS, (i + 1) * CHUNK_CHARS);
+        if (part) await storage.set(key, part); else await storage.delete(key);
+    }
+}
+
+async function clearImage(kind: "a" | "b", id: string): Promise<void> {
+    const storage = context?.storage;
+    if (!storage) return;
+    for (let i = 0; i < MAX_CHUNKS; i++) await storage.delete(i === 0 ? `${kind}-${id}` : `${kind}-${id}.${i}`);
 }
 
 /** Reads the profile the account has now and keeps it as a preset (new, or `id` replaced). Resolves to a sentence for the person. */
@@ -207,7 +282,7 @@ async function saveCurrent(name: string, id?: string): Promise<string> {
     const avatarUri = user.avatar ? await fitImage("avatars", me.id, user.avatar, [512, 256, 128]) : null;
     if (user.avatar && !avatarUri) notes.push("your picture was too big to keep");
     const bannerHash = profile.banner ?? user.banner;
-    const bannerUri = bannerHash ? await fitImage("banners", me.id, bannerHash, [1024, 600, 480]) : null;
+    const bannerUri = bannerHash ? await fitImage("banners", me.id, bannerHash, [1024, 600, 480, 320, 240]) : null;
     if (bannerHash && !bannerUri) notes.push("your banner was too big to keep");
     if (status === undefined) notes.push("your custom status could not be read");
 
@@ -217,6 +292,11 @@ async function saveCurrent(name: string, id?: string): Promise<string> {
         name,
         savedAt: Date.now(),
         globalName: asText(user.global_name),
+        nameStyle: readNameStyle(user.display_name_styles),
+        effectSkuId: asText(profile.profile_effect?.sku_id),
+        nameplateSkuId: asText(user.collectibles?.nameplate?.sku_id),
+        decorationSkuId: asText(user.avatar_decoration_data?.sku_id),
+        frameSkuId: asText((Array.isArray(profile.collectibles) ? profile.collectibles : []).find((c: any) => c?.type === 3)?.sku_id),
         pronouns: asText(withoutMarker(String(profile.pronouns ?? ""))),
         bio: asText(profile.bio),
         themeColors: Array.isArray(profile.theme_colors) ? profile.theme_colors.filter((c: unknown) => typeof c === "number") : null,
@@ -230,9 +310,9 @@ async function saveCurrent(name: string, id?: string): Promise<string> {
         hasBanner: Boolean(bannerUri)
     };
     const storage = context.storage;
-    await storage.set(`p-${presetId}`, JSON.parse(JSON.stringify(preset)) as JsonValue);
-    if (avatarUri) await storage.set(`a-${presetId}`, avatarUri); else await storage.delete(`a-${presetId}`);
-    if (bannerUri) await storage.set(`b-${presetId}`, bannerUri); else await storage.delete(`b-${presetId}`);
+    await storage.set(`p-${presetId}`, JSON.parse(JSON.stringify({ ...preset, widgets: packWidgets(preset.widgets) })) as JsonValue);
+    if (avatarUri) await writeImage("a", presetId, avatarUri); else await clearImage("a", presetId);
+    if (bannerUri) await writeImage("b", presetId, bannerUri); else await clearImage("b", presetId);
     const entries = (await readIndex()).filter(entry => entry.id !== presetId);
     entries.push({ id: presetId, name, savedAt: preset.savedAt });
     await writeIndex(entries);
@@ -243,8 +323,8 @@ async function removePreset(id: string): Promise<void> {
     const storage = context?.storage;
     if (!storage) return;
     await storage.delete(`p-${id}`);
-    await storage.delete(`a-${id}`);
-    await storage.delete(`b-${id}`);
+    await clearImage("a", id);
+    await clearImage("b", id);
     await writeIndex((await readIndex()).filter(entry => entry.id !== id));
 }
 
@@ -337,6 +417,9 @@ async function applyPreset(id: string, parts: ReadonlySet<PartId>): Promise<stri
         const userBody: Record<string, unknown> = {};
         if (useAvatar) userBody.avatar = useAvatar;
         if (parts.has("name") && preset.globalName) userBody.global_name = preset.globalName;
+        if (parts.has("nameStyle") && preset.nameStyle) Object.assign(userBody, nameStyleBody(preset.nameStyle));
+        if (parts.has("nameplate") && preset.nameplateSkuId) userBody.nameplate_sku_id = preset.nameplateSkuId;
+        if (parts.has("decoration") && preset.decorationSkuId) userBody.avatar_decoration_sku_id = preset.decorationSkuId;
         const profileBody: Record<string, unknown> = {};
         if (parts.has("pronouns") && pronouns !== null) profileBody.pronouns = pronouns;
         if (parts.has("bio") && preset.bio !== null) profileBody.bio = nitro ? preset.bio : preset.bio.replace(/<a?:[A-Za-z0-9_~]+:\d+>/g, "").trim();
@@ -352,6 +435,14 @@ async function applyPreset(id: string, parts: ReadonlySet<PartId>): Promise<stri
             try { await rest.patch({ url: "/users/@me/profile", body: profileBody, rejectWithError: true }); done.push(`profile updated (${Object.keys(profileBody).join(", ")})`); } catch (error) { done.push(`profile update failed (${describe(error)})`); }
         }
     } else {
+        // The editor has no pending field for the name style, so (like the status and the games) it is sent at once.
+        const own: Record<string, unknown> = {};
+        if (parts.has("nameStyle") && preset.nameStyle) Object.assign(own, nameStyleBody(preset.nameStyle));
+        if (parts.has("nameplate") && preset.nameplateSkuId) own.nameplate_sku_id = preset.nameplateSkuId;
+        if (parts.has("decoration") && preset.decorationSkuId) own.avatar_decoration_sku_id = preset.decorationSkuId;
+        if (Object.keys(own).length > 0) {
+            try { await rest.patch({ url: "/users/@me", body: own, rejectWithError: true }); done.push(`account updated (${Object.keys(own).join(", ")})`); } catch (error) { done.push(`account update failed (${describe(error)})`); }
+        }
         if (useAvatar) setPending({ pendingAvatar: { assetOrigin: "NEW_ASSET", imageUri: useAvatar, description: `profile-preset-${id}` } });
         if (useBanner) setPending({ pendingBanner: useBanner });
         if (parts.has("name") && preset.globalName) setPending({ pendingGlobalName: preset.globalName });
@@ -364,6 +455,13 @@ async function applyPreset(id: string, parts: ReadonlySet<PartId>): Promise<stri
         done.push("profile editor filled (open it and press Save)");
     }
 
+    // The profile effect goes through the editor's pending field (Discord saves it together with the other collectibles, and sending it alone could drop one the account has).
+    if (parts.has("effect") && preset.effectSkuId) {
+        if (nitro) { setPending({ pendingProfileEffect: { skuId: preset.effectSkuId } }); done.push("profile effect put in the profile editor (press Save there)"); } else done.push("profile effect skipped (needs Nitro)");
+    }
+    if (parts.has("frame") && preset.frameSkuId) {
+        if (nitro) { setPending({ pendingProfileFrame: { skuId: preset.frameSkuId } }); done.push("profile frame put in the profile editor (press Save there)"); } else done.push("profile frame skipped (needs Nitro)");
+    }
     if (parts.has("tag") && preset.primaryGuildId) {
         if (guilds?.getGuild?.(preset.primaryGuildId)) { setPending({ pendingPrimaryGuildId: preset.primaryGuildId }); done.push("server tag put in the profile editor (press Save there)"); } else done.push("server tag skipped (you are not in that server)");
     }
@@ -392,6 +490,11 @@ function summary(preset: Preset | undefined): string {
     if (preset.hasAvatar) bits.push("picture");
     if (preset.hasBanner) bits.push("banner");
     if (preset.globalName) bits.push("name");
+    if (preset.nameStyle) bits.push("name style");
+    if (preset.nameplateSkuId) bits.push("nameplate");
+    if (preset.effectSkuId) bits.push("effect");
+    if (preset.decorationSkuId) bits.push("decoration");
+    if (preset.frameSkuId) bits.push("frame");
     if (preset.pronouns) bits.push("pronouns");
     if (preset.bio) bits.push("bio");
     if (preset.themeColors || preset.accentColor !== null) bits.push("colours");

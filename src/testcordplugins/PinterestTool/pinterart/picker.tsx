@@ -11,7 +11,7 @@ import { PinterestProfileModal } from "./components";
 import { Native } from "./host";
 import { t } from "./i18n";
 import { PLUGIN_ICON } from "./icon";
-import { isApplyLabel, isCancelLabel, isCloseLabel, isGifTileLabel } from "./labels";
+import { isApplyLabel, isBigTile, isCancelLabel, isCloseLabel, isGifTileLabel, isModalDialog } from "./labels";
 import type { SearchKind } from "./shared";
 
 /** What the picker needs from the engine: only the modal opener and the error report. */
@@ -688,10 +688,11 @@ function findTileRow(dialog: HTMLElement): HTMLElement | null {
 
     let tile: HTMLElement = label;
     while (tile.parentElement && tile.parentElement !== dialog) {
-        const box = tile.getBoundingClientRect();
-        if (box.width >= 150 && box.height >= 100) break;
+        if (isBigTile(tile.getBoundingClientRect())) break;
         tile = tile.parentElement;
     }
+    // Climbing ended without finding a big tile (a small "GIF" tab in some other pop-up): this is not the picker.
+    if (!isBigTile(tile.getBoundingClientRect())) return null;
 
     let row = tile.parentElement;
     while (row && row !== dialog && row.children.length < 2) row = row.parentElement;
@@ -699,6 +700,8 @@ function findTileRow(dialog: HTMLElement): HTMLElement | null {
 }
 
 function enhanceImageDialog(dialog: HTMLElement) {
+    // Only Discord's windows: the pop-up of GIFs, stickers and emoji has the role "dialog" too, and the button must never go into it.
+    if (!isModalDialog(dialog)) return;
     const existing = dialog.querySelector<HTMLElement>("[data-vc-pinterest-tool='true']");
     if (existing) {
         const label = `Pinterest Tool · ${t(getTarget(dialog) === "BANNER" ? "banner" : "avatar")}`;
