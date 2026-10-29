@@ -11,12 +11,13 @@
 // Design: docs/analysis-08-installer-patching.md.
 
 import { appendFile, readFile, writeFile } from "node:fs/promises";
-import { basename, isAbsolute, join } from "node:path";
+import { basename, dirname, isAbsolute, join } from "node:path";
 
 import { BootState, forgetUnfinishedBoot, parseBootState, serializeBootState } from "../shared/bootState";
 import { buildLoaderAsar } from "./asar";
 import { BackupInfo, createBackup, listBackups, readBackup, verifyBackup } from "./backup";
 import { Classification, classifyResources, LEFTOVER_NAMES, State } from "./classify";
+import { enableDiscordDevTools } from "./discordDevTools";
 import { AppFolder, Branch, BRANCH_DIRS, BRANCH_EXES, findInstall, Install, isBranch } from "./discover";
 import { carryOldFiles, DIST_ENTRY, distPaths, distSwapSteps, missingDistFiles, stageDist, verifyInstalledDist } from "./dist";
 import { hashFile } from "./hash";
@@ -343,6 +344,10 @@ async function patch(ctx: Context, opts: Options, command: "inject" | "repair"):
         res.warnings.push(...result.commitErrors.map(e => `A temporary file could not be deleted: ${e}`));
 
         res.stateAfter = (await classifyResources(app.resources)).state;
+        // Developer tools are on by default (docs/decisions.md). Discord is closed here, so its own files are not being written. Never stops the install.
+        const devtools = await enableDiscordDevTools(join(dirname(ctx.dataDir), BRANCH_DIRS[branch]));
+        res.messages.push(...devtools.changed);
+        res.warnings.push(...devtools.problems);
         res.messages.push(`${command === "repair" ? "Repaired" : "Patched"} ${app.name}. Backup: ${backup.dir}`);
         say(ctx, "INFO", `Successfully ${command === "repair" ? "repaired" : "patched"} ${install.root}`);
         return res;

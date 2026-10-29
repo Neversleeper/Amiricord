@@ -7,8 +7,8 @@
 // What a native function of a plugin may do with the Discord window that made the call. Today only one thing: open that window's developer tools, and only
 // for a plugin whose manifest declares `permissions.system.devtools` (the native host checks that; see `nativeHost.ts`). Written over a small description of
 // Electron's `webContents` so this file is tested without Electron. Every call answers false instead of throwing.
-// Honest limit: Discord keeps its own developer tools switched off unless a flag in its settings file is on (Amiricord does not touch that file), and it may
-// close them again right after they open; `openDevTools` says whether they were open at that moment.
+// Honest limit: Discord keeps its own developer tools switched off unless a flag in its settings file is on (the installer turns it on, see
+// `src/installer/discordDevTools.ts`), and it may close them again right after they open; `openDevTools` says whether they were open at that moment.
 
 /** The part of Electron's `webContents` used here. */
 export interface WebContentsLike {

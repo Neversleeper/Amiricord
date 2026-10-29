@@ -17,13 +17,13 @@ export interface Owner {
 }
 
 /** The version shown in the settings page. It must equal the `version` of package.json (a test checks it). */
-export const PROJECT_VERSION = "0.3.2";
+export const PROJECT_VERSION = "0.3.3";
 
 /** The GitHub repository whose releases the updater reads (`owner/name`). It must be public for other people to be able to update. */
 export const UPDATE_REPO = "Neversleeper/Amiricord";
 
 /** Plugins whose card is drawn in the Plugins tab only for the owners (by Discord id). They work for everybody; only the card is hidden. The Privacy & Security tab still lists them. */
-export const OWNER_ONLY_PLUGINS: readonly string[] = ["Badges"];
+export const OWNER_ONLY_PLUGINS: readonly string[] = ["Badges", "NoDevtoolsWarning"];
 
 export const OWNERS: readonly Owner[] = [
     {

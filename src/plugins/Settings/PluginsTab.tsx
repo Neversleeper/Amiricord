@@ -44,12 +44,17 @@ function Choice({ label, value, options, onChange }: { label: string; value: str
     );
 }
 
-function Stat({ title, value, hint }: { title: string; value: string; hint: string; }) {
+function Stat({ title, value, hint, ratio }: { title: string; value: string; hint: string; ratio?: number; }) {
     return (
         <div className="amiricord-card amiricord-plugins-stat">
             <div className="amiricord-plugins-stat-title">{title}</div>
             <div className="amiricord-plugins-stat-value">{value}</div>
             <div className="amiricord-plugins-stat-hint">{hint}</div>
+            {ratio !== undefined && (
+                <div className="amiricord-plugins-bar" aria-hidden="true">
+                    <div className="amiricord-plugins-bar-fill" style={{ width: `${Math.round(Math.min(1, Math.max(0, ratio)) * 100)}%` }} />
+                </div>
+            )}
         </div>
     );
 }
@@ -122,6 +127,14 @@ export function makePluginsTab(deps: PluginsTabDeps): () => unknown {
         const shown = lists.plugins.length;
         const empty = emptyText(counts, shown, filter);
         const update = (patch: Partial<PluginsFilter>) => setFilter(previous => ({ ...previous, ...patch }));
+        // The quick filters under the search box: the same "state" filter as the dropdown, with how many plugins each one shows. The last two appear only when there is something to show.
+        const quick: Array<{ value: StateFilter; label: string; count: number; }> = [
+            { value: "all", label: "All", count: counts.plugins },
+            { value: "on", label: "On", count: counts.pluginsOn },
+            { value: "off", label: "Off", count: counts.plugins - counts.pluginsOn },
+            ...(waiting.length > 0 ? [{ value: "restart" as const, label: "Needs a restart", count: waiting.length }] : []),
+            ...(counts.problems > 0 ? [{ value: "problems" as const, label: "Problems", count: counts.problems }] : [])
+        ];
 
         return (
             <div className="amiricord-tab">
@@ -145,44 +158,58 @@ export function makePluginsTab(deps: PluginsTabDeps): () => unknown {
                 )}
 
                 <div className="amiricord-plugins-stats">
-                    <Stat title="Plugins" value={counts.plugins === 0 ? "None yet" : `${counts.pluginsOn} of ${counts.plugins} on`} hint="Plugins you can turn on and off" />
+                    <Stat title="Plugins" value={counts.plugins === 0 ? "None yet" : `${counts.pluginsOn} of ${counts.plugins} on`} hint="Plugins you can turn on and off" ratio={counts.plugins === 0 ? 0 : counts.pluginsOn / counts.plugins} />
                     <Stat title="Core plugins" value={String(counts.core)} hint="Always on, they keep Amiricord working" />
                 </div>
 
-                <div className="amiricord-heading">Filters</div>
-                <input
-                    type="text"
-                    className="amiricord-plugins-input"
-                    aria-label="Search for a plugin"
-                    placeholder="Search for a plugin..."
-                    value={filter.search}
-                    onChange={(event: { target: { value: string; }; }) => update({ search: event.target.value })}
-                />
-                <div className="amiricord-plugins-filters">
-                    <Choice label="Filter by state" value={filter.state} options={STATE_FILTERS} onChange={value => update({ state: value as StateFilter })} />
-                    <Choice
-                        label="Filter by origin"
-                        value={filter.origin}
-                        options={[{ value: "", label: "All origins" }, ...options.origins.map(origin => ({ value: origin, label: originLabel(origin) }))]}
-                        onChange={value => update({ origin: value })}
+                <div className="amiricord-plugins-toolbar">
+                    <input
+                        type="text"
+                        className="amiricord-plugins-input"
+                        aria-label="Search for a plugin"
+                        placeholder="Search for a plugin..."
+                        value={filter.search}
+                        onChange={(event: { target: { value: string; }; }) => update({ search: event.target.value })}
                     />
-                    <Choice label="Filter by risk" value={filter.risk} options={RISK_FILTERS} onChange={value => update({ risk: value as RiskFilter })} />
-                    <Choice
-                        label="Filter by tag"
-                        value={filter.tag}
-                        options={[{ value: "", label: "All tags" }, ...options.tags.map(tag => ({ value: tag, label: tag }))]}
-                        onChange={value => update({ tag: value })}
-                    />
-                    <Choice
-                        label="Filter by author"
-                        value={filter.author}
-                        options={[{ value: "", label: "All authors" }, ...options.authors.map(author => ({ value: author, label: author }))]}
-                        onChange={value => update({ author: value })}
-                    />
+                    <div className="amiricord-plugins-chips" role="group" aria-label="Quick filter">
+                        {quick.map(chip => (
+                            <button
+                                key={chip.value}
+                                type="button"
+                                className={`amiricord-plugins-chip${filter.state === chip.value ? " amiricord-plugins-chip-on" : ""}`}
+                                aria-pressed={filter.state === chip.value ? "true" : "false"}
+                                onClick={() => update({ state: chip.value })}
+                            >
+                                {chip.label}<span className="amiricord-plugins-chip-count">{chip.count}</span>
+                            </button>
+                        ))}
+                    </div>
+                    <div className="amiricord-plugins-filters">
+                        <Choice label="Filter by state" value={filter.state} options={STATE_FILTERS} onChange={value => update({ state: value as StateFilter })} />
+                        <Choice
+                            label="Filter by origin"
+                            value={filter.origin}
+                            options={[{ value: "", label: "All origins" }, ...options.origins.map(origin => ({ value: origin, label: originLabel(origin) }))]}
+                            onChange={value => update({ origin: value })}
+                        />
+                        <Choice label="Filter by risk" value={filter.risk} options={RISK_FILTERS} onChange={value => update({ risk: value as RiskFilter })} />
+                        <Choice
+                            label="Filter by tag"
+                            value={filter.tag}
+                            options={[{ value: "", label: "All tags" }, ...options.tags.map(tag => ({ value: tag, label: tag }))]}
+                            onChange={value => update({ tag: value })}
+                        />
+                        <Choice
+                            label="Filter by author"
+                            value={filter.author}
+                            options={[{ value: "", label: "All authors" }, ...options.authors.map(author => ({ value: author, label: author }))]}
+                            onChange={value => update({ author: value })}
+                        />
+                    </div>
                 </div>
                 {isFilterActive(filter) && <button type="button" className="amiricord-action amiricord-plugins-clear" onClick={() => setFilter(DEFAULT_FILTER)}>Clear filters</button>}
 
-                <div className="amiricord-heading">Plugins</div>
+                <div className="amiricord-heading">Plugins<span className="amiricord-heading-count">{shown}</span></div>
                 {shown > 0
                     ? <div className="amiricord-plugins-grid">{lists.plugins.map(draw)}</div>
                     : <p className="amiricord-hint amiricord-plugins-empty">{empty}</p>}

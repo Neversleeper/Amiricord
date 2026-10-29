@@ -1,0 +1,21 @@
+{
+    "schema": 1,
+    "id": "NoDevtoolsWarning",
+    "name": "No Devtools Warning",
+    "version": "1.0.0",
+    "description": "Removes the big \"Hold Up!\" warning that Discord prints in the developer console, so that the console is readable when someone is asked to look at a plugin's errors. As a side effect Discord stops hiding your token from the page while the tools are open, which also stops random logouts.",
+    "origin": "amiricord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        { "name": "Neversleeper", "discordId": "1564847328794382408", "github": "https://github.com/Neversleeper" }
+    ],
+    "credits": [
+        { "name": "Vendicated and contributors (Vencord), plugin NoDevtoolsWarning by Ven", "license": "GPL-3.0-or-later", "url": "https://github.com/TestcordDev/TestCord" }
+    ],
+    "tags": ["developer"],
+    "core": true,
+    "enabledByDefault": true,
+    "startAt": "init",
+    "entry": { "renderer": "index.ts" },
+    "permissions": {}
+}

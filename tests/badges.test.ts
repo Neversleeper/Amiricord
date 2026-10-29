@@ -315,7 +315,7 @@ describe("the card of the Badges plugin in the Plugins tab", () => {
     const ids = (shown: ReturnType<typeof cardsForPerson>) => shown.map(item => item.id);
 
     it("is drawn for the owners only, and every other plugin is drawn for everybody", () => {
-        assert.deepEqual(OWNER_ONLY_PLUGINS, ["Badges"]);
+        assert.deepEqual(OWNER_ONLY_PLUGINS, ["Badges", "NoDevtoolsWarning"]);
         const owners = OWNERS.map(owner => owner.discordId);
         assert.deepEqual(ids(cardsForPerson(cards, OWNER_ONLY_PLUGINS, owners, OWNERS[1].discordId)), ["Badges", "NoTrack"]);
         assert.deepEqual(ids(cardsForPerson(cards, OWNER_ONLY_PLUGINS, owners, OWNERS[0].discordId)), ["Badges", "NoTrack"]);
