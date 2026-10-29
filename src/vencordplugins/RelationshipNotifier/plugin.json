@@ -1,0 +1,34 @@
+{
+    "schema": 1,
+    "id": "RelationshipNotifier",
+    "name": "Relationship Notifier",
+    "version": "1.0.0",
+    "description": "Tells you when a friend, a group chat or a server removes you, also if it happened while Discord was closed.",
+    "origin": "vencord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        {
+            "name": "nick",
+            "role": "original author"
+        },
+        {
+            "name": "Neversleeper",
+            "role": "Amiricord port"
+        }
+    ],
+    "credits": [
+        {
+            "name": "Vendicated and contributors (Vencord), plugin RelationshipNotifier",
+            "license": "GPL-3.0-or-later",
+            "url": "https://github.com/Vendicated/Vencord"
+        }
+    ],
+    "tags": ["chat",
+        "utility"],
+    "enabledByDefault": false,
+    "startAt": "init",
+    "entry": {
+        "renderer": "index.ts"
+    },
+    "permissions": {}
+}
