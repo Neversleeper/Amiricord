@@ -209,6 +209,7 @@ const plugin: PluginCode & { buildLayout(builder: { key?: unknown; buildLayout()
             Component: guarded("The Updates tab", makeUpdatesTab({
                 current: PROJECT_VERSION,
                 history: releasedNews(patchNotes, PROJECT_VERSION),
+                lookupAuthor,
                 check: () => engine.updates({ type: "check" }),
                 install: () => engine.updates({ type: "install" }),
                 restart: () => { plugins.restart(); }

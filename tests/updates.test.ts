@@ -114,3 +114,24 @@ describe("pnpm release", () => {
         assert.match(say({ version: "0.2" }), /not major\.minor\.patch/);
     });
 });
+
+describe("who published a version", () => {
+    it("keeps the GitHub name of the author and drops anything that is not one", () => {
+        assert.equal(parseNewsEntry({ version: "0.4.1", title: "T", author: "Neversleeper" })?.author, "Neversleeper");
+        assert.equal(parseNewsEntry({ version: "0.4.1", title: "T", author: "some-one-1" })?.author, "some-one-1");
+        assert.equal("author" in (parseNewsEntry({ version: "0.4.1", title: "T" }) ?? {}), false);
+        for (const bad of ["", "-start", "end-", "has space", "a/b", "<b>x</b>", "x".repeat(40), 5]) {
+            assert.equal(parseNewsEntry({ version: "0.4.1", title: "T", author: bad })?.author, undefined, `author ${String(bad)}`);
+        }
+    });
+
+    it("stops a release whose note is longer than the app shows", () => {
+        const files = Object.fromEntries(UPDATE_FILES.map(name => [name, new TextEncoder().encode(`content of ${name}`)]));
+        const long = JSON.stringify([{ version: "0.2.0", title: "Hello", notes: ["x".repeat(241)] }]);
+        const refused = makeRelease({ version: "0.2.0", files, newsText: long });
+        assert.ok(Array.isArray(refused));
+        assert.match(refused.join("\n"), /longer than 240 characters/);
+        const fine = JSON.stringify([{ version: "0.2.0", title: "Hello", notes: ["x".repeat(240)] }]);
+        assert.ok(!Array.isArray(makeRelease({ version: "0.2.0", files, newsText: fine })));
+    });
+});

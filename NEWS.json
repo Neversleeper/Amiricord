@@ -1,14 +1,27 @@
 [
     {
+        "version": "0.4.1",
+        "date": "2026-10-29",
+        "title": "A clearer Updates tab",
+        "author": "Neversleeper",
+        "notes": [
+            "Each version now says who published it, with the GitHub name (a link to their profile) and the name and picture Discord shows for them.",
+            "The notes have bullets and nothing is cut off any more: a note that is too long makes the release stop, so it cannot be cut by mistake."
+        ]
+    },
+    {
         "version": "0.4.0",
         "date": "2026-10-29",
         "title": "Many new plugins, BetterDiscord support and a shortcut for developer tools",
         "notes": [
-            "New plugins (you switch them on in the Plugins tab; Crash Fixes and the developer tools shortcut start on): Better Invites (who sent an invite and a live countdown to its end), Channel Tabs (tabs for channels, like a browser), Ghosted (a ghost next to chats waiting for your answer and a counter), Friend Tags, Last Active, Cancel Friend Request, Universal Mention, Profile Copy Button, Experiments (can put an account at risk, read its card first), View Icons, More User Tags, Crash Fixes, Home Typing and Mic Loopback Tester.",
+            "New plugins, off until you switch them on in the Plugins tab: Better Invites (who sent an invite and a live countdown), Channel Tabs (tabs for channels) and Ghosted (a ghost next to chats waiting for your answer).",
+            "More new plugins: Friend Tags, Last Active, Cancel Friend Request, Universal Mention, Profile Copy Button, View Icons, More User Tags, Home Typing and Mic Loopback Tester.",
+            "Experiments is new too; it can put an account at risk, so read its card first. Crash Fixes and the developer tools shortcut start on.",
             "View Icons: clicking a profile picture opens it in Discord's own picture viewer, where you can zoom and save it.",
             "Plugins can now add buttons to the panel at the bottom left of Discord, and the BetterDiscord layer can run BetterDiscord plugins that come bundled with Amiricord.",
             "A shortcut opens Discord's developer tools."
-        ]
+        ],
+        "author": "Neversleeper"
     },
     {
         "version": "0.3.4",
@@ -17,7 +30,8 @@
         "notes": [
             "Discord's developer tools and the console's paste choice are now set up every time Discord starts, so updating from the Updates tab is enough; you no longer need to install again.",
             "Reminder: the console's warning against pasting code is off, so only paste what you understand."
-        ]
+        ],
+        "author": "Neversleeper"
     },
     {
         "version": "0.3.3",
@@ -27,7 +41,8 @@
             "The Plugins tab has a new look: a round mark for each plugin, a glow on the ones that are on, quick filters (All, On, Off) with counts, a search box that stays in view, and animated switches. The other tabs share the new look.",
             "Discord's developer tools and the console are on by default, and the big \"Hold Up!\" warning in the console is gone, so it is easy to read a plugin's errors when asked. Installing or repairing Amiricord sets this up.",
             "The warning against pasting code into the console is off, so only paste what you understand."
-        ]
+        ],
+        "author": "Neversleeper"
     },
     {
         "version": "0.3.2",
@@ -39,7 +54,8 @@
             "Quests: new Start All and Stop All buttons on the Quests page, and fixes to quest enrollment and the quest button menu.",
             "Safe mode no longer counts a normal close of Discord as a failure, and the Settings page has a way to leave it.",
             "More Alts: the Manage Accounts window follows the new Discord build."
-        ]
+        ],
+        "author": "Neversleeper"
     },
     {
         "version": "0.3.1",
@@ -49,7 +65,8 @@
             "More Alts works: the Manage Accounts window now lets you add more accounts than Discord's own five (the limit is set in the plugin's settings).",
             "New Server Search plugin (from Equicord): a search button under the Home button opens Discord's quick switcher. It turns on and off without restarting Discord.",
             "New pieces for plugin authors: plugins can draw things in the server list and add slash commands."
-        ]
+        ],
+        "author": "Neversleeper"
     },
     {
         "version": "0.3.0",
