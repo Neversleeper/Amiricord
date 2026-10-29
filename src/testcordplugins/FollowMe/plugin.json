@@ -1,0 +1,22 @@
+{
+    "schema": 1,
+    "id": "FollowMe",
+    "name": "Follow Me",
+    "version": "1.0.0",
+    "description": "Right-click a person and press Follow Me: whenever you change voice channel in a server they are moved to yours, and moved back if they leave it. It needs the Move Members permission; Discord decides what is allowed. /followme and /followme-stop do the same without a right-click.",
+    "origin": "testcord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        { "name": "Nightcord" }
+    ],
+    "credits": [
+        { "name": "Vendicated and contributors (Vencord), plugin FollowMe by Nightcord", "license": "GPL-3.0-or-later", "url": "https://github.com/TestcordDev/TestCord" }
+    ],
+    "tags": ["voice", "utility"],
+    "enabledByDefault": false,
+    "startAt": "webpackReady",
+    "entry": { "renderer": "index.ts" },
+    "permissions": {
+        "account": { "write": ["server-voice-moderation"] }
+    }
+}

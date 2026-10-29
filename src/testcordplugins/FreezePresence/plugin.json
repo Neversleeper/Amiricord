@@ -1,0 +1,20 @@
+{
+    "schema": 1,
+    "id": "FreezePresence",
+    "name": "Freeze Presence",
+    "version": "1.0.0",
+    "description": "Stops the member list from jumping around when people change status, and can make everyone look online in the member list. Both are local: nothing changes on Discord's side and nobody sees it but you.",
+    "origin": "testcord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        { "name": "Neversleeper", "discordId": "1564847328794382408", "github": "https://github.com/Neversleeper" }
+    ],
+    "credits": [
+        { "name": "Vendicated and contributors (Vencord), plugin FreezePresence by Neversleeper (under her earlier name nnenaza), as found in TestCord", "license": "GPL-3.0-or-later", "url": "https://github.com/TestcordDev/TestCord" }
+    ],
+    "tags": ["ui", "utility"],
+    "enabledByDefault": false,
+    "startAt": "init",
+    "entry": { "renderer": "index.ts" },
+    "permissions": {}
+}

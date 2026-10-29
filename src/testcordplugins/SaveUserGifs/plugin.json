@@ -1,0 +1,24 @@
+{
+    "schema": 1,
+    "id": "SaveUserGifs",
+    "name": "Save User GIFs",
+    "version": "1.0.0",
+    "description": "Right-click a person and press \"Save GIFs from user\" to collect the GIFs they sent in this channel or server: save them in a file, in your favourites, or both. It uses Discord's message search, which does not always answer the same twice, so run it again to pick up what it missed.",
+    "origin": "testcord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        { "name": "Neversleeper", "discordId": "1564847328794382408", "github": "https://github.com/Neversleeper" }
+    ],
+    "credits": [
+        { "name": "Vendicated and contributors (Vencord), plugin SaveUserGifs by Neversleeper (under her earlier name nnenaza), as found in TestCord and in her own repository Mixi-Plugins", "license": "GPL-3.0-or-later", "url": "https://github.com/TestcordDev/TestCord" }
+    ],
+    "tags": ["media", "utility"],
+    "enabledByDefault": false,
+    "startAt": "webpackReady",
+    "entry": { "renderer": "index.ts" },
+    "permissions": {
+        "account": { "write": ["favorite-gifs"] },
+        "messages": { "read": "all-channels", "send": false },
+        "files": "user-chosen"
+    }
+}

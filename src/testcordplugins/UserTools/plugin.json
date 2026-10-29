@@ -1,0 +1,22 @@
+{
+    "schema": 1,
+    "id": "UserTools",
+    "name": "User Tools",
+    "version": "1.0.0",
+    "description": "Right-click a person in a server to keep disconnecting, server-muting or server-deafening them whenever they are in a voice channel where you have the permission (Move, Mute or Deafen Members). Discord decides what is allowed. /usertools-list and /usertools-clear show and switch off everything.",
+    "origin": "testcord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        { "name": "x2b" }
+    ],
+    "credits": [
+        { "name": "Vendicated and contributors (Vencord), plugin UserTools by x2b", "license": "GPL-3.0-or-later", "url": "https://github.com/TestcordDev/TestCord" }
+    ],
+    "tags": ["voice", "utility"],
+    "enabledByDefault": false,
+    "startAt": "webpackReady",
+    "entry": { "renderer": "index.ts" },
+    "permissions": {
+        "account": { "write": ["server-voice-moderation"] }
+    }
+}

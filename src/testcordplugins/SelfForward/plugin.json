@@ -1,0 +1,21 @@
+{
+    "schema": 1,
+    "id": "SelfForward",
+    "name": "Self Forward",
+    "version": "1.0.0",
+    "description": "Adds the channel you are in to the list of places a message can be forwarded to.",
+    "origin": "testcord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        { "name": "VillainsRule", "role": "original author" },
+        { "name": "Neversleeper", "github": "https://github.com/Neversleeper", "role": "Amiricord port" }
+    ],
+    "credits": [
+        { "name": "Vendicated and contributors (Vencord), plugin SelfForward by VillainsRule", "license": "GPL-3.0-or-later", "url": "https://github.com/TestcordDev/TestCord" }
+    ],
+    "tags": ["utility"],
+    "enabledByDefault": false,
+    "startAt": "init",
+    "entry": { "renderer": "index.ts" },
+    "permissions": {}
+}
