@@ -97,6 +97,32 @@ describe("applying the options to a window", () => {
         assert.equal(t.trace.length, 1);
     });
 
+    it("turns a later minimum size that Discord sets itself into zero by zero, so it does not undo the option", () => {
+        const t = setup({ ...none, removeMinimumSize: true });
+        t.win.setMinimumSize!(940, 500);
+        assert.deepEqual(t.calls, ["min 0x0", "min 0x0"]);
+        const untouched = setup(none);
+        untouched.win.setMinimumSize!(940, 500);
+        assert.deepEqual(untouched.calls, ["min 940x500"]);
+    });
+
+    it("writes in the trace what Discord asked for and, later, the minimum size the window really has", async () => {
+        const { mock } = await import("node:test");
+        mock.timers.enable({ apis: ["setTimeout"] });
+        try {
+            const t = setup({ ...none, removeMinimumSize: true }, { getMinimumSize: () => [123, 45] });
+            t.win.setMinimumSize!(940, 500);
+            assert.ok(t.trace.some(line => line.includes("Discord asked for a minimum size of 940 by 500; it was kept at 0 by 0")));
+            mock.timers.tick(6000);
+            assert.ok(t.trace.some(line => line.includes("the minimum size of a window is now 123 by 45")));
+            const unknown = setup({ ...none, removeMinimumSize: true });
+            mock.timers.tick(6000);
+            assert.ok(unknown.trace.some(line => line.includes("is now unknown")));
+        } finally {
+            mock.timers.reset();
+        }
+    });
+
     it("asks for the chosen background effect, and not for none", () => {
         for (const material of ["mica", "tabbed", "acrylic"] as const) assert.deepEqual(setup({ ...none, material }).calls, [`material ${material}`]);
         assert.deepEqual(setup(none).calls, []);

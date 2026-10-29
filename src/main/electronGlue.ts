@@ -20,6 +20,7 @@ import { PROJECT_VERSION, UPDATE_REPO } from "../shared/project";
 import { readTextFile, writeTextAtomic } from "./atomicFile";
 import { buildBlockLog, exportName, exportText } from "./blockLog";
 import { makeCensus } from "./census";
+import { makeConsoleErrorListener } from "./consoleErrors";
 import { applyDns, dnsOff, dnsText } from "./dns/apply";
 import { chooseDns } from "./dns/config";
 import { FetchLike, verifyProvider } from "./dns/verify";
@@ -43,6 +44,7 @@ import { RequestHub, WebRequestLike } from "./requestHub";
 import { answerSecretCall, declaredSecrets, SecretStore } from "./secretStore";
 import { makeTokenGuard } from "./tokenGuard";
 import { TokenHosts, tokenHostsFromRegistry } from "./tokenHosts";
+import { probeTopBar } from "./topBarProbe";
 import { trace } from "./trace";
 import { createUpdater } from "./updater";
 import { answerUpdateRequest, type FetchLike as UpdateFetch, makeFetchBytes, realFiles } from "./updatesGlue";
@@ -103,6 +105,15 @@ export function startMain(options: MainOptions): MainController | null {
         const creation = creationChoicesOf(key => controller.pluginValue("Settings", key));
         if (anyCreationChoice(creation) && !controller.bootInfo().safeMode) {
             hookBrowserWindow({ resolve: id => require.resolve(id), cache: require.cache }, creation, text => { trace(dataDir, text); });
+            // Discord's crash screen keeps its error to itself, so while these options are on the red errors of its page are copied to the boot trace (src/main/consoleErrors.ts).
+            app.on("browser-window-created", (_event, win) => {
+                try {
+                    win.webContents.on("console-message", makeConsoleErrorListener(text => { trace(dataDir, text); }) as never);
+                    if (creation.nativeTitleBar) probeTopBar(win.webContents, text => { trace(dataDir, text); });
+                } catch (error) {
+                    trace(dataDir, `window options: the page error diagnostic could not be added: ${error instanceof Error ? error.message : String(error)}`);
+                }
+            });
         }
     } catch (error) {
         trace(dataDir, `window options: the creation options FAILED ${error instanceof Error ? error.message : String(error)}`);

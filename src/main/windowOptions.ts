@@ -57,6 +57,7 @@ export function isCtrlQ(input: InputLike): boolean {
 /** The part of Electron's `BrowserWindow` used here. Every function but `webContents.on` may be missing. */
 export interface WindowLike {
     setMinimumSize?(width: number, height: number): void;
+    getMinimumSize?(): number[];
     setBackgroundMaterial?(material: BackgroundMaterial): void;
     close?(): void;
     isDestroyed?(): boolean;
@@ -70,7 +71,25 @@ export function applyWindowOptions(win: WindowLike, options: WindowOptions, trac
     if (options.removeMinimumSize) {
         try {
             if (typeof win.setMinimumSize === "function") {
-                win.setMinimumSize(0, 0);
+                const original = win.setMinimumSize.bind(win);
+                original(0, 0);
+                // Discord sets its own minimum size (940 by 500) after the window is created, which would undo this, so later asks for a minimum size are turned into zero by zero.
+                // Each ask is written in the trace (the first five), and a few seconds later the minimum size the window really has, because it is not known why it can still be stuck.
+                let asks = 0;
+                win.setMinimumSize = (width, height) => {
+                    original(0, 0);
+                    if (asks++ < 5) trace(`window options: Discord asked for a minimum size of ${String(width)} by ${String(height)}; it was kept at 0 by 0`);
+                };
+                const check = setTimeout(() => {
+                    try {
+                        if (win.isDestroyed?.() === true) return;
+                        const size = win.getMinimumSize?.();
+                        trace(`window options: the minimum size of a window is now ${size ? `${String(size[0])} by ${String(size[1])}` : "unknown"}`);
+                    } catch (error) {
+                        trace(`window options: reading the minimum size FAILED: ${failure(error)}`);
+                    }
+                }, 6000);
+                check.unref?.();
                 trace("window options: the minimum size was removed from a window");
             } else trace("window options: this window cannot have its minimum size removed");
         } catch (error) {
