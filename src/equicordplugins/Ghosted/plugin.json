@@ -1,0 +1,24 @@
+{
+    "schema": 1,
+    "id": "Ghosted",
+    "name": "Ghosted",
+    "version": "1.0.0",
+    "description": "A small ghost appears next to a direct message when the last message is theirs and you have not answered, and a counter at the top of the server list shows how many are waiting. Click the counter to see the list.",
+    "origin": "equicord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        { "name": "vei", "role": "original author" },
+        { "name": "sadan", "role": "original author" },
+        { "name": "justjxke", "role": "original author" },
+        { "name": "iamme", "role": "original author" },
+        { "name": "Neversleeper", "role": "Amiricord port" }
+    ],
+    "credits": [
+        { "name": "Vendicated and contributors (Vencord), vei, sadan, justjxke and iamme (Equicord), plugin Ghosted", "license": "GPL-3.0-or-later", "url": "https://github.com/Equicord/Equicord" }
+    ],
+    "tags": ["chat", "utility"],
+    "enabledByDefault": false,
+    "startAt": "webpackReady",
+    "entry": { "renderer": "index.tsx" },
+    "permissions": {}
+}
