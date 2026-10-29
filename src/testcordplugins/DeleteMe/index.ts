@@ -77,7 +77,7 @@ export function openWindow(ctx: EnginePluginContext): string | undefined {
         ctx.toasts.show(target, "failure");
         return undefined;
     }
-    const RestAPI = ctx.finders.byProps<RestApi>("get", "post", "put", "del").get();
+    const RestAPI = ctx.finders.byProps<RestApi>("get", "post", "put", "patch", "del", "!Request", "!getXHR").get();
     if (!RestAPI) {
         ctx.toasts.show("Discord's request function was not found. Try again in a moment.", "failure");
         return undefined;

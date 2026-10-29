@@ -530,7 +530,7 @@ describe("DeleteMe: the plugin", () => {
         const world = fakeContext();
         const key = openWindow(world.ctx);
         assert.equal(key, "key");
-        assert.deepEqual(world.asked, [["get", "post", "put", "del"]]);
+        assert.deepEqual(world.asked, [["get", "post", "put", "patch", "del", "!Request", "!getXHR"]]);
         assert.equal(world.opened.length, 1);
         assert.equal(typeof world.opened[0].render, "function");
         assert.equal(typeof world.opened[0].options?.onCloseCallback, "function");
