@@ -8,6 +8,8 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
 import { buildChatBar, type ChatBarButton, ChatBarHub, type ChatBarPage, MAX_BUTTONS_PER_PLUGIN, planSync } from "../src/api/chatBar";
+import { buildMessageEvents, createMessageEventHub } from "../src/api/messageEvents";
+import { reverseText } from "../src/equicordplugins/TalkInReverse/index";
 import { messageBody, SUPPRESS_NOTIFICATIONS } from "../src/testcordplugins/QuickMsg/index";
 
 const button = (id: string, extra: Partial<ChatBarButton> = {}): ChatBarButton => ({ id, label: `Button ${id}`, icon: { viewBox: "0 0 24 24", path: "M0 0h24v24H0z" }, onClick: () => undefined, ...extra });
@@ -69,5 +71,47 @@ describe("quick message", () => {
         assert.equal(messageBody("   \n", true, "1"), undefined);
         assert.deepEqual(messageBody("hi", true, "7"), { content: "hi", flags: SUPPRESS_NOTIFICATIONS, nonce: "7", tts: false });
         assert.equal(messageBody("hi", false, "7")?.flags, 0);
+    });
+});
+
+describe("talk in reverse", () => {
+    it("turns the text backwards by whole characters", () => {
+        assert.equal(reverseText("abc"), "cba");
+        assert.equal(reverseText("a😀b"), "b😀a");
+        assert.equal(reverseText(""), "");
+    });
+});
+
+describe("before send handlers", () => {
+    const channel = { id: "1" };
+
+    it("gives the text to each handler in turn and keeps it when a handler says nothing", () => {
+        const hub = createMessageEventHub();
+        const events = buildMessageEvents(hub, "P", () => undefined, () => undefined);
+        events.onBeforeSend(content => content + "!");
+        events.onBeforeSend(() => undefined);
+        events.onBeforeSend(content => content.toUpperCase());
+        assert.equal(hub.transform("hi", channel), "HI!");
+    });
+
+    it("skips a handler that throws, reports it and ignores an empty answer", () => {
+        const hub = createMessageEventHub();
+        const reported: string[] = [];
+        const events = buildMessageEvents(hub, "P", () => undefined, source => reported.push(source));
+        events.onBeforeSend(() => { throw new Error("broken"); });
+        events.onBeforeSend(() => "");
+        events.onBeforeSend(content => content + "?");
+        assert.equal(hub.transform("hi", channel), "hi?");
+        assert.deepEqual(reported, ["message before send"]);
+    });
+
+    it("takes a plugin's handlers back when it stops", () => {
+        const hub = createMessageEventHub();
+        let dispose = () => undefined as void;
+        const events = buildMessageEvents(hub, "P", callback => { dispose = callback; }, () => undefined);
+        events.onBeforeSend(() => "changed");
+        assert.equal(hub.transform("hi", channel), "changed");
+        dispose();
+        assert.equal(hub.transform("hi", channel), "hi");
     });
 });

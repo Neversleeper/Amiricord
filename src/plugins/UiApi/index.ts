@@ -13,6 +13,7 @@
 
 import { commandHub } from "../../api/commands";
 import { currentReact } from "../../api/jsxRuntime";
+import { messageEventHub, type OutgoingChannel } from "../../api/messageEvents";
 import { serverList, type ServerListPosition } from "../../api/serverList";
 import { userArea } from "../../api/userArea";
 import type { PluginCode } from "../../renderer/engine";
@@ -85,6 +86,7 @@ const plugin: PluginCode & {
     renderServerList(position: ServerListPosition): unknown[];
     renderUserArea(props: unknown): unknown[];
     withCommands(base: unknown): unknown;
+    transformOutgoing(content: string, channel: OutgoingChannel): string;
 } = {
     patches: [
         {
@@ -127,6 +129,17 @@ const plugin: PluginCode & {
             }]
         },
         {
+            // The message box: the typed text is turned into the message to send by `let E=X.parse(channel,text)`; the plugins may change the text first.
+            // Read from Discord build 655747 (module 688606, one match).
+            find: ".handleSendMessage,onResize:",
+            lazy: true,
+            required: false,
+            replacements: [{
+                match: /let (\i)=(\i\.\i)\.parse\((\i),(\i)\);\1\.tts=/,
+                replace: "let $1=$2.parse($3,$self.transformOutgoing($4,$3));$1.tts="
+            }]
+        },
+        {
             // The function that gives the built-in commands (the list of shrug, tableflip, tts...): the added commands come with it.
             find: "getBuiltInCommands",
             lazy: true,
@@ -156,6 +169,15 @@ const plugin: PluginCode & {
             return [react.createElement(userAreaSlot(), { key: "amiricord-user-area", nameplate: given?.nameplate })];
         } catch {
             return [];
+        }
+    },
+
+    /** Called by the patched Discord code with the text about to be sent and its channel: the text after the plugins changed it. Never throws. */
+    transformOutgoing(content, channel) {
+        try {
+            return messageEventHub.transform(content, channel);
+        } catch {
+            return content;
         }
     },
 

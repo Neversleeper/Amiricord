@@ -21,6 +21,7 @@ import { FluxDispatcherLike, FluxHandlers, subscribeFlux } from "../api/flux";
 import { setReactSource } from "../api/jsxRuntime";
 import { LifecycleEvent, LifecycleOptions, PluginContext, PluginLifecycle, PluginRuntime } from "../api/lifecycle";
 import { locateMenuParts, type MenuParts } from "../api/menuParts";
+import { buildMessageEvents, messageEventHub, type PluginMessageEvents } from "../api/messageEvents";
 import { buildModals, PluginModals } from "../api/modals";
 import { buildNative, PluginNativeCaller } from "../api/native";
 import { type NativeMenuHub, nativeMenus } from "../api/nativeMenus";
@@ -162,6 +163,8 @@ export interface EnginePluginContext extends PluginContext {
     commands: PluginCommands;
     /** Buttons in the row at the right of the message box. They go when the plugin stops. See `src/api/chatBar.ts`. */
     chatBar: PluginChatBar;
+    /** Change the text of a message just before it is sent. They go when the plugin stops. See `src/api/messageEvents.ts`. */
+    messageEvents: PluginMessageEvents;
     /** A short message at the bottom of the page. See `src/api/toasts.ts`. */
     toasts: PluginToasts;
     /** Opens Discord's dialogs and closes what this plugin left open when it stops. See `src/api/modals.ts`. */
@@ -627,6 +630,7 @@ export function startEngine(options: EngineOptions): Engine {
                 userArea: buildUserArea(userArea, id, ctx.onDispose),
                 settingsTabs: buildSettingsTabs(settingsTabs, id, ctx.onDispose),
                 commands: buildCommands(commandHub, id, ctx.onDispose, reportError),
+                messageEvents: buildMessageEvents(messageEventHub, id, ctx.onDispose, reportError),
                 chatBar: chatBarHub ? buildChatBar(chatBarHub, id, ctx.onDispose) : { add: () => false, refresh: () => undefined },
                 toasts: havePage ? buildToasts(globalThis as unknown as ToastPage, css => { addCommonStyle(css, "toasts"); }, ctx.onDispose) : { show: () => undefined },
                 modals: buildModals(pluginFinders, ctx.onDispose, reportError),
