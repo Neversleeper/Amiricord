@@ -1,0 +1,21 @@
+{
+    "schema": 1,
+    "id": "LastActive",
+    "name": "Last Active",
+    "version": "1.0.0",
+    "description": "Jump to the last message you, or another person, wrote in a channel, from the right-click menu of a channel, a thread or a user.",
+    "origin": "equicord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        { "name": "Crxa", "role": "original author" },
+        { "name": "Neversleeper", "role": "Amiricord port" }
+    ],
+    "credits": [
+        { "name": "Vendicated and contributors (Vencord), Crxa (Equicord), plugin LastActive", "license": "GPL-3.0-or-later", "url": "https://github.com/Equicord/Equicord" }
+    ],
+    "tags": ["chat", "utility"],
+    "enabledByDefault": false,
+    "startAt": "webpackReady",
+    "entry": { "renderer": "index.tsx" },
+    "permissions": {}
+}

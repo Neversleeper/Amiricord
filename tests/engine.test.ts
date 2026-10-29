@@ -377,6 +377,19 @@ describe("finders and the global entry", () => {
         assert.deepEqual(failures, ["NoDb: storage is not available in this page"]);
     });
 
+    it("gives ctx.modules only to a plugin whose manifest declares dynamic code", async () => {
+        const seen: Record<string, string> = {};
+        const dynamic = { ...plugin("Dynamic"), permissions: { code: { dynamic: true } } };
+        const t = setup([dynamic, plugin("Plain")], {
+            Dynamic: { start(ctx) { seen.Dynamic = `${typeof ctx.modules?.loaded}/${typeof ctx.modules?.sourceOf}/${Array.isArray(ctx.modules?.loaded())}`; } },
+            Plain: { start(ctx) { seen.Plain = String(typeof ctx.modules); } }
+        });
+        t.boot();
+        t.dom();
+        await t.engine.done;
+        assert.deepEqual(seen, { Dynamic: "function/function/true", Plain: "undefined" });
+    });
+
     it("lets plugins find what Discord has already loaded", async () => {
         let found: unknown;
         const t = setup([plugin("Looker")], { Looker: { start(ctx) { found = ctx.finders.byProps<{ send: unknown; }>("send").get()?.send; } } });

@@ -1,0 +1,27 @@
+{
+    "schema": 1,
+    "id": "MoreUserTags",
+    "name": "More User Tags",
+    "version": "1.0.0",
+    "description": "Adds tags for the owner of a server and for people with administrator, staff, moderator and similar permissions, next to their name in the member list and in their profile.",
+    "origin": "equicord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        { "name": "Cyn", "role": "original author" },
+        { "name": "TheSun", "role": "original author" },
+        { "name": "RyanCaoDev", "role": "original author" },
+        { "name": "LordElias", "role": "original author" },
+        { "name": "AutumnVN", "role": "original author" },
+        { "name": "Hen", "role": "original author" },
+        { "name": "meowabyte", "role": "original author" },
+        { "name": "Neversleeper", "role": "Amiricord port" }
+    ],
+    "credits": [
+        { "name": "Vendicated and contributors (Vencord), Cyn, TheSun, RyanCaoDev, LordElias, AutumnVN (Vencord) and Hen, meowabyte (Equicord), plugin MoreUserTags", "license": "GPL-3.0-or-later", "url": "https://github.com/Equicord/Equicord" }
+    ],
+    "tags": ["ui"],
+    "enabledByDefault": false,
+    "startAt": "webpackReady",
+    "entry": { "renderer": "index.tsx" },
+    "permissions": {}
+}

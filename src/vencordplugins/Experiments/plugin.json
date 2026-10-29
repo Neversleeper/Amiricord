@@ -1,0 +1,25 @@
+{
+    "schema": 1,
+    "id": "Experiments",
+    "name": "Experiments",
+    "version": "1.0.0",
+    "description": "Turns on Discord's developer mode and the internal tools that go with it: the experiments page, experiment links and their embed. Experiments are unreleased features: they can break your client and, if Discord decides so, put your account at risk. Only for people who know what they are doing.",
+    "origin": "vencord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        { "name": "Megu", "role": "original author" },
+        { "name": "Ven", "role": "original author" },
+        { "name": "Nickyux", "role": "original author" },
+        { "name": "BanTheNons", "role": "original author" },
+        { "name": "Nuckyz", "role": "original author" },
+        { "name": "Neversleeper", "role": "Amiricord port" }
+    ],
+    "credits": [
+        { "name": "Vendicated and contributors (Vencord), plugin Experiments", "license": "GPL-3.0-or-later", "url": "https://github.com/Vendicated/Vencord" }
+    ],
+    "tags": ["developer", "experimental"],
+    "enabledByDefault": false,
+    "startAt": "webpackReady",
+    "entry": { "renderer": "index.tsx" },
+    "permissions": {}
+}

@@ -52,6 +52,20 @@ export function nativeModulesSource(entries: readonly PluginEntryFile[]): string
 }
 
 /**
+ * The `bundledPlugins` module of the BetterDiscord plugin: the text of every `*.plugin.js` file in `src/betterdiscordplugins`. The text is JSON-encoded, so nothing in a plugin
+ * can break out of the string. These files are the only BetterDiscord code that can ever run; the layer reads nothing from the disk or the network at run time.
+ */
+export function bundledBdPluginsSource(files: ReadonlyArray<{ file: string; code: string; }>): string {
+    const sorted = [...files].sort((a, b) => (a.file < b.file ? -1 : a.file > b.file ? 1 : 0));
+    return [
+        "import type { BdSourceFile } from \"./manager\";",
+        "",
+        `export const bundledPlugins: readonly BdSourceFile[] = ${JSON.stringify(sorted, null, 4)};`,
+        ""
+    ].join("\n");
+}
+
+/**
  * What the page gets about each plugin: what it needs to decide which plugins run, and what the Plugins page shows (the cards:
  * description, authors, credits, declared permissions, whether it has patches). Never the secret setting names, the path on this
  * machine, the permissions hash or the entry files.

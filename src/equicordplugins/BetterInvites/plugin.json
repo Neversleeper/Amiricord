@@ -1,0 +1,22 @@
+{
+    "schema": 1,
+    "id": "BetterInvites",
+    "name": "Better Invites",
+    "version": "1.0.0",
+    "description": "On a server invite: see when it expires, see who sent it, and click the server name to look inside before joining (only for servers that are open to discovery).",
+    "origin": "equicord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        { "name": "iamme", "role": "original author" },
+        { "name": "thororen", "role": "original author" },
+        { "name": "Neversleeper", "role": "Amiricord port" }
+    ],
+    "credits": [
+        { "name": "Vendicated and contributors (Vencord), iamme and thororen (Equicord), plugin BetterInvites", "license": "GPL-3.0-or-later", "url": "https://github.com/Equicord/Equicord" }
+    ],
+    "tags": ["chat", "ui"],
+    "enabledByDefault": false,
+    "startAt": "init",
+    "entry": { "renderer": "index.tsx" },
+    "permissions": {}
+}

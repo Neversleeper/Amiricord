@@ -1,0 +1,23 @@
+{
+    "schema": 1,
+    "id": "CrashFixes",
+    "name": "Crash Fixes",
+    "version": "1.0.0",
+    "description": "Small fixes for Discord crashes: an unknown stream resolution or frame rate no longer throws, a race in Discord's database worker is reordered, a database that fails to open no longer breaks start-up, and the GIF picker's right-click menu gets the GIF's full details.",
+    "origin": "equicord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        { "name": "thororen", "role": "original author" },
+        { "name": "nyx", "role": "original author" },
+        { "name": "Naibuu", "role": "original author" },
+        { "name": "Neversleeper", "role": "Amiricord port" }
+    ],
+    "credits": [
+        { "name": "Vendicated and contributors (Vencord), thororen, nyx and Naibuu (Equicord), the patches of plugin EquicordHelper", "license": "GPL-3.0-or-later", "url": "https://github.com/Equicord/Equicord" }
+    ],
+    "tags": ["utility"],
+    "enabledByDefault": true,
+    "startAt": "init",
+    "entry": { "renderer": "index.ts" },
+    "permissions": {}
+}

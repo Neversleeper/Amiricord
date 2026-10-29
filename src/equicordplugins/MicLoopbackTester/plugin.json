@@ -1,0 +1,21 @@
+{
+    "schema": 1,
+    "id": "MicLoopbackTester",
+    "name": "Mic Loopback Tester",
+    "version": "1.0.0",
+    "description": "Adds a button to the user panel (next to the microphone and headphones) that plays your own microphone back to you, so you can hear how you sound. Pressing it again stops the test.",
+    "origin": "equicord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        { "name": "benjii", "role": "original author" },
+        { "name": "Neversleeper", "role": "Amiricord port" }
+    ],
+    "credits": [
+        { "name": "Vendicated and contributors (Vencord), benjii (Equicord), plugin MicLoopbackTester", "license": "GPL-3.0-or-later", "url": "https://github.com/Equicord/Equicord" }
+    ],
+    "tags": ["voice", "utility"],
+    "enabledByDefault": false,
+    "startAt": "webpackReady",
+    "entry": { "renderer": "index.tsx" },
+    "permissions": {}
+}

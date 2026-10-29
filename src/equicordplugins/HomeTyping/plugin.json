@@ -1,0 +1,21 @@
+{
+    "schema": 1,
+    "id": "HomeTyping",
+    "name": "Home Typing",
+    "version": "1.0.0",
+    "description": "Changes the home button into a typing indicator (three dots) while someone in your direct messages is typing.",
+    "origin": "equicord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        { "name": "Samwich", "role": "original author" },
+        { "name": "Neversleeper", "role": "Amiricord port" }
+    ],
+    "credits": [
+        { "name": "Vendicated and contributors (Vencord), Samwich (Equicord), plugin HomeTyping", "license": "GPL-3.0-or-later", "url": "https://github.com/Equicord/Equicord" }
+    ],
+    "tags": ["ui"],
+    "enabledByDefault": false,
+    "startAt": "webpackReady",
+    "entry": { "renderer": "index.tsx" },
+    "permissions": {}
+}

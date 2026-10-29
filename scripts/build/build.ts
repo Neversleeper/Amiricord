@@ -11,7 +11,7 @@
 //   renderer.js  page script (IIFE; the preload wraps it so it can learn the bridge name)
 // Nothing is installed anywhere: the installer (stage 4) is what puts dist into Discord.
 
-import { mkdirSync, statSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { join, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -19,7 +19,7 @@ import { build, BuildOptions, Plugin } from "esbuild";
 
 import { ENGINE_APIS } from "../../src/shared/manifest";
 import { PROJECT_NAME } from "../../src/shared/project";
-import { generatedModules } from "./generate";
+import { bundledBdPluginsSource, generatedModules } from "./generate";
 import { JSX_BUILD_OPTIONS, JSX_IMPORT_SOURCE } from "./jsxOptions";
 import { checkPlugins, formatReport } from "./manifest/checkPlugins";
 import { buildRegistry, serializeRegistry } from "./manifest/registry";
@@ -58,6 +58,24 @@ function generatedPlugin(sources: { pluginModules: string; registryData: string;
                 // Generated code imports `./engine` and the plugins' own files.
                 resolveDir: join(srcRoot, "renderer")
             }));
+        }
+    };
+}
+
+/** Replaces the empty list of the BetterDiscord plugin with the `*.plugin.js` files of `src/betterdiscordplugins`. */
+function bundledBdPlugins(srcRoot: string): Plugin {
+    const folder = join(srcRoot, "betterdiscordplugins");
+    const files = existsSync(folder)
+        ? readdirSync(folder).filter(name => name.endsWith(".plugin.js")).map(name => ({ file: name, code: readFileSync(join(folder, name), "utf8") }))
+        : [];
+    return {
+        name: "bundled-bd-plugins",
+        setup(b) {
+            b.onResolve({ filter: /^\.\/bundled$/ }, args => {
+                if (!args.importer.replaceAll("\\", "/").endsWith("/src/plugins/BetterDiscord/index.tsx")) return undefined;
+                return { path: "bundled", namespace: "generated-bd" };
+            });
+            b.onLoad({ filter: /.*/, namespace: "generated-bd" }, () => ({ contents: bundledBdPluginsSource(files), loader: "ts", resolveDir: join(srcRoot, "plugins/BetterDiscord") }));
         }
     };
 }
@@ -124,7 +142,7 @@ export async function buildAll(settings: BuildSettings): Promise<BuildSummary> {
             format: "iife",
             target: "chrome120",
             ...pageOptions(srcRoot),
-            plugins: [generatedPlugin(generated.sources, srcRoot)]
+            plugins: [generatedPlugin(generated.sources, srcRoot), bundledBdPlugins(srcRoot)]
         })
     ]);
 

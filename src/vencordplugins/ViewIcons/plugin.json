@@ -1,0 +1,29 @@
+{
+    "schema": 1,
+    "id": "ViewIcons",
+    "name": "View Icons",
+    "version": "1.0.0",
+    "description": "Click a profile banner to see it large, and get View Avatar, View Server Avatar, View Avatar Decoration, View Icon and View Banner in the right-click menus of users, servers and group chats.",
+    "origin": "vencord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        { "name": "Vendicated", "role": "original author" },
+        { "name": "TheKodeToad", "role": "original author" },
+        { "name": "Nuckyz", "role": "original author" },
+        { "name": "nyx", "role": "original author" },
+        { "name": "Neversleeper", "role": "Amiricord port" }
+    ],
+    "credits": [
+        { "name": "Vendicated and contributors (Vencord), plugin ViewIcons", "license": "GPL-3.0-or-later", "url": "https://github.com/Vendicated/Vencord" }
+    ],
+    "tags": ["media", "ui"],
+    "enabledByDefault": false,
+    "startAt": "init",
+    "entry": { "renderer": "index.tsx" },
+    "permissions": {
+        "network": [
+            { "host": "cdn.discordapp.com", "from": "renderer", "why": "downloads the picture when you press Save image" },
+            { "host": "media.discordapp.net", "from": "renderer", "why": "downloads the picture when you press Save image" }
+        ]
+    }
+}

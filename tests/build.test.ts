@@ -30,10 +30,10 @@ afterEach(() => { rmSync(root, { recursive: true, force: true }); });
 const read = (...parts: string[]) => readFileSync(join(root, ...parts), "utf8");
 
 /** Run the bundled page script the way the preload would, with a fake bridge, and return what it sent. */
-async function runPage(bundle: string, extra: Record<string, unknown> = {}) {
+async function runPage(bundle: string, extra: Record<string, unknown> = {}, switchedOn: string[] = []) {
     const events: HealthEvent[] = [];
     const bridge = {
-        bootInfo: { safeMode: false, safeModeReason: null, quarantine: [], enteredSafeMode: false, problems: [], devMode: false, settings: { schema: 1, plugins: {} } },
+        bootInfo: { safeMode: false, safeModeReason: null, quarantine: [], enteredSafeMode: false, problems: [], devMode: false, settings: { schema: 1, plugins: Object.fromEntries(switchedOn.map(id => [id, { enabled: true }])) } },
         // Objects made inside the page belong to another realm, so they are copied before they are compared.
         sendHealth: (event: HealthEvent) => { events.push(JSON.parse(JSON.stringify(event))); },
         cleanBoot: () => { /* not reached inside this test's lifetime */ },
@@ -127,11 +127,11 @@ describe("the build", () => {
         for (const file of ["main.js", "preload.js", "renderer.js"]) assert.match(read(file), /SPDX-License-Identifier: GPL-3\.0-or-later/);
 
         const { events } = await runPage(read("renderer.js"));
-        // The self-test also reports at once that this test page has no WebSocket to watch: "not seen", never a pass; NoTrack, ContextMenuApi, NoDevtoolsWarning and UiApi start at once (stage init).
-        assert.deepEqual(events.map(e => e.type), ["enabled", "discord-build", "self-test", "started", "started", "started", "started"]);
+        // The self-test also reports at once that this test page has no WebSocket to watch: "not seen", never a pass; NoTrack, ContextMenuApi, CrashFixes, DevToolsShortcut, NoDevtoolsWarning and UiApi start at once (stage init).
+        assert.deepEqual(events.map(e => e.type), ["enabled", "discord-build", "self-test", "started", "started", "started", "started", "started", "started"]);
         const selfTest = events.find(e => e.type === "self-test");
         assert.ok(selfTest && selfTest.type === "self-test" && selfTest.name === "first-gateway-message" && selfTest.status === "not-seen");
-        assert.deepEqual(events[0], { type: "enabled", plugins: ["Badges", "ContextMenuApi", "NoDevtoolsWarning", "NoTrack", "Settings", "UiApi"] });
+        assert.deepEqual(events[0], { type: "enabled", plugins: ["Badges", "BetterDiscord", "ContextMenuApi", "CrashFixes", "DevToolsShortcut", "NoDevtoolsWarning", "NoTrack", "Settings", "UiApi"] });
     });
 
     it("includes a plugin's code in the page script and starts it", async () => {
@@ -157,7 +157,7 @@ describe("the build", () => {
 
         const { events, page } = await runPage(readFileSync(join(out, "renderer.js"), "utf8"));
         assert.equal((page as Record<string, unknown>).startedBy, "Demo");
-        assert.deepEqual(events.find(e => e.type === "enabled"), { type: "enabled", plugins: ["Badges", "ContextMenuApi", "Demo", "NoDevtoolsWarning", "NoTrack", "Settings", "UiApi"] });
+        assert.deepEqual(events.find(e => e.type === "enabled"), { type: "enabled", plugins: ["Badges", "BetterDiscord", "ContextMenuApi", "CrashFixes", "Demo", "DevToolsShortcut", "NoDevtoolsWarning", "NoTrack", "Settings", "UiApi"] });
         assert.equal(events.some(e => e.type === "started" && e.plugin === "Demo"), true);
     });
 
@@ -183,7 +183,7 @@ describe("the build", () => {
 
     it("does not run any code of a plugin that is switched off, even what its file does outside start()", async () => {
         const { page, events } = await buildWithFlagPlugin(false);
-        assert.deepEqual(events.find(e => e.type === "enabled"), { type: "enabled", plugins: ["Badges", "ContextMenuApi", "NoDevtoolsWarning", "NoTrack", "Settings", "UiApi"] });
+        assert.deepEqual(events.find(e => e.type === "enabled"), { type: "enabled", plugins: ["Badges", "BetterDiscord", "ContextMenuApi", "CrashFixes", "DevToolsShortcut", "NoDevtoolsWarning", "NoTrack", "Settings", "UiApi"] });
         assert.equal((page as Record<string, unknown>).flagFileRan, undefined);
     });
 

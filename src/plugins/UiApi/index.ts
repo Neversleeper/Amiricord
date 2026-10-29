@@ -14,6 +14,7 @@
 import { commandHub } from "../../api/commands";
 import { currentReact } from "../../api/jsxRuntime";
 import { serverList, type ServerListPosition } from "../../api/serverList";
+import { userArea } from "../../api/userArea";
 import type { PluginCode } from "../../renderer/engine";
 
 type Maker = (component: unknown, key: string, plugin: string) => unknown;
@@ -62,8 +63,27 @@ function slotFor(position: ServerListPosition): unknown {
     return slot;
 }
 
+/** The one component that draws every plugin button of the bar, made for the React Discord runs. */
+let userAreaComponent: { react: unknown; type: unknown; } | undefined;
+
+function userAreaSlot(): unknown {
+    const react = currentReact();
+    if (userAreaComponent?.react === react) return userAreaComponent.type;
+    const type = function AmiricordUserAreaSlot(props: { nameplate?: unknown; }) {
+        react.useSyncExternalStore(userArea.subscribe, userArea.version);
+        return react.createElement(react.Fragment, null, ...userArea.render((component, key) => {
+            const inner = react.createElement(component, { nameplate: props.nameplate, iconForeground: undefined });
+            const boundary = boundaryType();
+            return boundary ? react.createElement(boundary, { key }, inner) : react.createElement(react.Fragment, { key }, inner);
+        }));
+    };
+    userAreaComponent = { react, type };
+    return type;
+}
+
 const plugin: PluginCode & {
     renderServerList(position: ServerListPosition): unknown[];
+    renderUserArea(props: unknown): unknown[];
     withCommands(base: unknown): unknown;
 } = {
     patches: [
@@ -96,6 +116,17 @@ const plugin: PluginCode & {
             ]
         },
         {
+            // The bar at the bottom left (microphone, headphones, settings): the buttons added by plugins come first. The text was read from Discord build 653945, where the
+            // function that draws the bar returns a row whose first child is the microphone button (it takes `accountContainerRef`).
+            find: "accountContainerRef:",
+            lazy: true,
+            required: false,
+            replacements: [{
+                match: /children:\[(?=\(0,\i\.jsx\)\(\i,\{accountContainerRef:\i,selfMute)/,
+                replace: "children:[...$self.renderUserArea(arguments[0]),"
+            }]
+        },
+        {
             // The function that gives the built-in commands (the list of shrug, tableflip, tts...): the added commands come with it.
             find: "getBuiltInCommands",
             lazy: true,
@@ -112,6 +143,17 @@ const plugin: PluginCode & {
         try {
             const react = currentReact();
             return [react.createElement(slotFor(position), { key: `amiricord-slot-${position}` })];
+        } catch {
+            return [];
+        }
+    },
+
+    /** Called by the patched Discord code with the props of the bar: the buttons of the plugins, drawn by one component that listens to the hub. Never throws. */
+    renderUserArea(props) {
+        try {
+            const react = currentReact();
+            const given = props as { nameplate?: unknown; iconForeground?: string; } | undefined;
+            return [react.createElement(userAreaSlot(), { key: "amiricord-user-area", nameplate: given?.nameplate })];
         } catch {
             return [];
         }

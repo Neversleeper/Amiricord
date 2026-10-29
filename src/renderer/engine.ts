@@ -34,6 +34,7 @@ import { type AudioLike, createSoundLayer, locateSoundContext, type PluginSounds
 import { buildStorage, indexedDbBackend, IndexedDbFactory, PluginStorage, StorageBackend } from "../api/storage";
 import { pageStyleHost, StyleHandle, StyleHost, StyleManager } from "../api/styles";
 import { buildToasts, type PluginToasts, type ToastPage } from "../api/toasts";
+import { buildUserArea, type PluginUserArea, userArea } from "../api/userArea";
 import { type BlockLog, parseBlockLog } from "../shared/blocks";
 import { computeEnabledSet, PluginInfo } from "../shared/enabledSet";
 import { HealthEvent, redact } from "../shared/health";
@@ -138,6 +139,11 @@ export interface EnginePluginContext extends PluginContext {
         /** Look for a newer version ("check") or install it ("install"). Null when the main process did not answer or the answer was not in the expected form. */
         updates(request: UpdateRequest): Promise<UpdateAnswer | null>;
     };
+    /**
+     * Discord's modules that have already run, with their exports and original source. Only a plugin whose manifest declares `permissions.code.dynamic` gets it: it lets code
+     * look through every export, which a finder (a named question) does not. Used by the BetterDiscord layer.
+     */
+    modules?: { loaded(): Array<{ id: string; exports: unknown; }>; sourceOf(id: string): string | undefined; };
     /** Finders that report their misses against this plugin. */
     finders: ReturnType<FinderEngine["forPlugin"]>;
     /** Discord's stores and dispatcher by name, found through this plugin's own finders. See `src/api/commonStores.ts`. */
@@ -146,6 +152,8 @@ export interface EnginePluginContext extends PluginContext {
     menuItems: PluginContextMenus;
     /** Things drawn in Discord's server list (above, in, below). They go when the plugin stops. See `src/api/serverList.ts`. */
     serverList: PluginServerList;
+    /** Buttons in the user panel at the bottom left. They go when the plugin stops. See `src/api/userArea.ts`. */
+    userArea: PluginUserArea;
     /** Slash commands. They go when the plugin stops. See `src/api/commands.ts`. */
     commands: PluginCommands;
     /** A short message at the bottom of the page. See `src/api/toasts.ts`. */
@@ -607,6 +615,7 @@ export function startEngine(options: EngineOptions): Engine {
                 common: buildCommon(pluginFinders),
                 menuItems: menuHub ? buildContextMenus(menuHub, id, ctx.onDispose) : { add: () => undefined },
                 serverList: buildServerList(serverList, id, ctx.onDispose),
+                userArea: buildUserArea(userArea, id, ctx.onDispose),
                 commands: buildCommands(commandHub, id, ctx.onDispose, reportError),
                 toasts: havePage ? buildToasts(globalThis as unknown as ToastPage, css => { addCommonStyle(css, "toasts"); }, ctx.onDispose) : { show: () => undefined },
                 modals: buildModals(pluginFinders, ctx.onDispose, reportError),
@@ -619,6 +628,7 @@ export function startEngine(options: EngineOptions): Engine {
                 components: pluginComponents,
                 addStyle: styles.forRun(id, ctx.onDispose),
                 reportError,
+                ...(info.permissions?.code.dynamic === true ? { modules: { loaded: () => view.loadedModules(), sourceOf: (moduleId: string) => view.sourceOf(moduleId) } } : {}),
                 ...(info.core ? { settingsAdmin: settingsClient, plugins: pluginCards, engine: engineApi, privacy: privacyApi } : {})
             };
         };

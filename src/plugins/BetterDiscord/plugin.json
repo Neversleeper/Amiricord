@@ -1,0 +1,23 @@
+{
+    "schema": 1,
+    "id": "BetterDiscord",
+    "name": "BetterDiscord Plugins",
+    "version": "1.0.0",
+    "description": "Runs BetterDiscord plugins (.plugin.js files) inside Amiricord. Only plugins that were bundled into this build by its owners are run; nothing is downloaded or read from your disk. This layer is always on, but it runs nothing by itself: every BetterDiscord plugin has its own switch in this plugin's settings and is off until you switch it on. A BetterDiscord plugin can do anything a plugin of Amiricord can (it is not limited by permissions), so switch on only the ones you trust.",
+    "origin": "amiricord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        { "name": "Neversleeper", "discordId": "1564847328794382408", "github": "https://github.com/Neversleeper" }
+    ],
+    "credits": [
+        { "name": "BetterDiscord, the plugin format and the BdApi it documents (no code copied)", "license": "Apache-2.0", "url": "https://github.com/BetterDiscord/BetterDiscord" }
+    ],
+    "tags": ["developer", "utility"],
+    "core": true,
+    "enabledByDefault": true,
+    "startAt": "webpackReady",
+    "entry": { "renderer": "index.tsx" },
+    "permissions": {
+        "code": { "dynamic": true }
+    }
+}
