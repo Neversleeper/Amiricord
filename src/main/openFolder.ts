@@ -25,9 +25,9 @@ export interface OpenFolderDeps {
 export const REVEAL_FILE = "state.json";
 
 /** Never throws. */
-export async function openDataFolder(deps: OpenFolderDeps): Promise<void> {
+export async function openDataFolder(deps: OpenFolderDeps, file: string = REVEAL_FILE): Promise<void> {
     try {
-        deps.reveal(join(deps.folder, REVEAL_FILE));
+        deps.reveal(join(deps.folder, file));
         deps.trace("open data folder: asked the explorer to show a file inside it");
         return;
     } catch (error) {

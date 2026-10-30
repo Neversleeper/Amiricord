@@ -4,11 +4,19 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-// A tab a plugin adds to the Amiricord section of Discord's settings: `ctx.settingsTabs.add({ title, Component })`. TestCord let a plugin push itself into the list of the
-// settings plugin (the Token Login Manager is a tab there); here the plugin asks through its context and the core plugin Settings draws the tab after its own ones, inside
-// the same error boundary and with the same sidebar look. One tab per plugin, and it goes when the plugin stops. The tab is drawn the next time Settings is opened (Discord
-// builds the settings tree when Settings opens, so a tab added while Settings is open shows from the next opening). Nothing here was tried in a real Discord.
+// Tabs a plugin adds to the Amiricord section of Discord's settings (the sidebar, under "Amiricord Settings"): `ctx.settingsTabs.add("logs", { title, Component })`.
+// The core plugin Settings reads this hub when it builds the settings tree and draws each tab inside an error boundary of its own, so a tab that fails to draw cannot break the
+// others. The tab's place in the list is after the core tabs, in the order the plugins added them, and the owner can hide or move it in Editor Mode like any other (its key is
+// `<plugin>:<key>`, so two plugins can never clash). A plugin's tabs go when it stops. No permission is needed: a tab only draws inside the plugin's own place in the settings.
+// This is what Vencord's `SettingsPlugin.customEntries` is used for; written from scratch for Amiricord's own settings tree. Nothing here was tried in a real Discord.
 
+export const MAX_SETTINGS_TABS_PER_PLUGIN = 3;
+/** The key a tab gets when a plugin adds it with the short form, `add(tab)`. */
+const SINGLE_TAB_KEY = "main";
+const MAX_TITLE_CHARS = 40;
+const KEY_PATTERN = /^[a-z0-9][a-z0-9-]{0,31}$/i;
+
+/** What a plugin gives for one tab. */
 export interface PluginSettingsTab {
     /** The sidebar text. */
     title: string;
@@ -16,57 +24,116 @@ export interface PluginSettingsTab {
     panelTitle?: string;
     /** The React component that draws the tab. */
     Component: unknown;
-    /** Draws the sidebar icon; a plain default is used when missing. */
+    /** Draws the sidebar icon (a function returning a React element); a plain default is used when missing. */
     icon?: () => unknown;
 }
 
 export interface PluginSettingsTabs {
-    /** Show a tab for this plugin. A second call replaces the first. Returns false when the tab is not valid. */
-    add(tab: PluginSettingsTab): boolean;
+    /**
+     * Add a tab. `key` is 1 to 32 letters, digits or dashes. Returns the function that takes the tab out again; a tab that is refused (a bad key or title, a component that is not a
+     * component, a repeated key, more than three tabs) is written in the plugin's health report and the function does nothing. The tab goes by itself when the plugin stops.
+     */
+    add(key: string, tab: PluginSettingsTab): () => void;
+    /** The short form, for a plugin with a single tab: the same as `add("main", tab)`. */
+    add(tab: PluginSettingsTab): () => void;
 }
 
-export interface SettingsTabEntry extends PluginSettingsTab {
-    /** `plugin-<id>`: unique among tabs; the sidebar nodes get keys derived from it. */
+/** One tab as the Settings plugin reads it. */
+export interface SettingsTabEntry {
+    /** `<plugin>:<key>`. */
     key: string;
     plugin: string;
+    title: string;
+    panelTitle?: string;
+    Component: unknown;
+    icon?: () => unknown;
 }
 
-export const MAX_TITLE_CHARS = 40;
-
-export interface SettingsTabsHub {
-    add(plugin: string, tab: PluginSettingsTab): boolean;
+export interface SettingsTabHub {
+    /** Add a tab of `plugin`. Returns why it was refused, or null. */
+    add(plugin: string, key: string, tab: PluginSettingsTab): string | null;
+    remove(plugin: string, key: string): void;
     removeAll(plugin: string): void;
-    /** The tabs in the order they were added. Copies; never throws. */
+    /** The tabs, in the order they were added. */
     list(): SettingsTabEntry[];
+    subscribe(listener: () => void): () => void;
+    version(): number;
 }
 
-const ID = /^[A-Za-z0-9_-]{1,64}$/;
+const isComponent = (value: unknown) => typeof value === "function" || (typeof value === "object" && value !== null);
 
-export function createSettingsTabsHub(): SettingsTabsHub {
+export function createSettingsTabHub(): SettingsTabHub {
     let entries: SettingsTabEntry[] = [];
+    let version = 0;
+    const listeners = new Set<() => void>();
+
+    const changed = () => {
+        version++;
+        for (const listener of [...listeners]) {
+            try { listener(); } catch { /* a broken listener does not stop the others */ }
+        }
+    };
+
     return {
-        add(plugin, tab) {
-            if (!ID.test(plugin)) return false;
-            if (typeof tab?.title !== "string" || tab.title.trim() === "" || tab.title.length > MAX_TITLE_CHARS) return false;
-            if (tab.panelTitle !== undefined && (typeof tab.panelTitle !== "string" || tab.panelTitle.length > MAX_TITLE_CHARS * 2)) return false;
-            if (typeof tab.Component !== "function") return false;
-            if (tab.icon !== undefined && typeof tab.icon !== "function") return false;
-            const entry: SettingsTabEntry = { key: `plugin-${plugin}`, plugin, title: tab.title.trim(), panelTitle: tab.panelTitle?.trim() || undefined, Component: tab.Component, icon: tab.icon };
-            const at = entries.findIndex(existing => existing.plugin === plugin);
-            entries = at === -1 ? [...entries, entry] : entries.map((existing, index) => (index === at ? entry : existing));
-            return true;
+        add(plugin, key, tab) {
+            if (typeof key !== "string" || !KEY_PATTERN.test(key)) return "the key of a settings tab is 1 to 32 letters, digits or dashes";
+            if (typeof tab !== "object" || tab === null) return "a settings tab needs a title and a component";
+            if (typeof tab.title !== "string" || tab.title.trim() === "" || tab.title.length > MAX_TITLE_CHARS) return `the title of a settings tab is 1 to ${MAX_TITLE_CHARS} characters`;
+            if (tab.panelTitle !== undefined && (typeof tab.panelTitle !== "string" || tab.panelTitle.length > MAX_TITLE_CHARS)) return `the panel title of a settings tab is at most ${MAX_TITLE_CHARS} characters`;
+            if (!isComponent(tab.Component)) return "the component of a settings tab is not a component";
+            if (tab.icon !== undefined && typeof tab.icon !== "function") return "the icon of a settings tab must be a function";
+            const full = `${plugin}:${key}`;
+            if (entries.some(entry => entry.key === full)) return `there is already a settings tab called "${key}" from this plugin`;
+            if (entries.filter(entry => entry.plugin === plugin).length >= MAX_SETTINGS_TABS_PER_PLUGIN) return `a plugin can add at most ${MAX_SETTINGS_TABS_PER_PLUGIN} settings tabs`;
+            entries = [...entries, { key: full, plugin, title: tab.title.trim(), panelTitle: tab.panelTitle?.trim() || undefined, Component: tab.Component, icon: tab.icon }];
+            changed();
+            return null;
         },
+
+        remove(plugin, key) {
+            const full = `${plugin}:${key}`;
+            const before = entries.length;
+            entries = entries.filter(entry => entry.key !== full);
+            if (entries.length !== before) changed();
+        },
+
         removeAll(plugin) {
+            const before = entries.length;
             entries = entries.filter(entry => entry.plugin !== plugin);
+            if (entries.length !== before) changed();
         },
-        list: () => entries.map(entry => ({ ...entry }))
+
+        list: () => entries,
+
+        subscribe(listener) {
+            listeners.add(listener);
+            return () => { listeners.delete(listener); };
+        },
+
+        version: () => version
     };
 }
 
-/** The hub the core plugin Settings and the engine share. */
-export const settingsTabs: SettingsTabsHub = createSettingsTabsHub();
+/** The hub the engine and the core plugin Settings share. */
+export const settingsTabs: SettingsTabHub = createSettingsTabHub();
 
-export function buildSettingsTabs(hub: SettingsTabsHub, plugin: string, onDispose: (callback: () => void) => void): PluginSettingsTabs {
+export function buildSettingsTabs(hub: SettingsTabHub, plugin: string, onDispose: (callback: () => void) => void, reportError: (source: string, error: unknown) => void): PluginSettingsTabs {
     onDispose(() => { hub.removeAll(plugin); });
-    return { add: tab => hub.add(plugin, tab) };
+    return {
+        add(first: string | PluginSettingsTab, second?: PluginSettingsTab) {
+            const key = typeof first === "string" ? first : SINGLE_TAB_KEY;
+            const tab = typeof first === "string" ? second as PluginSettingsTab : first;
+            let refused: string | null;
+            try {
+                refused = hub.add(plugin, key, tab);
+            } catch (error) {
+                refused = error instanceof Error ? error.message : String(error);
+            }
+            if (refused !== null) {
+                reportError("settings tab", new Error(refused));
+                return () => undefined;
+            }
+            return () => { hub.remove(plugin, key); };
+        }
+    };
 }

@@ -11,6 +11,7 @@ import { before, describe, it } from "node:test";
 import { build } from "esbuild";
 
 import { pageOptions } from "../scripts/build/build";
+import { SettingsClient } from "../src/api/settingsClient";
 import type { EnginePluginContext, PluginCode } from "../src/renderer/engine";
 import { compileModule } from "../src/webpack/compileModule";
 
@@ -48,7 +49,7 @@ function fakeContext(options: { types?: unknown; withEngine?: boolean; } = {}) {
         finders: { byProps: () => ({ get: () => options.types }) },
         engine: options.withEngine === false ? undefined : {
             status: () => ({ version: "0.1.0", discordBuild: 650101, safeMode: false, safeModeReason: null, enteredSafeMode: false, quarantine: [], devMode: false, problems: [] }),
-            openDataFolder: () => { log.folders++; }
+            openDataFolder: () => { log.folders++; }, openHealthReport: () => undefined, openSourceCode: () => undefined
         },
         plugins: options.withEngine === false ? undefined : { cards: () => [], card: () => undefined, toggle: async () => ({ status: "unchanged" }), restart: () => { log.restarts++; } }
     } as unknown as EnginePluginContext;
@@ -151,6 +152,118 @@ describe("the Settings plugin in use", () => {
             for (const undo of log.disposers.splice(0).reverse()) undo();
             await plugin.stop!(ctx);
         }
+    });
+
+    it("applies the saved custom CSS when it starts, follows both of its settings, and takes the style out when it stops", async () => {
+        const plugin = load();
+        const saved = { customCssOn: true, customCss: "a { color: red }" };
+        plugin.settings!.bind(new SettingsClient({ schema: 1, plugins: { Settings: { values: saved } } }, () => undefined), "Settings");
+        const { ctx, log } = fakeContext();
+        const sheets = new Map<string, string>();
+        (ctx as unknown as { addStyle(css: string, name?: string): unknown; }).addStyle = (css, name = "?") => {
+            if (name === "custom-css") sheets.set(name, css);
+            else log.styles.push([css, name]);
+            return { update: (next: string) => { sheets.set(name, next); }, remove: () => { sheets.delete(name); } };
+        };
+        await plugin.start!(ctx);
+        assert.equal(sheets.get("custom-css"), "a { color: red }", "applied when it starts");
+        (plugin.settings as unknown as { store: Record<string, unknown>; }).store.customCss = "b { color: blue }";
+        assert.equal(sheets.get("custom-css"), "b { color: blue }", "a new sheet is applied at once");
+        (plugin.settings as unknown as { store: Record<string, unknown>; }).store.customCssOn = false;
+        assert.equal(sheets.has("custom-css"), false, "switching it off takes it out of the page");
+        (plugin.settings as unknown as { store: Record<string, unknown>; }).store.customCssOn = true;
+        assert.equal(sheets.get("custom-css"), "b { color: blue }");
+        for (const undo of log.disposers.splice(0)) undo();
+        assert.equal(sheets.has("custom-css"), false, "stopping the plugin takes it out");
+        assert.deepEqual(log.errors, []);
+        plugin.settings!.unbind();
+    });
+
+    it("applies no custom CSS in safe mode, and none by default", async () => {
+        const plugin = load();
+        plugin.settings!.bind(new SettingsClient({ schema: 1, plugins: { Settings: { values: { customCssOn: true, customCss: "a { color: red }" } } } }, () => undefined), "Settings");
+        const safe = fakeContext();
+        const sheets: string[] = [];
+        (safe.ctx as unknown as { addStyle(css: string, name?: string): unknown; }).addStyle = (css, name) => { if (name === "custom-css") sheets.push(css); return { update: () => undefined, remove: () => undefined }; };
+        (safe.ctx.engine as unknown as { status(): { safeMode: boolean; }; }).status = () => ({ safeMode: true });
+        await plugin.start!(safe.ctx);
+        assert.equal(sheets.length, 0);
+        for (const undo of safe.log.disposers.splice(0)) undo();
+        await plugin.stop!(safe.ctx);
+        plugin.settings!.unbind();
+        plugin.settings!.bind(new SettingsClient({ schema: 1, plugins: {} }, () => undefined), "Settings");
+        const fresh = fakeContext();
+        (fresh.ctx as unknown as { addStyle(css: string, name?: string): unknown; }).addStyle = (css, name) => { if (name === "custom-css") sheets.push(css); return { update: () => undefined, remove: () => undefined }; };
+        await plugin.start!(fresh.ctx);
+        assert.equal(sheets.length, 0);
+        plugin.settings!.unbind();
+    });
+
+    it("drops the oldest notifications of the log at once when the owner chooses a smaller size, and not for a size that is not one of the choices", async () => {
+        const plugin = load();
+        plugin.settings!.bind(new SettingsClient({ schema: 1, plugins: {} }, () => undefined), "Settings");
+        const { ctx, log } = fakeContext();
+        const trims: number[] = [];
+        (ctx.engine as unknown as { notificationLog: { trim(limit: number): void; }; }).notificationLog = { trim: limit => { trims.push(limit); } };
+        await plugin.start!(ctx);
+        const store = (plugin.settings as unknown as { store: Record<string, unknown>; }).store;
+        store.notificationLogSize = 25;
+        store.notificationLogSize = 200;
+        assert.deepEqual(trims, [25, 200]);
+        assert.throws(() => { store.notificationLogSize = 30; }, TypeError, "a size that is not offered is refused by the settings store");
+        assert.deepEqual(trims, [25, 200]);
+        for (const undo of log.disposers.splice(0)) undo();
+        store.notificationLogSize = 50;
+        assert.deepEqual(trims, [25, 200], "after the plugin stops nothing is listening");
+        plugin.settings!.unbind();
+    });
+
+    it("swaps the logo of the Home button when the switch is on, follows the switch, and takes the style out when it stops; nothing by default", async () => {
+        const plugin = load();
+        const run = async (values: Record<string, unknown>) => {
+            plugin.settings!.bind(new SettingsClient({ schema: 1, plugins: { Settings: { values: values as Record<string, never> } } }, () => undefined), "Settings");
+            const { ctx, log } = fakeContext();
+            const sheets = new Map<string, string>();
+            (ctx as unknown as { addStyle(css: string, name?: string): unknown; }).addStyle = (css, name = "?") => {
+                if (name === "amiricord-logo") sheets.set(name, css);
+                return { update: () => undefined, remove: () => { sheets.delete(name); } };
+            };
+            await plugin.start!(ctx);
+            return { ctx, log, sheets };
+        };
+        const off = await run({});
+        assert.equal(off.sheets.size, 0, "off by default");
+        for (const undo of off.log.disposers.splice(0)) undo();
+        await plugin.stop!(off.ctx);
+        plugin.settings!.unbind();
+
+        const on = await run({ showAmiricordLogo: true });
+        const css = on.sheets.get("amiricord-logo") ?? "";
+        assert.match(css, /guildsnav___home/);
+        assert.match(css, /url\("data:image\/webp;base64,/, "the logo the plugin carries, as an image given in the address");
+        const store = (plugin.settings as unknown as { store: Record<string, unknown>; }).store;
+        store.showAmiricordLogo = false;
+        assert.equal(on.sheets.size, 0, "switching it off takes the style out");
+        store.showAmiricordLogo = true;
+        assert.equal(on.sheets.size, 1);
+        for (const undo of on.log.disposers.splice(0)) undo();
+        assert.equal(on.sheets.size, 0, "stopping the plugin takes it out");
+        assert.deepEqual(on.log.errors, []);
+        await plugin.stop!(on.ctx);
+        plugin.settings!.unbind();
+    });
+
+    it("declares the three window options as settings that need a restart, off by default, and the effect as one of four", () => {
+        const definition = (load().settings as unknown as { definition: Record<string, { type: string; default: unknown; restartNeeded?: boolean; options?: Array<{ value: string; }>; }>; }).definition;
+        for (const key of ["removeMinimumSize", "ctrlQToQuit", "nativeTitleBar", "transparentWindow"]) {
+            assert.equal(definition[key].type, "boolean", key);
+            assert.equal(definition[key].default, false, key);
+            assert.equal(definition[key].restartNeeded, true, key);
+        }
+        assert.equal(definition.backgroundMaterial.default, "none");
+        assert.equal(definition.backgroundMaterial.restartNeeded, true);
+        assert.deepEqual(definition.backgroundMaterial.options!.map(option => option.value), ["none", "mica", "tabbed", "acrylic"]);
+        assert.equal(definition.showAmiricordLogo.default, false);
     });
 
     it("refuses to start without the engine and the plugin cards that only a core plugin gets", async () => {

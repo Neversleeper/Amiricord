@@ -33,6 +33,16 @@ export interface SettingItem {
     warning?: string;
     /** The feature is not built yet: the switch is drawn off and does nothing. */
     soon?: boolean;
+    /** A switch that works: how to read it, change it and hear about changes made elsewhere (the editor window). Given by `defaultSettings`, never together with `soon`. */
+    live?: LiveSwitch;
+}
+
+/** What makes a switch of the main tab work. */
+export interface LiveSwitch {
+    get(): boolean;
+    set(on: boolean): void;
+    /** Be told when it changes from somewhere else. Returns the way to stop listening. */
+    subscribe(listener: () => void): () => void;
 }
 
 /** A drop-down of the settings: a title, a text and the labels of its choices. */
@@ -44,6 +54,15 @@ export interface ChoiceItem {
     choices: string[];
     restart?: boolean;
     soon?: boolean;
+    /** A drop-down that works: which choice is picked, how to pick another, and how to hear about a change made elsewhere. Given by `defaultChoices`, never together with `soon`. */
+    live?: LiveChoice;
+}
+
+/** What makes a drop-down of the main tab work: the position of the picked choice (0 is the first). */
+export interface LiveChoice {
+    get(): number;
+    set(index: number): void;
+    subscribe(listener: () => void): () => void;
 }
 
 /** A titled group of buttons under the settings (the notifications). */
@@ -56,27 +75,34 @@ export interface ButtonGroupItem {
 
 export interface QuickActionActions {
     openDataFolder(): void;
+    openNotificationLog(): void;
+    openNotificationOptions(): void;
+    openCssEditor(): void;
+    openHealthReport(): void;
+    openSourceCode(): void;
     restart(): void;
 }
 
-/** The six tiles, in the order they are drawn. The two that work are wired to what the engine offers. */
+/** The six tiles, in the order they are drawn. Five of them work and are wired to what the engine offers; "Edit Custom CSS" and "Notification Log" open their own windows. */
 export function defaultQuickActions(actions: QuickActionActions): QuickActionItem[] {
     return [
-        { id: "notification-log", title: "Notification Log", Icon: LogIcon, soon: true },
-        { id: "quick-css", title: "Edit Custom CSS", Icon: PaintbrushIcon, soon: true },
+        { id: "notification-log", title: "Notification Log", Icon: LogIcon, run: actions.openNotificationLog },
+        { id: "quick-css", title: "Edit Custom CSS", Icon: PaintbrushIcon, run: actions.openCssEditor },
         {
             id: "relaunch", title: "Relaunch Discord", Icon: RefreshIcon, run: actions.restart,
             confirm: { text: "Relaunching closes any call and loses messages you have not sent.", button: "Relaunch now" }
         },
         { id: "data-folder", title: "Open Settings Folder", Icon: FolderIcon, run: actions.openDataFolder },
-        { id: "health-report", title: "Health Report", Icon: HealthIcon, soon: true },
-        { id: "source-code", title: "View Source Code", Icon: SourceIcon, soon: true }
+        { id: "health-report", title: "Health Report", Icon: HealthIcon, run: actions.openHealthReport },
+        { id: "source-code", title: "View Source Code", Icon: SourceIcon, run: actions.openSourceCode }
     ];
 }
 
-/** The switches of "Client Settings". All of them wait for their feature; each one is its own step of the plan. */
-export function defaultSettings(): SettingItem[] {
-    return [
+/**
+ * The switches of "Client Settings". A switch whose feature is built is given its `LiveSwitch` by id and stops being `soon`; the others wait, and each one is its own step of the plan.
+ */
+export function defaultSettings(live: Readonly<Record<string, LiveSwitch | undefined>> = {}): SettingItem[] {
+    return withLive([
         { id: "amiricord-icon", title: "Show the Amiricord logo", description: "Swaps the Discord logo button for the Amiricord logo.", soon: true },
         { id: "custom-css", title: "Custom CSS", description: "Turn your own style sheet on or off.", soon: true },
         {
@@ -95,17 +121,22 @@ export function defaultSettings(): SettingItem[] {
         {
             id: "ctrl-q", title: "Ctrl+Q to quit", restart: true, soon: true,
             description: "Adds Ctrl+Q as a second way to close Discord, besides Alt+F4."
-        },
-        {
-            id: "react-devtools", title: "React Developer Tools", restart: true, soon: true,
-            description: "A tool for people who write plugins. Leave it off if you are not sure."
         }
-    ];
+    ], live);
 }
 
-/** The drop-downs that follow the switches. */
-export function defaultChoices(): ChoiceItem[] {
-    return [{
+function withLive(items: SettingItem[], live: Readonly<Record<string, LiveSwitch | undefined>>): SettingItem[] {
+    return items.map(item => {
+        const found = live[item.id];
+        if (!found) return item;
+        const { soon: _soon, ...rest } = item;
+        return { ...rest, live: found };
+    });
+}
+
+/** The drop-downs that follow the switches. A drop-down whose feature is built is given its `LiveChoice` by id and stops being `soon`. */
+export function defaultChoices(live: Readonly<Record<string, LiveChoice | undefined>> = {}): ChoiceItem[] {
+    return withLiveChoices([{
         id: "background-material", title: "Window background effect", restart: true, soon: true,
         description: "Gives the window one of the Windows background looks. It needs a theme that supports transparency, and Discord must restart after you change it.",
         choices: [
@@ -114,17 +145,26 @@ export function defaultChoices(): ChoiceItem[] {
             "Tabbed (Mica with a stronger tint)",
             "Acrylic (blurs whatever is behind the window)"
         ]
-    }];
+    }], live);
+}
+
+function withLiveChoices(items: ChoiceItem[], live: Readonly<Record<string, LiveChoice | undefined>>): ChoiceItem[] {
+    return items.map(item => {
+        const found = live[item.id];
+        if (!found) return item;
+        const { soon: _soon, ...rest } = item;
+        return { ...rest, live: found };
+    });
 }
 
 /** The groups of buttons at the end of the settings. */
-export function defaultButtonGroups(): ButtonGroupItem[] {
+export function defaultButtonGroups(actions: Pick<QuickActionActions, "openNotificationLog" | "openNotificationOptions">): ButtonGroupItem[] {
     return [{
         id: "notifications", title: "Notifications",
         description: "Controls for the notifications Amiricord itself shows. Discord's own message notifications are not affected.",
         buttons: [
-            { id: "notification-settings", title: "Notification options", soon: true },
-            { id: "notification-log", title: "Open the log", soon: true }
+            { id: "notification-settings", title: "Notification options", run: actions.openNotificationOptions },
+            { id: "notification-log", title: "Open the log", run: actions.openNotificationLog }
         ]
     }];
 }

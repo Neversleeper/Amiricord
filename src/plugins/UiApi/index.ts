@@ -100,13 +100,15 @@ const plugin: PluginCode & {
         {
             // The scroll area of the list: the Home separator, then the servers. "in" goes between them and "below" after the servers.
             // The text must be in the module that draws the list (a first version looked for `.setGuildsTree(`, which is in another module of the same file).
+            // Seen in build 653945: the Questify plugin wraps the element that comes after the separator (its patch turns `(0,r.jsx)(i3,{guildDiscoveryButton:` into
+            // `(0,r.jsx)(Wrapper,{__amiricordOriginal:i3,guildDiscoveryButton:`), so the first pattern must not expect the plain form after the separator.
             find: "guildDiscoveryButton:",
             all: true,
             lazy: true,
             required: false,
             replacements: [
                 {
-                    match: /(scrollToTop:\i,lurkingGuildIds:\i\}\),\(0,\i\.jsx\)\(\i,\{\}\),)(?=\(0,\i\.jsx\)\(\i,\{guildDiscoveryButton)/,
+                    match: /(scrollToTop:\i,lurkingGuildIds:\i\}\),\(0,\i\.jsx\)\(\i,\{\}\),)(?=\(0,\i\.jsx\)\(.{1,160}?guildDiscoveryButton:)/,
                     replace: "$1...$self.renderServerList(\"in\"),"
                 },
                 {

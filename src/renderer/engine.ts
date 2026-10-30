@@ -23,6 +23,7 @@ import { locateMenuParts, type MenuParts } from "../api/menuParts";
 import { buildModals, PluginModals } from "../api/modals";
 import { buildNative, PluginNativeCaller } from "../api/native";
 import { type NativeMenuHub, nativeMenus } from "../api/nativeMenus";
+import { createNotificationLog, logSizeOf, type NotificationLog } from "../api/notificationLog";
 import { createNotificationLayer, type PluginNotifications } from "../api/notifications";
 import { buildPluginCards, PluginCard, PluginSource } from "../api/pluginCards";
 import { describeSettings, isPluginSettings, PluginSettingsAnswer, PluginSettingsComponent } from "../api/pluginSettings";
@@ -69,6 +70,8 @@ export interface Bridge {
     restart(): void;
     /** Ask the main process to open the data folder in the file explorer. Only core plugins reach it, through `ctx.engine.openDataFolder`. */
     openDataFolder(): void;
+    /** Ask the main process to open the health report file (`place` "health") or the project's page in the browser (`place` "source"). Only core plugins reach it, through `ctx.engine`. */
+    openOwn?(place: "health" | "source"): void;
     /** Ask the main process to turn safe mode off for the next start. Only core plugins reach it, through `ctx.engine.leaveSafeMode`. */
     leaveSafeMode?(): void;
     /** Ask the main process how many requests its firewall cancelled. Read only; the answer is checked field by field before it is used. */
@@ -127,8 +130,14 @@ export interface EnginePluginContext extends PluginContext {
     engine?: {
         status(): EngineStatus;
         openDataFolder(): void;
+        /** Show the health report file in the file explorer. */
+        openHealthReport(): void;
+        /** Open the project's page in the browser. */
+        openSourceCode(): void;
         /** Turn safe mode off for the next start (the caller restarts Discord after). */
         leaveSafeMode(): void;
+        /** The notifications plugins showed in this session, kept in memory only (the Notification Log of the main tab). See `src/api/notificationLog.ts`. */
+        notificationLog: NotificationLog;
         /** The read-only snapshot of the Privacy & Security tab from the main process (null when it did not answer or the answer was not in the expected form). */
         privacy(): Promise<PrivacyAnswer | null>;
         /** "Test now" for one provider by id. Asks the provider a question and applies nothing. */
@@ -155,7 +164,7 @@ export interface EnginePluginContext extends PluginContext {
     serverList: PluginServerList;
     /** Buttons in the user panel at the bottom left. They go when the plugin stops. See `src/api/userArea.ts`. */
     userArea: PluginUserArea;
-    /** A tab in the Amiricord section of Discord's settings. It goes when the plugin stops. See `src/api/settingsTabs.ts`. */
+    /** Tabs in the Amiricord section of Discord's settings (the sidebar). They go when the plugin stops. See `src/api/settingsTabs.ts`. */
     settingsTabs: PluginSettingsTabs;
     /** Slash commands. They go when the plugin stops. See `src/api/commands.ts`. */
     commands: PluginCommands;
@@ -443,6 +452,8 @@ export function startEngine(options: EngineOptions): Engine {
         }
     };
     refreshNetwork();
+    // The notifications plugins showed in this session, in memory only (the Notification Log of the main tab). Made here because the engine's API for core plugins hands it out.
+    const notificationLog = createNotificationLog();
     const engineApi = {
         status: (): EngineStatus => (refreshNetwork(), {
             version: PROJECT_VERSION, discordBuild: build, safeMode: info.safeMode, safeModeReason: info.safeModeReason,
@@ -454,6 +465,9 @@ export function startEngine(options: EngineOptions): Engine {
             dns
         }),
         openDataFolder: () => { bridge.openDataFolder(); },
+        notificationLog,
+        openHealthReport: () => { bridge.openOwn?.("health"); },
+        openSourceCode: () => { bridge.openOwn?.("source"); },
         leaveSafeMode: () => { bridge.leaveSafeMode?.(); },
         privacy: async (): Promise<PrivacyAnswer | null> => {
             try {
@@ -587,8 +601,14 @@ export function startEngine(options: EngineOptions): Engine {
         native: options.nativeMenus ?? nativeMenus,
         menuParts: findMenuParts
     });
+    // The log keeps what plugins showed, in memory, up to the size the owner chose; the Settings plugin keeps the three choices (cards, log, size). Missing means the default.
+    const notificationChoice = (key: string) => settingsClient.getValue("Settings", key);
     const notificationLayer = createNotificationLayer({
         document: pageDocument,
+        enabled: () => notificationChoice("notificationCards") !== false,
+        record: (plugin, title, body) => {
+            if (notificationChoice("notificationLog") !== false) notificationLog.add(plugin, title, body, logSizeOf(notificationChoice("notificationLogSize")));
+        },
         setTimeout: (work, ms) => setTimeout(work, ms),
         clearTimeout: timer => { clearTimeout(timer as ReturnType<typeof setTimeout>); },
         addStyle: css => { addPageStyle(css, "notifications", "notification styles"); }
@@ -619,7 +639,7 @@ export function startEngine(options: EngineOptions): Engine {
                 menuItems: menuHub ? buildContextMenus(menuHub, id, ctx.onDispose) : { add: () => undefined },
                 serverList: buildServerList(serverList, id, ctx.onDispose),
                 userArea: buildUserArea(userArea, id, ctx.onDispose),
-                settingsTabs: buildSettingsTabs(settingsTabs, id, ctx.onDispose),
+                settingsTabs: buildSettingsTabs(settingsTabs, id, ctx.onDispose, reportError),
                 commands: buildCommands(commandHub, id, ctx.onDispose, reportError),
                 toasts: havePage ? buildToasts(globalThis as unknown as ToastPage, css => { addCommonStyle(css, "toasts"); }, ctx.onDispose) : { show: () => undefined },
                 modals: buildModals(pluginFinders, ctx.onDispose, reportError),

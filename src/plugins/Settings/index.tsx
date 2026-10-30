@@ -14,19 +14,27 @@ import banner from "../../../assets/amiricord-banner.webp";
 import logo from "../../../assets/amiricord-logo.webp";
 import patchNotes from "../../../NEWS.json";
 import { currentReact } from "../../api/jsxRuntime";
+import { DEFAULT_LOG_SIZE, LOG_SIZE_CHOICES, logSizeOf } from "../../api/notificationLog";
 import type { PluginCard } from "../../api/pluginCards";
 import { definePluginSettings } from "../../api/pluginSettings";
-import { settingsTabs } from "../../api/settingsTabs";
+import { type SettingsTabEntry, settingsTabs } from "../../api/settingsTabs";
 import type { EnginePluginContext, PluginCode } from "../../renderer/engine";
 import { OWNER_ONLY_PLUGINS, OWNERS, PROJECT_VERSION } from "../../shared/project";
 import { releasedNews } from "../../shared/updates";
+import { MATERIALS } from "../../shared/windowChoices";
 import { type AuthorInfo, authorInfo, type RawDiscordUser } from "./authorModel";
+import { CUSTOM_CSS_ELEMENT_ID, CUSTOM_CSS_MAX, keepLast, makeCustomCss } from "./customCss";
+import { makeCustomCssWindow } from "./CustomCssWindow";
 import { EntryRegistry } from "./entries";
 import { makeErrorBoundary } from "./ErrorBoundary";
+import { makeHomeLogo } from "./homeLogo";
 import { makeSidebarIcon, PluginsIcon, PrivacyIcon, UpdaterIcon } from "./icon";
 import { buildLayoutWithSection, FALLBACK_TYPES, readTypes, type SettingsEntry, TYPE_NAMES } from "./layout";
-import { defaultButtonGroups, defaultChoices, defaultQuickActions, defaultSettings } from "./mainItems";
+import { defaultButtonGroups, defaultChoices, defaultQuickActions, defaultSettings, type LiveChoice, type LiveSwitch } from "./mainItems";
 import { makeMainTab } from "./MainTab";
+import { hideDiscordButtons, NATIVE_TITLE_BAR_STYLE_NAME, nativeTitleBarCss } from "./nativeTitleBar";
+import { makeNotificationLogWindow } from "./NotificationLogWindow";
+import { makeNotificationOptionsWindow } from "./NotificationOptionsWindow";
 import { cardsForPerson } from "./pluginsModel";
 import { makePluginsTab } from "./PluginsTab";
 import { PLUGINS_TAB_CSS, PLUGINS_TAB_STYLE_NAME } from "./pluginsTabStyles";
@@ -41,7 +49,18 @@ const registry = new EntryRegistry();
 
 /** What Editor Mode saved: one JSON text (docs/design-04-editor-mode.md). Read through `parseLayout`, so a damaged value is harmless. */
 const settings = definePluginSettings({
-    tabLayout: { type: "string", default: "", maxLength: LAYOUT_MAX_CHARS, description: "Which tabs of the Amiricord section are hidden, their order and the pinned ones (saved by Editor Mode)." }
+    tabLayout: { type: "string", default: "", maxLength: LAYOUT_MAX_CHARS, description: "Which tabs of the Amiricord section are hidden, their order and the pinned ones (saved by Editor Mode)." },
+    customCss: { type: "string", default: "", maxLength: CUSTOM_CSS_MAX, description: "Your own style sheet (saved by Edit Custom CSS)." },
+    customCssOn: { type: "boolean", default: false, description: "Whether your own style sheet is applied to Discord." },
+    showAmiricordLogo: { type: "boolean", default: false, description: "Whether the Discord logo of the Home button is swapped for the Amiricord logo." },
+    removeMinimumSize: { type: "boolean", default: false, restartNeeded: true, description: "Whether the Discord window may be made smaller than the size Discord normally allows." },
+    ctrlQToQuit: { type: "boolean", default: false, restartNeeded: true, description: "Whether Ctrl+Q closes the Discord window, as Alt+F4 does." },
+    nativeTitleBar: { type: "boolean", default: false, restartNeeded: true, description: "Whether the Discord window uses the standard Windows title bar instead of Discord's own." },
+    transparentWindow: { type: "boolean", default: false, restartNeeded: true, description: "Whether the Discord window is made see-through (needs a theme made for it)." },
+    backgroundMaterial: { type: "select", default: "none", restartNeeded: true, options: MATERIALS.map(name => ({ label: name, value: name })), description: "The Windows background effect of the Discord window (none, mica, tabbed or acrylic)." },
+    notificationCards: { type: "boolean", default: true, description: "Whether the notifications of plugins are drawn as cards in the corner of Discord's window." },
+    notificationLog: { type: "boolean", default: true, description: "Whether the notifications of plugins are kept in the Notification Log (in memory, for this session)." },
+    notificationLogSize: { type: "select", default: DEFAULT_LOG_SIZE, options: LOG_SIZE_CHOICES.map(size => ({ label: String(size), value: size })), description: "How many notifications the Notification Log keeps." }
 });
 let context: EnginePluginContext | undefined;
 let nodeTypes: { get(): unknown; } | undefined;
@@ -53,14 +72,6 @@ function boundary() {
     return Boundary;
 }
 
-/** The tabs of the section: Amiricord's own, in the sidebar order, then the ones plugins added (each drawn inside the error boundary, with a plain icon when it brought none). */
-function allTabs(): SettingsEntry[] {
-    const fromPlugins = settingsTabs.list().map(({ key, title, panelTitle, Component, icon }): SettingsEntry => ({
-        key, title, panelTitle, icon: icon ?? PluginsIcon, Component: guarded(`The tab of ${title}`, Component as () => unknown)
-    }));
-    return [...registry.list(), ...fromPlugins];
-}
-
 /** A tab drawn inside the error boundary. */
 function guarded(label: string, Inner: () => unknown) {
     return function Guarded() {
@@ -68,6 +79,22 @@ function guarded(label: string, Inner: () => unknown) {
         return <Safe label={label}><Inner /></Safe>;
     };
 }
+
+/** The tabs other plugins added (`ctx.settingsTabs`), each drawn inside its own error boundary. One wrapper per tab, so drawing it again does not start it over. */
+const pluginTabWrappers = new WeakMap<SettingsTabEntry, SettingsEntry>();
+function pluginTabEntries(): SettingsEntry[] {
+    return settingsTabs.list().map(tab => {
+        let entry = pluginTabWrappers.get(tab);
+        if (!entry) {
+            entry = { key: tab.key, title: tab.title, panelTitle: tab.panelTitle, Component: guarded(`The "${tab.title}" tab of ${tab.plugin}`, tab.Component as () => unknown), icon: tab.icon };
+            pluginTabWrappers.set(tab, entry);
+        }
+        return entry;
+    });
+}
+
+/** Every tab of the section: the core ones in their fixed order, then the ones plugins added, in the order they were added. */
+const allEntries = (): SettingsEntry[] => [...registry.list(), ...pluginTabEntries()];
 
 const plugin: PluginCode & { buildLayout(builder: { key?: unknown; buildLayout(): unknown; }): unknown; } = {
     settings,
@@ -84,7 +111,9 @@ const plugin: PluginCode & { buildLayout(builder: { key?: unknown; buildLayout()
     buildLayout(builder) {
         return buildLayoutWithSection(builder, {
             types: () => readTypes(nodeTypes?.get()) ?? FALLBACK_TYPES,
-            entries: () => (context ? visibleTabs(allTabs(), parseLayout(settings.store.tabLayout)) : []),
+            entries: () => (context ? visibleTabs(allEntries(), parseLayout(settings.store.tabLayout)) : []),
+            // A tab a plugin added without an icon gets this one; Discord cannot draw a sidebar item that has none.
+            fallbackIcon: PluginsIcon,
             onError: error => { context?.reportError("settings layout", error); }
         });
     },
@@ -96,6 +125,77 @@ const plugin: PluginCode & { buildLayout(builder: { key?: unknown; buildLayout()
         nodeTypes = ctx.finders.byProps(...TYPE_NAMES);
         ctx.addStyle(SETTINGS_CSS, SETTINGS_STYLE_NAME);
 
+        // The owner's own style sheet: applied from the two saved settings now and whenever either changes (the switch of the main tab or the editor window).
+        const customCss = makeCustomCss({
+            read: () => ({ on: settings.store.customCssOn, text: settings.store.customCss }),
+            add: (css, name) => ctx.addStyle(css, name),
+            safeMode: () => engine.status().safeMode,
+            keepLast: () => {
+                const page = (globalThis as { document?: Parameters<typeof keepLast>[0]; MutationObserver?: new (callback: () => void) => ReturnType<Parameters<typeof keepLast>[2]>; });
+                const { document, MutationObserver } = page;
+                return document && MutationObserver ? keepLast(document, CUSTOM_CSS_ELEMENT_ID, callback => new MutationObserver(callback)) : () => undefined;
+            },
+            report: (source, error) => { ctx.reportError(source, error); }
+        });
+        customCss.apply();
+        ctx.onDispose(settings.onChange("customCss", () => { customCss.apply(); }));
+        ctx.onDispose(settings.onChange("customCssOn", () => { customCss.apply(); }));
+        ctx.onDispose(customCss.stop);
+        // A switch of the main tab that is one saved true or false of this plugin: read, written (a refusal goes to the health report) and heard when it changes elsewhere.
+        const liveSwitch = (key: "customCssOn" | "showAmiricordLogo" | "removeMinimumSize" | "ctrlQToQuit" | "nativeTitleBar" | "transparentWindow", what: string): LiveSwitch => ({
+            get: () => settings.store[key],
+            set: on => {
+                try {
+                    settings.store[key] = on;
+                } catch (error) {
+                    ctx.reportError(`saving the ${what} switch`, error);
+                }
+            },
+            subscribe: listener => settings.onChange(key, () => { listener(); })
+        });
+        const customCssSwitch = liveSwitch("customCssOn", "Custom CSS");
+
+        // The Amiricord logo in the place of Discord's in the Home button: a style, added while the switch is on.
+        const homeLogo = makeHomeLogo({
+            logo,
+            read: () => settings.store.showAmiricordLogo,
+            add: (css, name) => ctx.addStyle(css, name),
+            safeMode: () => engine.status().safeMode,
+            report: (source, error) => { ctx.reportError(source, error); }
+        });
+        homeLogo.apply();
+        ctx.onDispose(settings.onChange("showAmiricordLogo", () => { homeLogo.apply(); }));
+        ctx.onDispose(homeLogo.stop);
+
+        // With the standard Windows bar on, Discord's own window buttons would be there twice: hide them. Decided once, at start (see nativeTitleBar.ts).
+        try {
+            if (hideDiscordButtons({ nativeTitleBar: settings.store.nativeTitleBar, transparentWindow: settings.store.transparentWindow, safeMode: engine.status().safeMode })) {
+                ctx.addStyle(nativeTitleBarCss(), NATIVE_TITLE_BAR_STYLE_NAME);
+            }
+        } catch (error) {
+            ctx.reportError("Windows title bar", error);
+        }
+        const homeLogoSwitch = liveSwitch("showAmiricordLogo", "Amiricord logo");
+
+        // The window options are read by the main process when Discord starts (src/main/windowOptions.ts), so changing one only saves it; the page says "Restart" next to each.
+        const noMinimumSizeSwitch = liveSwitch("removeMinimumSize", "minimum window size");
+        const ctrlQSwitch = liveSwitch("ctrlQToQuit", "Ctrl+Q");
+        const titleBarSwitch = liveSwitch("nativeTitleBar", "Windows title bar");
+        const transparentSwitch = liveSwitch("transparentWindow", "transparent window");
+        const materialChoice: LiveChoice = {
+            get: () => Math.max(0, MATERIALS.indexOf(settings.store.backgroundMaterial)),
+            set: index => {
+                const name = MATERIALS[index];
+                if (name === undefined) return;
+                try {
+                    settings.store.backgroundMaterial = name;
+                } catch (error) {
+                    ctx.reportError("saving the window background effect", error);
+                }
+            },
+            subscribe: listener => settings.onChange("backgroundMaterial", () => { listener(); })
+        };
+
         const removeMain = registry.register({
             key: "amiricord",
             title: "Amiricord",
@@ -104,15 +204,23 @@ const plugin: PluginCode & { buildLayout(builder: { key?: unknown; buildLayout()
                 leaveSafeMode: () => { engine.leaveSafeMode(); plugins.restart(); },
                 status: () => engine.status(),
                 cards: () => plugins.cards(),
-                quickActions: defaultQuickActions({ openDataFolder: () => { engine.openDataFolder(); }, restart: () => { plugins.restart(); } }),
-                settings: defaultSettings(),
-                choices: defaultChoices(),
-                buttonGroups: defaultButtonGroups(),
+                quickActions: defaultQuickActions({
+                    openDataFolder: () => { engine.openDataFolder(); },
+                    openCssEditor: () => { openCssEditor(); },
+                    openNotificationLog: () => { openNotificationLog(); },
+                    openNotificationOptions: () => { openNotificationOptions(); },
+                    openHealthReport: () => { engine.openHealthReport(); },
+                    openSourceCode: () => { engine.openSourceCode(); },
+                    restart: () => { plugins.restart(); }
+                }),
+                settings: defaultSettings({ "custom-css": customCssSwitch, "amiricord-icon": homeLogoSwitch, "no-min-size": noMinimumSizeSwitch, "ctrl-q": ctrlQSwitch, "native-title-bar": titleBarSwitch, "transparent": transparentSwitch }),
+                choices: defaultChoices({ "background-material": materialChoice }),
+                buttonGroups: defaultButtonGroups({ openNotificationLog: () => { openNotificationLog(); }, openNotificationOptions: () => { openNotificationOptions(); } }),
                 logo,
                 banner,
                 editor: guarded("The tab editor", makeTabsEditor({
                     title: "Amiricord",
-                    tabs: () => allTabs().map(({ key, title, icon }) => ({ key, title, icon })),
+                    tabs: () => allEntries().map(({ key, title, icon }) => ({ key, title, icon })),
                     read: () => settings.store.tabLayout,
                     write: text => {
                         try {
@@ -173,6 +281,71 @@ const plugin: PluginCode & { buildLayout(builder: { key?: unknown; buildLayout()
                 const Safe = boundary();
                 return <Safe label="The plugin window"><Window id={card.id} onClose={() => { props.onClose(); }} /></Safe>;
             }) !== undefined;
+        };
+
+        // The Notification Log keeps only as many as the size the owner chose: a smaller size drops the oldest ones at once.
+        ctx.onDispose(settings.onChange("notificationLogSize", size => { engine.notificationLog.trim(logSizeOf(size)); }));
+
+        // The two windows of the notifications: the log (what plugins showed in this session) and its options. Each is made once per opening, like the other windows.
+        const openInWindow = (what: string, make: (parts: WindowParts) => (props: { onClose(): void; }) => unknown): void => {
+            const parts = windowParts();
+            if (!parts) {
+                ctx.reportError(what, new Error("Discord's window pieces were not found, so the window cannot open"));
+                return;
+            }
+            const Window = make(parts) as (props: { onClose(): void; }) => never;
+            ctx.modals.open(props => {
+                const Safe = boundary();
+                return <Safe label={what}><Window onClose={() => { props.onClose(); }} /></Safe>;
+            });
+        };
+        const openNotificationLog = () => {
+            openInWindow("The Notification Log window", parts => makeNotificationLogWindow({
+                list: () => engine.notificationLog.list(), clear: () => { engine.notificationLog.clear(); },
+                subscribe: listener => engine.notificationLog.subscribe(listener), version: () => engine.notificationLog.version(), parts
+            }));
+        };
+        const openNotificationOptions = () => {
+            openInWindow("The notification options window", parts => makeNotificationOptionsWindow({
+                read: () => ({ cards: settings.store.notificationCards, log: settings.store.notificationLog, size: logSizeOf(settings.store.notificationLogSize) }),
+                set: change => {
+                    try {
+                        if (change.cards !== undefined) settings.store.notificationCards = change.cards;
+                        if (change.log !== undefined) settings.store.notificationLog = change.log;
+                        if (change.size !== undefined) settings.store.notificationLogSize = logSizeOf(change.size) as (typeof LOG_SIZE_CHOICES)[number];
+                    } catch (error) {
+                        ctx.reportError("saving the notification options", error);
+                    }
+                },
+                parts
+            }));
+        };
+
+        // The Custom CSS editor: a window with the engine's pieces, made once per opening so Discord drawing the layer again does not lose what is typed.
+        const openCssEditor = () => {
+            const parts = windowParts();
+            if (!parts) {
+                ctx.reportError("the Custom CSS editor", new Error("Discord's window pieces were not found, so the editor cannot open"));
+                return;
+            }
+            const Editor = makeCustomCssWindow({
+                read: () => ({ on: settings.store.customCssOn, text: settings.store.customCss }),
+                save: text => {
+                    try {
+                        settings.store.customCss = text;
+                        return null;
+                    } catch (error) {
+                        return error instanceof Error ? error.message : String(error);
+                    }
+                },
+                setOn: on => { customCssSwitch.set(on); },
+                safeMode: () => engine.status().safeMode,
+                parts
+            });
+            ctx.modals.open(props => {
+                const Safe = boundary();
+                return <Safe label="The Custom CSS window"><Editor onClose={() => { props.onClose(); }} /></Safe>;
+            });
         };
 
         const removePlugins = registry.register({
