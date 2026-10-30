@@ -12,6 +12,7 @@ import { MAX_ALIVE, sparklesFor } from "../src/testcordplugins/ClickSparkles/ind
 import { bannerText } from "../src/testcordplugins/FakeMuteDeafen/index";
 import { isSuggestedHeader } from "../src/testcordplugins/HideSuggestedChannels/index";
 import { cssFor } from "../src/testcordplugins/NoButtons/index";
+import { withSeconds } from "../src/testcordplugins/RealtimeTimestamps/index";
 import { typingLabel } from "../src/testcordplugins/ShowTypingUsers/index";
 import { countLabel, isFull } from "../src/testcordplugins/VoiceCount/index";
 import { sanitize } from "../src/testcordplugins/ZeroWidthSanitizer/index";
@@ -99,5 +100,15 @@ describe("ported plugins, ninth batch", () => {
         assert.match(bannerText({ mute: false, deaf: true, video: false }, true)!, /see you deafened and muted,/);
         assert.match(bannerText({ mute: false, deaf: true, video: false }, false)!, /see you deafened,/);
         assert.match(bannerText({ mute: true, deaf: false, video: true }, true)!, /muted and with your camera on/);
+    });
+
+    it("adds the seconds to the time Discord wrote", () => {
+        const date = new Date(2026, 9, 30, 3, 25, 7);
+        assert.equal(withSeconds("Today at 3:25 AM", date), "Today at 3:25:07 AM");
+        assert.equal(withSeconds("03:25", date), "03:25:07");
+        assert.equal(withSeconds("30/10/2026 15:25", date), "30/10/2026 15:25:07");
+        assert.equal(withSeconds("Today at 3:25:07 AM", date), "Today at 3:25:07 AM");
+        assert.equal(withSeconds("no clock here", date), "no clock here");
+        assert.equal(withSeconds("3:25", new Date("nope")), "3:25");
     });
 });
