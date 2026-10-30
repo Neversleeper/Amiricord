@@ -7,7 +7,9 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
+import { createdAt, shortAge } from "../src/plugins/MemberAccountAge/index";
 import { MAX_ALIVE, sparklesFor } from "../src/testcordplugins/ClickSparkles/index";
+import { bannerText } from "../src/testcordplugins/FakeMuteDeafen/index";
 import { isSuggestedHeader } from "../src/testcordplugins/HideSuggestedChannels/index";
 import { cssFor } from "../src/testcordplugins/NoButtons/index";
 import { typingLabel } from "../src/testcordplugins/ShowTypingUsers/index";
@@ -77,5 +79,25 @@ describe("ported plugins, ninth batch", () => {
         // Direction marks are kept unless asked.
         assert.equal(sanitize("a‎b", keep).removed, 0);
         assert.deepEqual(sanitize("a‎b", { removeDirectionMarks: true }), { result: "ab", removed: 1 });
+    });
+
+    it("says how old an account is", () => {
+        const id = "175928847299117063";
+        assert.equal(new Date(createdAt(id)).getUTCFullYear(), 2016);
+        const day = 86400000;
+        const born = Date.UTC(2026, 0, 1);
+        assert.equal(shortAge(born, born + 12 * day), "12d");
+        assert.equal(shortAge(born, born + 59 * day), "59d");
+        assert.equal(shortAge(born, born + 90 * day), "3mo");
+        assert.equal(shortAge(born, born + 800 * day), "2y");
+        assert.equal(shortAge(born, born - day), "0d");
+    });
+
+    it("words the bar of Fake Mute Deafen", () => {
+        assert.equal(bannerText({ mute: false, deaf: false, video: false }, true), undefined);
+        assert.match(bannerText({ mute: true, deaf: false, video: false }, true)!, /see you muted,/);
+        assert.match(bannerText({ mute: false, deaf: true, video: false }, true)!, /see you deafened and muted,/);
+        assert.match(bannerText({ mute: false, deaf: true, video: false }, false)!, /see you deafened,/);
+        assert.match(bannerText({ mute: true, deaf: false, video: true }, true)!, /muted and with your camera on/);
     });
 });

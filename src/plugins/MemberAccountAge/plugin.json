@@ -1,0 +1,26 @@
+{
+    "schema": 1,
+    "id": "MemberAccountAge",
+    "name": "Member Account Age",
+    "version": "1.0.0",
+    "description": "Shows how old each account is next to the names in the member list, and marks new accounts. Read from the id, nothing is asked of any server.",
+    "origin": "amiricord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        {
+            "name": "Neversleeper",
+            "github": "https://github.com/Neversleeper",
+            "role": "author"
+        }
+    ],
+    "tags": [
+        "ui",
+        "utility"
+    ],
+    "enabledByDefault": false,
+    "startAt": "domReady",
+    "entry": {
+        "renderer": "index.ts"
+    },
+    "permissions": {}
+}

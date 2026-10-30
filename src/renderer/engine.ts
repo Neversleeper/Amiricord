@@ -21,6 +21,7 @@ import { FluxDispatcherLike, FluxHandlers, subscribeFlux } from "../api/flux";
 import { buildHeaderBar, HeaderBarHub, type HeaderBarPage, type PluginHeaderBar } from "../api/headerBar";
 import { setReactSource } from "../api/jsxRuntime";
 import { LifecycleEvent, LifecycleOptions, PluginContext, PluginLifecycle, PluginRuntime } from "../api/lifecycle";
+import { buildMemberDecor, MemberDecorHub, type MemberDecorPage, type PluginMemberDecor } from "../api/memberDecor";
 import { locateMenuParts, type MenuParts } from "../api/menuParts";
 import { buildMessageButtons, MessageButtonsHub, type MessageButtonsPage, type PluginMessageButtons } from "../api/messageButtons";
 import { buildMessageDecor, MessageDecorHub, type MessageDecorPage, type PluginMessageDecor } from "../api/messageDecor";
@@ -29,6 +30,7 @@ import { buildModals, PluginModals } from "../api/modals";
 import { buildNative, PluginNativeCaller } from "../api/native";
 import { type NativeMenuHub, nativeMenus } from "../api/nativeMenus";
 import { navigate as goToChannel, type NavigatePage } from "../api/navigate";
+import { buildNotices, NoticesHub, type NoticesPage, type PluginNotices } from "../api/notices";
 import { createNotificationLog, logSizeOf, type NotificationLog } from "../api/notificationLog";
 import { createNotificationLayer, type PluginNotifications } from "../api/notifications";
 import { buildPluginCards, PluginCard, PluginSource } from "../api/pluginCards";
@@ -182,6 +184,10 @@ export interface EnginePluginContext extends PluginContext {
     headerBar: PluginHeaderBar;
     /** A short text next to the name of the person who wrote a message. They go when the plugin stops. See `src/api/messageDecor.ts`. */
     messageDecor: PluginMessageDecor;
+    /** A short text next to the name of each person in the member list. They go when the plugin stops. See `src/api/memberDecor.ts`. */
+    memberDecor: PluginMemberDecor;
+    /** A bar across the top of the window with a message and up to two buttons. It goes when the plugin stops. See `src/api/notices.ts`. */
+    notices: PluginNotices;
     /** Change the text of a message just before it is sent. They go when the plugin stops. See `src/api/messageEvents.ts`. */
     messageEvents: PluginMessageEvents;
     /** A short message at the bottom of the page. See `src/api/toasts.ts`. */
@@ -654,6 +660,12 @@ export function startEngine(options: EngineOptions): Engine {
     const messageDecorHub = havePage && (globalThis as unknown as Partial<MessageDecorPage>).setTimeout !== undefined
         ? new MessageDecorHub(globalThis as unknown as MessageDecorPage, (css, name) => { addCommonStyle(css, name); }, (plugin, source, error) => { send({ type: "runtime-error", plugin, source, error: describe(error) }); })
         : undefined;
+    const memberDecorHub = havePage && (globalThis as unknown as Partial<MemberDecorPage>).setTimeout !== undefined
+        ? new MemberDecorHub(globalThis as unknown as MemberDecorPage, (css, name) => { addCommonStyle(css, name); }, (plugin, source, error) => { send({ type: "runtime-error", plugin, source, error: describe(error) }); })
+        : undefined;
+    const noticesHub = havePage
+        ? new NoticesHub(globalThis as unknown as NoticesPage, (css, name) => { addCommonStyle(css, name); }, (plugin, source, error) => { send({ type: "runtime-error", plugin, source, error: describe(error) }); })
+        : undefined;
     const headerBarHub = havePage && (globalThis as unknown as Partial<HeaderBarPage>).setTimeout !== undefined
         ? new HeaderBarHub(globalThis as unknown as HeaderBarPage, (css, name) => { addCommonStyle(css, name); }, (plugin, source, error) => { send({ type: "runtime-error", plugin, source, error: describe(error) }); })
         : undefined;
@@ -676,6 +688,8 @@ export function startEngine(options: EngineOptions): Engine {
                 navigate: path => havePage && goToChannel(globalThis as unknown as NavigatePage, path),
                 headerBar: headerBarHub ? buildHeaderBar(headerBarHub, id, ctx.onDispose) : { add: () => false, refresh: () => undefined },
                 messageDecor: messageDecorHub ? buildMessageDecor(messageDecorHub, id, ctx.onDispose) : { add: () => false, refresh: () => undefined },
+                memberDecor: memberDecorHub ? buildMemberDecor(memberDecorHub, id, ctx.onDispose) : { add: () => false, refresh: () => undefined },
+                notices: noticesHub ? buildNotices(noticesHub, id, ctx.onDispose) : { show: () => false, dismiss: () => undefined },
                 messageButtons: messageButtonsHub ? buildMessageButtons(messageButtonsHub, id, ctx.onDispose) : { add: () => false, refresh: () => undefined },
                 toasts: havePage ? buildToasts(globalThis as unknown as ToastPage, css => { addCommonStyle(css, "toasts"); }, ctx.onDispose) : { show: () => undefined },
                 modals: buildModals(pluginFinders, ctx.onDispose, reportError),
