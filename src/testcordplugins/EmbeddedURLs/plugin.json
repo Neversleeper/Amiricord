@@ -1,0 +1,21 @@
+{
+    "schema": 1,
+    "id": "EmbeddedURLs",
+    "name": "Embedded URLs",
+    "version": "1.0.0",
+    "description": "Rewrites TikTok, X/Twitter and Instagram links in your messages to ones that show a full preview in Discord.",
+    "origin": "testcord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        { "name": "Dadian1", "role": "original author" },
+        { "name": "Neversleeper", "github": "https://github.com/Neversleeper", "role": "Amiricord port" }
+    ],
+    "credits": [
+        { "name": "Vendicated and contributors (Vencord), plugin EmbeddedURLs by Dadian1", "license": "GPL-3.0-or-later", "url": "https://github.com/TestcordDev/TestCord" }
+    ],
+    "tags": ["chat", "utility"],
+    "enabledByDefault": false,
+    "startAt": "init",
+    "entry": { "renderer": "index.ts" },
+    "permissions": {}
+}

@@ -1,0 +1,26 @@
+{
+    "schema": 1,
+    "id": "RoleDuplication",
+    "name": "Role Duplication",
+    "version": "1.0.0",
+    "description": "Adds a /duplicaterole command that makes a copy of a role of the server you are in (same colour, permissions, name with a custom name if you want).",
+    "origin": "testcord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        { "name": "i am me", "role": "original author" },
+        { "name": "x2b", "role": "original author" },
+        { "name": "Neversleeper", "github": "https://github.com/Neversleeper", "role": "Amiricord port" }
+    ],
+    "credits": [
+        { "name": "Vendicated and contributors (Vencord), plugin RoleDuplication by i am me, x2b", "license": "GPL-3.0-or-later", "url": "https://github.com/TestcordDev/TestCord" }
+    ],
+    "tags": ["utility"],
+    "enabledByDefault": false,
+    "startAt": "domReady",
+    "entry": { "renderer": "index.ts" },
+    "permissions": {
+        "account": {
+            "write": ["server-roles"]
+        }
+    }
+}

@@ -1,0 +1,22 @@
+{
+    "schema": 1,
+    "id": "RevealAllSpoilers",
+    "name": "Reveal All Spoilers",
+    "version": "1.0.0",
+    "description": "Ctrl-click a spoiler to show every spoiler in that message, Ctrl+Shift-click to show every spoiler in the chat; or turn on auto-reveal to never see spoilers at all.",
+    "origin": "testcord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        { "name": "whqwert", "role": "original author" },
+        { "name": "x2b", "role": "original author" },
+        { "name": "Neversleeper", "github": "https://github.com/Neversleeper", "role": "Amiricord port" }
+    ],
+    "credits": [
+        { "name": "Vendicated and contributors (Vencord), plugin RevealAllSpoilers by whqwert, x2b", "license": "GPL-3.0-or-later", "url": "https://github.com/TestcordDev/TestCord" }
+    ],
+    "tags": ["chat", "utility"],
+    "enabledByDefault": false,
+    "startAt": "init",
+    "entry": { "renderer": "index.ts" },
+    "permissions": {}
+}

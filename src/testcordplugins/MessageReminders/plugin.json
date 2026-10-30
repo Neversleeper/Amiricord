@@ -1,0 +1,21 @@
+{
+    "schema": 1,
+    "id": "MessageReminders",
+    "name": "Message Reminders",
+    "version": "1.0.0",
+    "description": "Right-click a message to be reminded about it later (in 30 minutes, 1 hour, 3 hours, this evening or tomorrow morning); a notice brings you back to it. A Reminders tab lists them.",
+    "origin": "testcord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        { "name": "sirphantom89", "role": "original author" },
+        { "name": "Neversleeper", "github": "https://github.com/Neversleeper", "role": "Amiricord port" }
+    ],
+    "credits": [
+        { "name": "Vendicated and contributors (Vencord), plugin MessageReminders by sirphantom89", "license": "GPL-3.0-or-later", "url": "https://github.com/TestcordDev/TestCord" }
+    ],
+    "tags": ["chat", "utility"],
+    "enabledByDefault": false,
+    "startAt": "domReady",
+    "entry": { "renderer": "index.ts" },
+    "permissions": {}
+}

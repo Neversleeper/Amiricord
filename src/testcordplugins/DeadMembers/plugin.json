@@ -1,0 +1,21 @@
+{
+    "schema": 1,
+    "id": "DeadMembers",
+    "name": "Dead Members",
+    "version": "1.0.0",
+    "description": "Marks the name of a message's author when they have left the server (crossed out, or with a small mark).",
+    "origin": "testcord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        { "name": "Kyuuhachi", "role": "original author" },
+        { "name": "Neversleeper", "github": "https://github.com/Neversleeper", "role": "Amiricord port" }
+    ],
+    "credits": [
+        { "name": "Vendicated and contributors (Vencord), plugin DeadMembers by Kyuuhachi", "license": "GPL-3.0-or-later", "url": "https://github.com/TestcordDev/TestCord" }
+    ],
+    "tags": ["chat", "ui"],
+    "enabledByDefault": false,
+    "startAt": "init",
+    "entry": { "renderer": "index.ts" },
+    "permissions": {}
+}

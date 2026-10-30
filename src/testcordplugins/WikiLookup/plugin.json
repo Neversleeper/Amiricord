@@ -1,0 +1,29 @@
+{
+    "schema": 1,
+    "id": "WikiLookup",
+    "name": "Wiki Lookup",
+    "version": "1.0.0",
+    "description": "Adds a /wiki command that looks a subject up on Wikipedia and shows a short summary in a window, only to you.",
+    "origin": "testcord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        { "name": "Sharp", "role": "original author" },
+        { "name": "Neversleeper", "github": "https://github.com/Neversleeper", "role": "Amiricord port" }
+    ],
+    "credits": [
+        { "name": "Vendicated and contributors (Vencord), plugin WikiLookup by Sharp", "license": "GPL-3.0-or-later", "url": "https://github.com/TestcordDev/TestCord" }
+    ],
+    "tags": ["chat", "utility"],
+    "enabledByDefault": false,
+    "startAt": "domReady",
+    "entry": { "renderer": "index.ts" },
+    "permissions": {
+        "network": [
+            {
+                "host": "en.wikipedia.org",
+                "from": "renderer",
+                "why": "get the summary of the subject you typed"
+            }
+        ]
+    }
+}
