@@ -36,6 +36,7 @@ import { createNotificationLayer, type PluginNotifications } from "../api/notifi
 import { buildPluginCards, PluginCard, PluginSource } from "../api/pluginCards";
 import { describeSettings, isPluginSettings, PluginSettingsAnswer, PluginSettingsComponent } from "../api/pluginSettings";
 import { PluginSwitch, ToggleResult } from "../api/pluginSwitch";
+import { buildProfileBadges, type PluginProfileBadges, profileBadges } from "../api/profileBadges";
 import { buildSecrets, PluginSecrets } from "../api/secrets";
 import { buildServerList, type PluginServerList, serverList } from "../api/serverList";
 import { SettingsClient } from "../api/settingsClient";
@@ -188,6 +189,8 @@ export interface EnginePluginContext extends PluginContext {
     memberDecor: PluginMemberDecor;
     /** A bar across the top of the window with a message and up to two buttons. It goes when the plugin stops. See `src/api/notices.ts`. */
     notices: PluginNotices;
+    /** Badges on a person's profile (the card and the popout), drawn by Discord like its own. They go when the plugin stops. See `src/api/profileBadges.ts`. */
+    profileBadges: PluginProfileBadges;
     /** Change the text of a message just before it is sent. They go when the plugin stops. See `src/api/messageEvents.ts`. */
     messageEvents: PluginMessageEvents;
     /** A short message at the bottom of the page. See `src/api/toasts.ts`. */
@@ -690,6 +693,7 @@ export function startEngine(options: EngineOptions): Engine {
                 messageDecor: messageDecorHub ? buildMessageDecor(messageDecorHub, id, ctx.onDispose) : { add: () => false, refresh: () => undefined },
                 memberDecor: memberDecorHub ? buildMemberDecor(memberDecorHub, id, ctx.onDispose) : { add: () => false, refresh: () => undefined },
                 notices: noticesHub ? buildNotices(noticesHub, id, ctx.onDispose) : { show: () => false, dismiss: () => undefined },
+                profileBadges: buildProfileBadges(profileBadges, id, ctx.onDispose),
                 messageButtons: messageButtonsHub ? buildMessageButtons(messageButtonsHub, id, ctx.onDispose) : { add: () => false, refresh: () => undefined },
                 toasts: havePage ? buildToasts(globalThis as unknown as ToastPage, css => { addCommonStyle(css, "toasts"); }, ctx.onDispose) : { show: () => undefined },
                 modals: buildModals(pluginFinders, ctx.onDispose, reportError),

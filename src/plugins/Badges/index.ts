@@ -13,6 +13,7 @@
 // and the download from GitHub (the repository is private until it is made public; without the list only the owner badge and the user badge show).
 
 import { nativeOf } from "../../api/native";
+import { profileBadges } from "../../api/profileBadges";
 import type { PluginCode } from "../../renderer/engine";
 import { OWNERS } from "../../shared/project";
 import { type BadgeProfile, badgesOf, type ProfileBadge } from "./badgeLogic";
@@ -50,7 +51,10 @@ const plugin: PluginCode & { badgesOf(profile: BadgeProfile | null | undefined):
     /** Called by the patched Discord code for every profile it draws. */
     badgesOf(profile) {
         try {
-            return badgesOf(profile, { owners: OWNER_IDS, list, registered, showUsers: true });
+            const own = badgesOf(profile, { owners: OWNER_IDS, list, registered, showUsers: true });
+            // The badges other plugins added (`ctx.profileBadges`).
+            const userId = typeof profile?.userId === "string" ? profile.userId : null;
+            return userId === null ? own : [...own, ...profileBadges.forUser(userId)];
         } catch {
             return [];
         }

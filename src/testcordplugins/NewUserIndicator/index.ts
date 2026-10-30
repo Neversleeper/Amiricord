@@ -8,8 +8,8 @@
 // less than N days ago (30 by default): beside the name above a message and in the member list. The age is read from the person's id (an id holds the moment the account
 // was made), so nothing is asked of anyone and nothing is sent.
 // Where it hooks was read in a running Discord (build 653945): the header of a message (`hideSystemTag:` is in it once; the badges of the name are the `null!=ev?ev:null` that
-// follows the lobby name) and the row of the member list (the same place MoreUserTags uses). Differences from the original: no mark on the profile badges (Amiricord has no
-// badge list to add to), and the explanation is the element's own hover text ("Account created N days ago") instead of Discord's tooltip. NOT seen on screen yet.
+// follows the lobby name) and the row of the member list (the same place MoreUserTags uses). Differences from the original: the profile mark is a badge added through
+// `ctx.profileBadges` (new, drawn by Discord with the same hover text; it uses a red disc with a white "!" instead of the emoji), and the explanation is the element's own hover text ("Account created N days ago") instead of Discord's tooltip. NOT seen on screen yet.
 
 import { currentReact } from "../../api/jsxRuntime";
 import { definePluginSettings } from "../../api/pluginSettings";
@@ -17,9 +17,12 @@ import type { PluginCode } from "../../renderer/engine";
 
 const DISCORD_EPOCH = 1_420_070_400_000n;
 const DAY_MS = 86_400_000;
+/** A red exclamation mark on a white disc, the picture of the profile badge (a small vector image kept inside the program). */
+const BADGE_ICON = `data:image/svg+xml;charset=utf-8,${encodeURIComponent("<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 32 32\"><circle cx=\"16\" cy=\"16\" r=\"16\" fill=\"#f23f43\"/><rect x=\"14\" y=\"6\" width=\"4\" height=\"12.5\" rx=\"2\" fill=\"#fff\"/><circle cx=\"16\" cy=\"24\" r=\"2.4\" fill=\"#fff\"/></svg>")}`;
 const SNOWFLAKE = /^\d{15,25}$/;
 
 const settings = definePluginSettings({
+    badges: { type: "boolean", default: true, description: "Show the mark as a badge on the profile (the card and the popout)." },
     decorators: { type: "boolean", default: true, description: "Show the mark in the member list." },
     decorations: { type: "boolean", default: true, description: "Show the mark next to names above messages." },
     days: { type: "number", default: 30, min: 1, max: 3650, integer: true, description: "An account made fewer days ago than this gets the mark." }
@@ -52,6 +55,18 @@ const plugin: PluginCode & {
     memberIndicator(props: { user?: { id?: unknown; bot?: unknown; }; } | undefined): unknown;
 } = {
     settings,
+
+    start(ctx) {
+        // The mark on the profile, as the original does with a profile badge (`ctx.profileBadges`; Discord draws it with the hover text as its tooltip).
+        ctx.profileBadges.add({
+            id: "new-user",
+            badge: userId => {
+                if (!settings.store.badges) return undefined;
+                const text = indicatorText({ id: userId }, settings.store.days, Date.now());
+                return text === undefined ? undefined : { description: text, iconSrc: BADGE_ICON };
+            }
+        });
+    },
 
     patches: [
         {
