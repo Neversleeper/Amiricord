@@ -1,0 +1,21 @@
+{
+    "schema": 1,
+    "id": "FindReply",
+    "name": "Find Reply",
+    "version": "1.0.0",
+    "description": "A button on messages that have replies below them: each press jumps to the next reply (a message that answers it with Reply, or that pings its author).",
+    "origin": "equicord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        { "name": "Equicord contributors", "role": "original author" },
+        { "name": "Neversleeper", "github": "https://github.com/Neversleeper", "role": "Amiricord port" }
+    ],
+    "credits": [
+        { "name": "Vendicated and contributors (Vencord), plugin FindReply by Equicord contributors", "license": "GPL-3.0-or-later", "url": "https://github.com/Equicord/Equicord" }
+    ],
+    "tags": ["chat", "utility"],
+    "enabledByDefault": false,
+    "startAt": "domReady",
+    "entry": { "renderer": "index.ts" },
+    "permissions": {}
+}

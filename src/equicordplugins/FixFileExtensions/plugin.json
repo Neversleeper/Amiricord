@@ -1,0 +1,21 @@
+{
+    "schema": 1,
+    "id": "FixFileExtensions",
+    "name": "Fix File Extensions",
+    "version": "1.0.0",
+    "description": "Renames files you upload to a format Discord can show, when there is one (for example .avi to .mp4).",
+    "origin": "equicord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        { "name": "thororen", "role": "original author" },
+        { "name": "Neversleeper", "github": "https://github.com/Neversleeper", "role": "Amiricord port" }
+    ],
+    "credits": [
+        { "name": "Vendicated and contributors (Vencord), plugin FixFileExtensions by thororen", "license": "GPL-3.0-or-later", "url": "https://github.com/Equicord/Equicord" }
+    ],
+    "tags": ["media", "utility"],
+    "enabledByDefault": false,
+    "startAt": "init",
+    "entry": { "renderer": "index.ts" },
+    "permissions": {}
+}

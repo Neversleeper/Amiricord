@@ -1,0 +1,26 @@
+{
+    "schema": 1,
+    "id": "VoiceChannelLog",
+    "name": "Voice Channel Log",
+    "version": "1.0.0",
+    "description": "Keeps a log of what happens in the voice channel you are in (who joined, left or moved, camera on or off, screen share on or off) and shows it in a Voice Log tab or from a right-click on the channel.",
+    "origin": "equicord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        { "name": "Sqaaakoi", "role": "original author" },
+        { "name": "thororen", "role": "original author" },
+        { "name": "nyx", "role": "original author" },
+        { "name": "Moxxie", "role": "original author" },
+        { "name": "Fres", "role": "original author" },
+        { "name": "amy", "role": "original author" },
+        { "name": "Neversleeper", "github": "https://github.com/Neversleeper", "role": "Amiricord port" }
+    ],
+    "credits": [
+        { "name": "Vendicated and contributors (Vencord), plugin VoiceChannelLog by Sqaaakoi, thororen, nyx, Moxxie, Fres, amy", "license": "GPL-3.0-or-later", "url": "https://github.com/Equicord/Equicord" }
+    ],
+    "tags": ["chat", "utility"],
+    "enabledByDefault": false,
+    "startAt": "domReady",
+    "entry": { "renderer": "index.ts" },
+    "permissions": {}
+}

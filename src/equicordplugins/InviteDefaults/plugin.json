@@ -1,0 +1,21 @@
+{
+    "schema": 1,
+    "id": "InviteDefaults",
+    "name": "Invite Defaults",
+    "version": "1.0.0",
+    "description": "Sets your own default length, number of uses and temporary membership for new server invites.",
+    "origin": "equicord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        { "name": "VillainsRule", "role": "original author" },
+        { "name": "Neversleeper", "github": "https://github.com/Neversleeper", "role": "Amiricord port" }
+    ],
+    "credits": [
+        { "name": "Vendicated and contributors (Vencord), plugin InviteDefaults by VillainsRule", "license": "GPL-3.0-or-later", "url": "https://github.com/Equicord/Equicord" }
+    ],
+    "tags": ["utility"],
+    "enabledByDefault": false,
+    "startAt": "init",
+    "entry": { "renderer": "index.ts" },
+    "permissions": {}
+}

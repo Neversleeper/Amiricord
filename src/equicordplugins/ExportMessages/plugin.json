@@ -1,0 +1,21 @@
+{
+    "schema": 1,
+    "id": "ExportMessages",
+    "name": "Export Messages",
+    "version": "1.0.0",
+    "description": "Right-click a message and choose Export Message to save it as a text file, or use /exportchannel to save the last messages of the channel you are in.",
+    "origin": "equicord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        { "name": "Equicord contributors", "role": "original author" },
+        { "name": "Neversleeper", "github": "https://github.com/Neversleeper", "role": "Amiricord port" }
+    ],
+    "credits": [
+        { "name": "Vendicated and contributors (Vencord), plugin ExportMessages by Equicord contributors", "license": "GPL-3.0-or-later", "url": "https://github.com/Equicord/Equicord" }
+    ],
+    "tags": ["chat", "utility"],
+    "enabledByDefault": false,
+    "startAt": "domReady",
+    "entry": { "renderer": "index.ts" },
+    "permissions": {}
+}

@@ -1,0 +1,21 @@
+{
+    "schema": 1,
+    "id": "ShowResourceChannels",
+    "name": "Show Resource Channels",
+    "version": "1.0.0",
+    "description": "Shows the channels that are hidden behind a server's \"resources\" entry in the channel list.",
+    "origin": "equicord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        { "name": "VillainsRule", "role": "original author" },
+        { "name": "Neversleeper", "github": "https://github.com/Neversleeper", "role": "Amiricord port" }
+    ],
+    "credits": [
+        { "name": "Vendicated and contributors (Vencord), plugin ShowResourceChannels by VillainsRule", "license": "GPL-3.0-or-later", "url": "https://github.com/Equicord/Equicord" }
+    ],
+    "tags": ["utility", "ui"],
+    "enabledByDefault": false,
+    "startAt": "init",
+    "entry": { "renderer": "index.ts" },
+    "permissions": {}
+}

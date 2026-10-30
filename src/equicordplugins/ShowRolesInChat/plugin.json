@@ -1,0 +1,21 @@
+{
+    "schema": 1,
+    "id": "ShowRolesInChat",
+    "name": "Show Roles In Chat",
+    "version": "1.0.0",
+    "description": "Shows the name of the highest role of a message's author next to their name.",
+    "origin": "equicord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        { "name": "Equicord contributors", "role": "original author" },
+        { "name": "Neversleeper", "github": "https://github.com/Neversleeper", "role": "Amiricord port" }
+    ],
+    "credits": [
+        { "name": "Vendicated and contributors (Vencord), plugin ShowRolesInChat by Equicord contributors", "license": "GPL-3.0-or-later", "url": "https://github.com/Equicord/Equicord" }
+    ],
+    "tags": ["chat", "utility"],
+    "enabledByDefault": false,
+    "startAt": "domReady",
+    "entry": { "renderer": "index.ts" },
+    "permissions": {}
+}

@@ -1,0 +1,21 @@
+{
+    "schema": 1,
+    "id": "LoginWithToken",
+    "name": "Login With Token",
+    "version": "1.0.0",
+    "description": "Adds a \"Login with token\" link on Discord's own login page, next to the password field; it opens a window where you paste one of your own account tokens to switch to it.",
+    "origin": "equicord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        { "name": "thororen", "role": "original author" },
+        { "name": "Neversleeper", "github": "https://github.com/Neversleeper", "role": "Amiricord port" }
+    ],
+    "credits": [
+        { "name": "Vendicated and contributors (Vencord), plugin LoginWithToken by thororen", "license": "GPL-3.0-or-later", "url": "https://github.com/Equicord/Equicord" }
+    ],
+    "tags": ["privacy", "utility"],
+    "enabledByDefault": false,
+    "startAt": "domReady",
+    "entry": { "renderer": "index.ts" },
+    "permissions": {}
+}

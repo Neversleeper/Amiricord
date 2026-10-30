@@ -1,0 +1,21 @@
+{
+    "schema": 1,
+    "id": "MoreCommands",
+    "name": "More Commands",
+    "version": "1.0.0",
+    "description": "A set of small slash commands that send a message: /choose, /rolldice, /flipcoin, /randomnumber, /transform (upper, lower, reverse, mock, uwu, morse...), /wordcount, /lenny, /shrug, /tableflip and /slap.",
+    "origin": "equicord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        { "name": "Equicord contributors", "role": "original author" },
+        { "name": "Neversleeper", "github": "https://github.com/Neversleeper", "role": "Amiricord port" }
+    ],
+    "credits": [
+        { "name": "Vendicated and contributors (Vencord), plugin MoreCommands by Equicord contributors", "license": "GPL-3.0-or-later", "url": "https://github.com/Equicord/Equicord" }
+    ],
+    "tags": ["chat", "utility"],
+    "enabledByDefault": false,
+    "startAt": "init",
+    "entry": { "renderer": "index.ts" },
+    "permissions": {}
+}

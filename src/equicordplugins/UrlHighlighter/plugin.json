@@ -1,0 +1,21 @@
+{
+    "schema": 1,
+    "id": "UrlHighlighter",
+    "name": "Url Highlighter",
+    "version": "1.0.0",
+    "description": "Colours the links in messages that match your patterns (like *.example.com), edited in a URL Highlighter tab.",
+    "origin": "equicord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        { "name": "prism", "role": "original author" },
+        { "name": "Neversleeper", "github": "https://github.com/Neversleeper", "role": "Amiricord port" }
+    ],
+    "credits": [
+        { "name": "Vendicated and contributors (Vencord), plugin UrlHighlighter by prism", "license": "GPL-3.0-or-later", "url": "https://github.com/Equicord/Equicord" }
+    ],
+    "tags": ["chat", "ui"],
+    "enabledByDefault": false,
+    "startAt": "domReady",
+    "entry": { "renderer": "index.ts" },
+    "permissions": {}
+}

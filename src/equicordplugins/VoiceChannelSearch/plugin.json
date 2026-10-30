@@ -1,0 +1,21 @@
+{
+    "schema": 1,
+    "id": "VoiceChannelSearch",
+    "name": "Voice Channel Search",
+    "version": "1.0.0",
+    "description": "Search every voice channel of every server you are in and join one, or go to its page, from a window opened with Ctrl+Alt+V or the /voicesearch command.",
+    "origin": "equicord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        { "name": "Equicord contributors", "role": "original author" },
+        { "name": "Neversleeper", "github": "https://github.com/Neversleeper", "role": "Amiricord port" }
+    ],
+    "credits": [
+        { "name": "Vendicated and contributors (Vencord), plugin VoiceChannelSearch by Equicord contributors", "license": "GPL-3.0-or-later", "url": "https://github.com/Equicord/Equicord" }
+    ],
+    "tags": ["voice", "utility"],
+    "enabledByDefault": false,
+    "startAt": "domReady",
+    "entry": { "renderer": "index.ts" },
+    "permissions": {}
+}

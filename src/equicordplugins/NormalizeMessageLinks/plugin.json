@@ -1,0 +1,21 @@
+{
+    "schema": 1,
+    "id": "NormalizeMessageLinks",
+    "name": "Normalize Message Links",
+    "version": "1.0.0",
+    "description": "Copied message links point to discord.com instead of canary.discord.com or ptb.discord.com.",
+    "origin": "equicord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        { "name": "bb010g", "role": "original author" },
+        { "name": "Neversleeper", "github": "https://github.com/Neversleeper", "role": "Amiricord port" }
+    ],
+    "credits": [
+        { "name": "Vendicated and contributors (Vencord), plugin NormalizeMessageLinks by bb010g", "license": "GPL-3.0-or-later", "url": "https://github.com/Equicord/Equicord" }
+    ],
+    "tags": ["chat", "utility"],
+    "enabledByDefault": false,
+    "startAt": "init",
+    "entry": { "renderer": "index.ts" },
+    "permissions": {}
+}

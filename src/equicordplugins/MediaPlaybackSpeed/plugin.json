@@ -1,0 +1,21 @@
+{
+    "schema": 1,
+    "id": "MediaPlaybackSpeed",
+    "name": "Media Playback Speed",
+    "version": "1.0.0",
+    "description": "Sets a speed for videos, sounds and voice messages when they start playing.",
+    "origin": "equicord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        { "name": "D3SOX", "role": "original author" },
+        { "name": "Neversleeper", "github": "https://github.com/Neversleeper", "role": "Amiricord port" }
+    ],
+    "credits": [
+        { "name": "Vendicated and contributors (Vencord), plugin MediaPlaybackSpeed by D3SOX", "license": "GPL-3.0-or-later", "url": "https://github.com/Equicord/Equicord" }
+    ],
+    "tags": ["media", "utility"],
+    "enabledByDefault": false,
+    "startAt": "init",
+    "entry": { "renderer": "index.ts" },
+    "permissions": {}
+}

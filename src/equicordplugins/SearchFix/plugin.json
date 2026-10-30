@@ -1,0 +1,21 @@
+{
+    "schema": 1,
+    "id": "SearchFix",
+    "name": "Search Fix",
+    "version": "1.0.0",
+    "description": "Fixes the \"We dropped the magnifying glass!\" error when you search far into the past.",
+    "origin": "equicord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        { "name": "Jaxx", "role": "original author" },
+        { "name": "Neversleeper", "github": "https://github.com/Neversleeper", "role": "Amiricord port" }
+    ],
+    "credits": [
+        { "name": "Vendicated and contributors (Vencord), plugin SearchFix by Jaxx", "license": "GPL-3.0-or-later", "url": "https://github.com/Equicord/Equicord" }
+    ],
+    "tags": ["utility", "fix"],
+    "enabledByDefault": false,
+    "startAt": "init",
+    "entry": { "renderer": "index.ts" },
+    "permissions": {}
+}

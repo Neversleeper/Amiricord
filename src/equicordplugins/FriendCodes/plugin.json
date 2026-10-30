@@ -1,0 +1,25 @@
+{
+    "schema": 1,
+    "id": "FriendCodes",
+    "name": "Friend Codes",
+    "version": "1.0.0",
+    "description": "Adds a /friendcodes command that opens a window with your friend codes: you can make a new one, copy the link of one, or revoke them all.",
+    "origin": "equicord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        { "name": "HypedDomi", "role": "original author" },
+        { "name": "Neversleeper", "github": "https://github.com/Neversleeper", "role": "Amiricord port" }
+    ],
+    "credits": [
+        { "name": "Vendicated and contributors (Vencord), plugin FriendCodes by HypedDomi", "license": "GPL-3.0-or-later", "url": "https://github.com/Equicord/Equicord" }
+    ],
+    "tags": ["utility"],
+    "enabledByDefault": false,
+    "startAt": "domReady",
+    "entry": { "renderer": "index.ts" },
+    "permissions": {
+        "system": {
+            "clipboard": true
+        }
+    }
+}

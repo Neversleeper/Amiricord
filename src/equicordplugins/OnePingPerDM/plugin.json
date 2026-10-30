@@ -1,0 +1,21 @@
+{
+    "schema": 1,
+    "id": "OnePingPerDM",
+    "name": "One Ping Per DM",
+    "version": "1.0.0",
+    "description": "When someone sends you several unread messages in a DM, you hear one sound; read them to reset it.",
+    "origin": "equicord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        { "name": "ProffDea", "role": "original author" },
+        { "name": "Neversleeper", "github": "https://github.com/Neversleeper", "role": "Amiricord port" }
+    ],
+    "credits": [
+        { "name": "Vendicated and contributors (Vencord), plugin OnePingPerDM by ProffDea", "license": "GPL-3.0-or-later", "url": "https://github.com/Equicord/Equicord" }
+    ],
+    "tags": ["chat", "utility"],
+    "enabledByDefault": false,
+    "startAt": "init",
+    "entry": { "renderer": "index.ts" },
+    "permissions": {}
+}

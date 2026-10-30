@@ -1,0 +1,21 @@
+{
+    "schema": 1,
+    "id": "UnlimitedAccounts",
+    "name": "Unlimited Accounts",
+    "version": "1.0.0",
+    "description": "Raises how many accounts you can add to Discord's account switcher.",
+    "origin": "equicord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        { "name": "thororen", "role": "original author" },
+        { "name": "Neversleeper", "github": "https://github.com/Neversleeper", "role": "Amiricord port" }
+    ],
+    "credits": [
+        { "name": "Vendicated and contributors (Vencord), plugin UnlimitedAccounts by thororen", "license": "GPL-3.0-or-later", "url": "https://github.com/Equicord/Equicord" }
+    ],
+    "tags": ["utility"],
+    "enabledByDefault": false,
+    "startAt": "init",
+    "entry": { "renderer": "index.ts" },
+    "permissions": {}
+}

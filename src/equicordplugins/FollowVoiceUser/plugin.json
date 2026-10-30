@@ -1,0 +1,21 @@
+{
+    "schema": 1,
+    "id": "FollowVoiceUser",
+    "name": "Follow Voice User",
+    "version": "1.0.0",
+    "description": "Adds \"Follow User\" to the right-click menu of a friend: when they join another voice channel, you join it too.",
+    "origin": "equicord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        { "name": "TheArmagan", "role": "original author" },
+        { "name": "Neversleeper", "github": "https://github.com/Neversleeper", "role": "Amiricord port" }
+    ],
+    "credits": [
+        { "name": "Vendicated and contributors (Vencord), plugin FollowVoiceUser by TheArmagan", "license": "GPL-3.0-or-later", "url": "https://github.com/Equicord/Equicord" }
+    ],
+    "tags": ["voice"],
+    "enabledByDefault": false,
+    "startAt": "domReady",
+    "entry": { "renderer": "index.ts" },
+    "permissions": {}
+}

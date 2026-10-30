@@ -1,0 +1,26 @@
+{
+    "schema": 1,
+    "id": "SplitLargeMessages",
+    "name": "Split Large Messages",
+    "version": "1.0.0",
+    "description": "Adds a /split command: it cuts a long text into pieces that fit Discord's limit and sends them one after another, with a pause between them.",
+    "origin": "equicord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        { "name": "Equicord contributors", "role": "original author" },
+        { "name": "Neversleeper", "github": "https://github.com/Neversleeper", "role": "Amiricord port" }
+    ],
+    "credits": [
+        { "name": "Vendicated and contributors (Vencord), plugin SplitLargeMessages by Equicord contributors", "license": "GPL-3.0-or-later", "url": "https://github.com/Equicord/Equicord" }
+    ],
+    "tags": ["chat", "utility"],
+    "enabledByDefault": false,
+    "startAt": "domReady",
+    "entry": { "renderer": "index.ts" },
+    "permissions": {
+        "messages": {
+            "read": "none",
+            "send": true
+        }
+    }
+}

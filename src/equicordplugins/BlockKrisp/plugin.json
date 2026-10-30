@@ -1,0 +1,21 @@
+{
+    "schema": 1,
+    "id": "BlockKrisp",
+    "name": "Block Krisp",
+    "version": "1.0.0",
+    "description": "Stops Krisp noise suppression from loading and tells Discord it is not supported.",
+    "origin": "equicord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        { "name": "D3SOX", "role": "original author" },
+        { "name": "Neversleeper", "github": "https://github.com/Neversleeper", "role": "Amiricord port" }
+    ],
+    "credits": [
+        { "name": "Vendicated and contributors (Vencord), plugin BlockKrisp by D3SOX", "license": "GPL-3.0-or-later", "url": "https://github.com/Equicord/Equicord" }
+    ],
+    "tags": ["privacy", "utility", "voice"],
+    "enabledByDefault": false,
+    "startAt": "init",
+    "entry": { "renderer": "index.ts" },
+    "permissions": {}
+}

@@ -1,0 +1,21 @@
+{
+    "schema": 1,
+    "id": "NoPushToTalk",
+    "name": "No Push To Talk",
+    "version": "1.0.0",
+    "description": "Lets you use voice activity in channels that force push to talk.",
+    "origin": "equicord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        { "name": "omaw", "role": "original author" },
+        { "name": "Neversleeper", "github": "https://github.com/Neversleeper", "role": "Amiricord port" }
+    ],
+    "credits": [
+        { "name": "Vendicated and contributors (Vencord), plugin NoPushToTalk by omaw", "license": "GPL-3.0-or-later", "url": "https://github.com/Equicord/Equicord" }
+    ],
+    "tags": ["utility", "voice"],
+    "enabledByDefault": false,
+    "startAt": "init",
+    "entry": { "renderer": "index.ts" },
+    "permissions": {}
+}
