@@ -1,0 +1,21 @@
+{
+    "schema": 1,
+    "id": "PreviewMessage",
+    "name": "Preview Message",
+    "version": "1.0.0",
+    "description": "Adds a button to the message bar that shows, in a window, the text you have written, before you send it.",
+    "origin": "vencord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        { "name": "Aria", "role": "original author" },
+        { "name": "Neversleeper", "github": "https://github.com/Neversleeper", "role": "Amiricord port" }
+    ],
+    "credits": [
+        { "name": "Vendicated and contributors (Vencord), plugin PreviewMessage by Aria", "license": "GPL-3.0-or-later", "url": "https://github.com/Vendicated/Vencord" }
+    ],
+    "tags": ["chat", "utility"],
+    "enabledByDefault": false,
+    "startAt": "domReady",
+    "entry": { "renderer": "index.ts" },
+    "permissions": {}
+}

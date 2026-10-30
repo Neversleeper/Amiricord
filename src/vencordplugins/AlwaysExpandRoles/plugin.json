@@ -1,0 +1,21 @@
+{
+    "schema": 1,
+    "id": "AlwaysExpandRoles",
+    "name": "Always Expand Roles",
+    "version": "1.0.0",
+    "description": "Always opens the full role list in profile popouts.",
+    "origin": "vencord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        { "name": "surgedevs", "role": "original author" },
+        { "name": "Neversleeper", "github": "https://github.com/Neversleeper", "role": "Amiricord port" }
+    ],
+    "credits": [
+        { "name": "Vendicated and contributors (Vencord), plugin AlwaysExpandRoles by surgedevs", "license": "GPL-3.0-or-later", "url": "https://github.com/Vendicated/Vencord" }
+    ],
+    "tags": ["ui"],
+    "enabledByDefault": false,
+    "startAt": "init",
+    "entry": { "renderer": "index.ts" },
+    "permissions": {}
+}

@@ -1,0 +1,25 @@
+{
+    "schema": 1,
+    "id": "ShowAllMessageButtons",
+    "name": "Show All Message Buttons",
+    "version": "1.0.0",
+    "description": "Always shows the whole message button menu, without holding Shift, and deletes or pins without it too.",
+    "origin": "vencord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        { "name": "Nuckyz", "role": "original author" },
+        { "name": "Neversleeper", "github": "https://github.com/Neversleeper", "role": "Amiricord port" }
+    ],
+    "credits": [
+        { "name": "Vendicated and contributors (Vencord), plugin ShowAllMessageButtons by Nuckyz", "license": "GPL-3.0-or-later", "url": "https://github.com/Vendicated/Vencord" }
+    ],
+    "tags": ["chat", "utility"],
+    "enabledByDefault": false,
+    "startAt": "init",
+    "entry": { "renderer": "index.ts" },
+    "permissions": {
+        "account": {
+            "write": ["delete-own-messages", "pin-messages"]
+        }
+    }
+}

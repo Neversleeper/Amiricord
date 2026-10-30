@@ -1,0 +1,22 @@
+{
+    "schema": 1,
+    "id": "FixImagesQuality",
+    "name": "Fix Images Quality",
+    "version": "1.0.0",
+    "description": "Loads images at their original resolution instead of a smaller copy.",
+    "origin": "vencord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        { "name": "Nuckyz", "role": "original author" },
+        { "name": "Ven", "role": "original author" },
+        { "name": "Neversleeper", "github": "https://github.com/Neversleeper", "role": "Amiricord port" }
+    ],
+    "credits": [
+        { "name": "Vendicated and contributors (Vencord), plugin FixImagesQuality by Nuckyz, Ven", "license": "GPL-3.0-or-later", "url": "https://github.com/Vendicated/Vencord" }
+    ],
+    "tags": ["media", "ui"],
+    "enabledByDefault": false,
+    "startAt": "init",
+    "entry": { "renderer": "index.ts" },
+    "permissions": {}
+}

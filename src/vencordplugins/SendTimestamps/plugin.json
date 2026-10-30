@@ -1,0 +1,22 @@
+{
+    "schema": 1,
+    "id": "SendTimestamps",
+    "name": "Send Timestamps",
+    "version": "1.0.0",
+    "description": "Turns a time written between angle brackets, like <9:30 PM> or <21:30>, into a Discord timestamp that shows in everyone's own time zone.",
+    "origin": "vencord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        { "name": "Ven", "role": "original author" },
+        { "name": "Tyler", "role": "original author" },
+        { "name": "Neversleeper", "github": "https://github.com/Neversleeper", "role": "Amiricord port" }
+    ],
+    "credits": [
+        { "name": "Vendicated and contributors (Vencord), plugin SendTimestamps by Ven, Tyler", "license": "GPL-3.0-or-later", "url": "https://github.com/Vendicated/Vencord" }
+    ],
+    "tags": ["chat", "utility"],
+    "enabledByDefault": false,
+    "startAt": "init",
+    "entry": { "renderer": "index.ts" },
+    "permissions": {}
+}

@@ -1,0 +1,22 @@
+{
+    "schema": 1,
+    "id": "ShowTimeoutDuration",
+    "name": "Show Timeout Duration",
+    "version": "1.0.0",
+    "description": "Shows how much longer a person's timeout in the server will last, next to their name in messages.",
+    "origin": "vencord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        { "name": "Ven", "role": "original author" },
+        { "name": "Sqaaakoi", "role": "original author" },
+        { "name": "Neversleeper", "github": "https://github.com/Neversleeper", "role": "Amiricord port" }
+    ],
+    "credits": [
+        { "name": "Vendicated and contributors (Vencord), plugin ShowTimeoutDuration by Ven, Sqaaakoi", "license": "GPL-3.0-or-later", "url": "https://github.com/Vendicated/Vencord" }
+    ],
+    "tags": ["utility"],
+    "enabledByDefault": false,
+    "startAt": "domReady",
+    "entry": { "renderer": "index.ts" },
+    "permissions": {}
+}

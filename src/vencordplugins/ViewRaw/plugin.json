@@ -1,0 +1,27 @@
+{
+    "schema": 1,
+    "id": "ViewRaw",
+    "name": "View Raw",
+    "version": "1.0.0",
+    "description": "Right-click a message or a person and choose View Raw to see the data Discord holds about them as text, with buttons to copy it.",
+    "origin": "vencord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        { "name": "Ven", "role": "original author" },
+        { "name": "Nickyux", "role": "original author" },
+        { "name": "Vishnya", "role": "original author" },
+        { "name": "Neversleeper", "github": "https://github.com/Neversleeper", "role": "Amiricord port" }
+    ],
+    "credits": [
+        { "name": "Vendicated and contributors (Vencord), plugin ViewRaw by Ven, Nickyux, Vishnya", "license": "GPL-3.0-or-later", "url": "https://github.com/Vendicated/Vencord" }
+    ],
+    "tags": ["developer", "utility"],
+    "enabledByDefault": false,
+    "startAt": "domReady",
+    "entry": { "renderer": "index.ts" },
+    "permissions": {
+        "system": {
+            "clipboard": true
+        }
+    }
+}

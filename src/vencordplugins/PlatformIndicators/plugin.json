@@ -1,0 +1,22 @@
+{
+    "schema": 1,
+    "id": "PlatformIndicators",
+    "name": "Platform Indicators",
+    "version": "1.0.0",
+    "description": "Shows where a person is online (desktop, mobile, web or console) next to their name in messages.",
+    "origin": "vencord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        { "name": "Kyuuhachi", "role": "original author" },
+        { "name": "TheSun", "role": "original author" },
+        { "name": "Neversleeper", "github": "https://github.com/Neversleeper", "role": "Amiricord port" }
+    ],
+    "credits": [
+        { "name": "Vendicated and contributors (Vencord), plugin PlatformIndicators by Kyuuhachi, TheSun", "license": "GPL-3.0-or-later", "url": "https://github.com/Vendicated/Vencord" }
+    ],
+    "tags": ["ui", "utility"],
+    "enabledByDefault": false,
+    "startAt": "domReady",
+    "entry": { "renderer": "index.ts" },
+    "permissions": {}
+}

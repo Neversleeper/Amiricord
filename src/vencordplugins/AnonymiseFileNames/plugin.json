@@ -1,0 +1,21 @@
+{
+    "schema": 1,
+    "id": "AnonymiseFileNames",
+    "name": "Anonymise File Names",
+    "version": "1.0.0",
+    "description": "Gives the files you upload a different name (random letters, a fixed name, the time or the date) so the real name is not shown, keeping the extension.",
+    "origin": "vencord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        { "name": "fawn", "role": "original author" },
+        { "name": "Neversleeper", "github": "https://github.com/Neversleeper", "role": "Amiricord port" }
+    ],
+    "credits": [
+        { "name": "Vendicated and contributors (Vencord), plugin AnonymiseFileNames by fawn", "license": "GPL-3.0-or-later", "url": "https://github.com/Vendicated/Vencord" }
+    ],
+    "tags": ["privacy", "utility"],
+    "enabledByDefault": false,
+    "startAt": "init",
+    "entry": { "renderer": "index.ts" },
+    "permissions": {}
+}

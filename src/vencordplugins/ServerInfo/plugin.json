@@ -1,0 +1,23 @@
+{
+    "schema": 1,
+    "id": "ServerInfo",
+    "name": "Server Info",
+    "version": "1.0.0",
+    "description": "Right-click a server icon and choose Server Info to see its details: when it was created, the owner, how many members, roles and boosts, its features and more.",
+    "origin": "vencord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        { "name": "Ven", "role": "original author" },
+        { "name": "Nuckyz", "role": "original author" },
+        { "name": "Z1xus", "role": "original author" },
+        { "name": "Neversleeper", "github": "https://github.com/Neversleeper", "role": "Amiricord port" }
+    ],
+    "credits": [
+        { "name": "Vendicated and contributors (Vencord), plugin ServerInfo by Ven, Nuckyz, Z1xus", "license": "GPL-3.0-or-later", "url": "https://github.com/Vendicated/Vencord" }
+    ],
+    "tags": ["utility"],
+    "enabledByDefault": false,
+    "startAt": "domReady",
+    "entry": { "renderer": "index.ts" },
+    "permissions": {}
+}

@@ -1,0 +1,22 @@
+{
+    "schema": 1,
+    "id": "ReadAllNotificationsButton",
+    "name": "Read All Notifications Button",
+    "version": "1.0.0",
+    "description": "Adds a \"Read All\" button at the top of the server list that marks every unread channel as read.",
+    "origin": "vencord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        { "name": "kemo", "role": "original author" },
+        { "name": "KrystalSkull", "role": "original author" },
+        { "name": "Neversleeper", "github": "https://github.com/Neversleeper", "role": "Amiricord port" }
+    ],
+    "credits": [
+        { "name": "Vendicated and contributors (Vencord), plugin ReadAllNotificationsButton by kemo, KrystalSkull", "license": "GPL-3.0-or-later", "url": "https://github.com/Vendicated/Vencord" }
+    ],
+    "tags": ["utility"],
+    "enabledByDefault": false,
+    "startAt": "webpackReady",
+    "entry": { "renderer": "index.ts" },
+    "permissions": {}
+}
