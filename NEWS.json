@@ -1,5 +1,25 @@
 [
     {
+        "version": "0.7.0",
+        "date": "2026-10-30",
+        "title": "122 new plugins (all off until you switch them on), a Main tab and Auto Redeem",
+        "author": "Neversleeper",
+        "notes": [
+            "New: Auto Redeem (TestCord) redeems gift links it sees (Discord may ask for its own captcha; you solve it). Main tab from szlcx404: Custom CSS, Notification Log, Health Report, window options. Plugins can add their own settings tab.",
+            "For plugin makers: chat bar buttons, message buttons and decor, header bar buttons, panels, navigate, change a message before sending. Fixes: no crash on reload from Questify; More Alts list scrolls.",
+            "Equicord: Alt Krisp Switch, Block Krisp, Custom Status Timeouts, Download All Attachments, Export Messages, Find Reply, Fix File Extensions, Follow Voice User, Friend Codes, Google That, In Role, Invite Defaults, Login With Token.",
+            "Equicord: Media Playback Speed, More Commands, No Push To Talk, Normalize Message Links, One Ping Per DM, Pin Icon, Repeat Messages, Rich Magnet Links, Scheduled Messages, Search Fix, Sed Enhanced, Show Resource Channels.",
+            "Equicord: Show Roles In Chat, Silence Users, Split Large Messages, Talk In Reverse, Unit Converter, Unlimited Accounts, Url Highlighter, Voice Channel Log, Voice Channel Search, Voice Chat Utils, Voice Stats. TestCord: Anti Move Deco.",
+            "TestCord: Auto Correct, Better Joined Date, Bookmarks, Cache Reset Button, Cancel Friend Request, Channel Gallery, Compose Mode, Context Menu Select Fix, Dead Members, Define, Embedded URLs, Export DM, Fake URL, Icon Export.",
+            "TestCord: Import Multiple Tokens, Last Online, Message Click Actions, Message Reminders, Message Statistics, Mute Unmute Servers, Newlines In Commands, No Draft Length Limit, Quick Delete, Quick Msg, Reaction Logger, Reaction Tracker.",
+            "TestCord: Recent Channel Switcher, Relationship Indicators, Reveal All Spoilers, Role Duplication, Safe Numbers, Silent Call, Time Delete, User Flags, User Notes, Webcam Start Notifier, Webhook Send, Wiki Lookup.",
+            "Vencord: Always Expand Roles, Anonymise File Names, Better GIF Alt Text, Call Timer, Character Counter, Clear URLs, Copy Emoji Markdown, Copy File Contents, Copy Sticker Links, Copy User URLs, Custom Idle, Fix Codeblock Gap.",
+            "Vencord: Fix Images Quality, Image Filename, Jump To, Keep Current Channel, Message Logger, New Guild Settings, No F1, No Onboarding Delay, No Pending Count, No System Badge, No Unblock To Jump, Permission Free Will, Permissions Viewer.",
+            "Vencord: Plain Folder Icon, Platform Indicators, Preview Message, Quick Mention, Quick Reply, Read All Notifications Button, Reply Timestamp, Reverse Image Search, Send Timestamps, Server Info, Show All Message Buttons, Show Me Your Name.",
+            "Vencord: Show Timeout Duration, Silent Message Toggle, Super Reaction Tweaks, Text Replace, Theme Attributes, Unsuppress Embeds, User Voice Show, View Raw, Who Reacted."
+        ]
+    },
+    {
         "version": "0.6.0",
         "date": "2026-10-29",
         "title": "Themes, Token Login Manager and many more plugins",
