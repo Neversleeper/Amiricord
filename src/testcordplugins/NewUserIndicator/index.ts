@@ -9,10 +9,11 @@
 // was made), so nothing is asked of anyone and nothing is sent.
 // Where it hooks was read in a running Discord (build 653945): the header of a message (`hideSystemTag:` is in it once; the badges of the name are the `null!=ev?ev:null` that
 // follows the lobby name) and the row of the member list (the same place MoreUserTags uses). Differences from the original: the profile mark is a badge added through
-// `ctx.profileBadges` (new, drawn by Discord with the same hover text; it uses a red disc with a white "!" instead of the emoji), and the explanation is the element's own hover text ("Account created N days ago") instead of Discord's tooltip. NOT seen on screen yet.
+// `ctx.profileBadges` (new, drawn by Discord with the same hover text; it uses a red disc with a white "!" instead of the emoji), and the explanation ("Account created N days ago") is shown by `src/api/tooltip.ts`, a tooltip drawn like Discord's own that appears at once (the browser's hover text was slow and plain), instead of Discord's tooltip component. NOT seen on screen yet.
 
 import { currentReact } from "../../api/jsxRuntime";
 import { definePluginSettings } from "../../api/pluginSettings";
+import { hideTip, showTip } from "../../api/tooltip";
 import type { PluginCode } from "../../renderer/engine";
 
 const DISCORD_EPOCH = 1_420_070_400_000n;
@@ -47,7 +48,13 @@ function mark(user: { id?: unknown; bot?: unknown; } | null | undefined, enabled
     if (!enabled) return null;
     const text = indicatorText(user, settings.store.days, Date.now());
     if (text === undefined) return null;
-    return (currentReact() as { createElement(type: unknown, props?: unknown, ...children: unknown[]): unknown; }).createElement("span", { key: "amiricord-new-user", title: text, "aria-label": text, style: { marginLeft: "4px", cursor: "default" } }, "❗");
+    return (currentReact() as { createElement(type: unknown, props?: unknown, ...children: unknown[]): unknown; }).createElement("span", {
+        key: "amiricord-new-user",
+        "aria-label": text,
+        style: { marginLeft: "4px", cursor: "default" },
+        onMouseEnter: (event: { currentTarget: Element; }) => { showTip(event.currentTarget, text); },
+        onMouseLeave: hideTip
+    }, "❗");
 }
 
 const plugin: PluginCode & {
@@ -66,6 +73,10 @@ const plugin: PluginCode & {
                 return text === undefined ? undefined : { description: text, iconSrc: BADGE_ICON };
             }
         });
+    },
+
+    stop() {
+        hideTip();
     },
 
     patches: [
