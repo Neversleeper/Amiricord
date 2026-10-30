@@ -52,16 +52,22 @@ describe("adjusting the options of a window", () => {
         assert.deepEqual(options, discord(), "the original is untouched");
     });
 
-    it("no minimum size builds the window with a minimum of zero, so the one Discord gave does not come back, and changes no other option", () => {
+    it("no minimum size ALONE changes nothing at creation (the window is not swapped; it is applied after the window is built)", () => {
         const options = { ...discord(), minWidth: 940, minHeight: 500 };
-        const result = adjustCreation(options, { ...off, noMinimumSize: true }, quiet) as Record<string, unknown>;
-        assert.equal(result.minWidth, 0);
-        assert.equal(result.minHeight, 0);
-        assert.equal(result.frame, false);
+        assert.equal(adjustCreation(options, { ...off, noMinimumSize: true }, quiet), options);
+        assert.equal(anyCreationChoice({ ...off, noMinimumSize: true }), false);
+    });
+
+    it("with a creation option on, no minimum size builds the window with a small minimum (320 by 200, not zero) and changes no other option", () => {
+        const options = { ...discord(), minWidth: 940, minHeight: 500 };
+        const result = adjustCreation(options, { nativeTitleBar: true, transparent: false, noMinimumSize: true }, quiet) as Record<string, unknown>;
+        assert.equal(result.minWidth, 320);
+        assert.equal(result.minHeight, 200);
+        assert.equal(result.frame, undefined, "the title bar option still applies");
         assert.equal(result.width, 900);
         assert.equal(options.minWidth, 940, "the original is untouched");
         const other = { minWidth: 940 };
-        assert.equal(adjustCreation(other, { ...off, noMinimumSize: true }, quiet), other, "a window that is not Discord's is left alone");
+        assert.equal(adjustCreation(other, { nativeTitleBar: true, transparent: false, noMinimumSize: true }, quiet), other, "a window that is not Discord's is left alone");
     });
 
     it("transparent makes a frameless see-through window", () => {
@@ -99,6 +105,13 @@ describe("putting the window constructor in place", () => {
         const t = fakeHost();
         const before = t.entry.exports;
         assert.equal(hookBrowserWindow(t.host, off, () => undefined), false);
+        assert.equal(t.entry.exports, before);
+    });
+
+    it("does nothing either when only the minimum size is on: swapping the window made Discord's own window buttons stop answering", () => {
+        const t = fakeHost();
+        const before = t.entry.exports;
+        assert.equal(hookBrowserWindow(t.host, { ...off, noMinimumSize: true }, () => undefined), false);
         assert.equal(t.entry.exports, before);
     });
 

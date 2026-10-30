@@ -10,6 +10,8 @@
 // tested without Electron. The safe parts: only the two options change, nothing else is touched; if the swap cannot be done the window is simply Discord's; if adjusting throws,
 // the window is built with the options Discord gave. Not applied in safe mode (the caller decides). Not verified in a real Discord: how each option looks on Discord's own window.
 
+import { SMALL_MINIMUM } from "../shared/windowChoices";
+
 export interface CreationChoices {
     /** Use the standard Windows title bar instead of Discord's own. */
     nativeTitleBar: boolean;
@@ -30,8 +32,13 @@ export function creationChoicesOf(read: (key: string) => unknown): CreationChoic
     };
 }
 
+/**
+ * Whether the window has to be swapped at all. Only the two options that Electron reads at creation count. "No minimum size" does NOT: with it as the only option, swapping the window
+ * made Discord's own minimize, maximize and close buttons stop answering (seen on Stable, Discord build 655747, 2026-10-29; with the option off they worked), and that option is applied
+ * to the window after it is built (`windowOptions.ts`) with the same result. When one of the two creation options is on, "no minimum size" is still put in the options.
+ */
 export function anyCreationChoice(choices: CreationChoices): boolean {
-    return choices.nativeTitleBar || choices.transparent || choices.noMinimumSize;
+    return choices.nativeTitleBar || choices.transparent;
 }
 
 type Options = Record<string, unknown>;
@@ -65,8 +72,8 @@ export function adjustCreation(options: unknown, choices: CreationChoices, trace
         trace("window options: a window is built with the Windows title bar");
     }
     if (choices.noMinimumSize) {
-        adjusted.minWidth = 0;
-        adjusted.minHeight = 0;
+        adjusted.minWidth = SMALL_MINIMUM.width;
+        adjusted.minHeight = SMALL_MINIMUM.height;
         trace("window options: a window is built with no minimum size");
     }
     return adjusted;

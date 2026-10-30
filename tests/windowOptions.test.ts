@@ -91,16 +91,16 @@ describe("applying the options to a window", () => {
         assert.deepEqual(t.trace, []);
     });
 
-    it("removes the minimum size by asking for zero by zero, and only that", () => {
+    it("removes the minimum size by asking for a small one (320 by 200, not zero: zero stopped the maximize button), and only that", () => {
         const t = setup({ ...none, removeMinimumSize: true });
-        assert.deepEqual(t.calls, ["min 0x0"]);
+        assert.deepEqual(t.calls, ["min 320x200"]);
         assert.equal(t.trace.length, 1);
     });
 
-    it("turns a later minimum size that Discord sets itself into zero by zero, so it does not undo the option", () => {
+    it("turns a later minimum size that Discord sets itself into the small one, so it does not undo the option", () => {
         const t = setup({ ...none, removeMinimumSize: true });
         t.win.setMinimumSize!(940, 500);
-        assert.deepEqual(t.calls, ["min 0x0", "min 0x0"]);
+        assert.deepEqual(t.calls, ["min 320x200", "min 320x200"]);
         const untouched = setup(none);
         untouched.win.setMinimumSize!(940, 500);
         assert.deepEqual(untouched.calls, ["min 940x500"]);
@@ -112,7 +112,7 @@ describe("applying the options to a window", () => {
         try {
             const t = setup({ ...none, removeMinimumSize: true }, { getMinimumSize: () => [123, 45] });
             t.win.setMinimumSize!(940, 500);
-            assert.ok(t.trace.some(line => line.includes("Discord asked for a minimum size of 940 by 500; it was kept at 0 by 0")));
+            assert.ok(t.trace.some(line => line.includes("Discord asked for a minimum size of 940 by 500; it was kept at 320 by 200")));
             mock.timers.tick(6000);
             assert.ok(t.trace.some(line => line.includes("the minimum size of a window is now 123 by 45")));
             const unknown = setup({ ...none, removeMinimumSize: true });
@@ -158,7 +158,7 @@ describe("applying the options to a window", () => {
 
     it("applies all three to one window, each in its own step", () => {
         const t = setup({ removeMinimumSize: true, ctrlQ: true, material: "mica" });
-        assert.deepEqual(t.calls, ["min 0x0", "material mica", "on before-input-event"]);
+        assert.deepEqual(t.calls, ["min 320x200", "material mica", "on before-input-event"]);
     });
 
     it("never throws: a step that fails is written in the trace and the next steps still run", () => {

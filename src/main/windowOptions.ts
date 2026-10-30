@@ -10,7 +10,7 @@
 // a function, is written in the boot trace and never stops Discord from starting or from opening a window. Nothing is applied in safe mode (the caller decides).
 // Not verified in a real Discord: what each one does to Discord's own window.
 
-import { type BackgroundMaterial, MATERIALS, OPTION_KEYS } from "../shared/windowChoices";
+import { type BackgroundMaterial, MATERIALS, OPTION_KEYS, SMALL_MINIMUM } from "../shared/windowChoices";
 
 export { type BackgroundMaterial, MATERIALS, OPTION_KEYS };
 
@@ -72,13 +72,13 @@ export function applyWindowOptions(win: WindowLike, options: WindowOptions, trac
         try {
             if (typeof win.setMinimumSize === "function") {
                 const original = win.setMinimumSize.bind(win);
-                original(0, 0);
-                // Discord sets its own minimum size (940 by 500) after the window is created, which would undo this, so later asks for a minimum size are turned into zero by zero.
+                original(SMALL_MINIMUM.width, SMALL_MINIMUM.height);
+                // Discord sets its own minimum size (940 by 500) after the window is created, which would undo this, so later asks for a minimum size are turned into the small one.
                 // Each ask is written in the trace (the first five), and a few seconds later the minimum size the window really has, because it is not known why it can still be stuck.
                 let asks = 0;
                 win.setMinimumSize = (width, height) => {
-                    original(0, 0);
-                    if (asks++ < 5) trace(`window options: Discord asked for a minimum size of ${String(width)} by ${String(height)}; it was kept at 0 by 0`);
+                    original(SMALL_MINIMUM.width, SMALL_MINIMUM.height);
+                    if (asks++ < 5) trace(`window options: Discord asked for a minimum size of ${String(width)} by ${String(height)}; it was kept at ${String(SMALL_MINIMUM.width)} by ${String(SMALL_MINIMUM.height)}`);
                 };
                 const check = setTimeout(() => {
                     try {

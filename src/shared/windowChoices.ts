@@ -12,3 +12,6 @@ export type BackgroundMaterial = (typeof MATERIALS)[number];
 
 /** The names of the settings of the Settings plugin, as they are saved. */
 export const OPTION_KEYS = { removeMinimumSize: "removeMinimumSize", ctrlQ: "ctrlQToQuit", material: "backgroundMaterial" } as const;
+
+/** The smallest the window may be made when the minimum size is removed. It is not zero: a minimum of 0 by 0 stopped the maximize button from working (seen on 2026-10-29), while a small one does not. */
+export const SMALL_MINIMUM = { width: 320, height: 200 } as const;
