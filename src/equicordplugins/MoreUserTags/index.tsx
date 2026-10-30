@@ -133,7 +133,9 @@ function TagSlot(props: { user?: unknown; }): unknown {
             dispatcher?.unsubscribe?.("CHANNEL_SELECT", listener);
         };
     }, []);
-    return tagElement(props.user);
+    const tag = tagElement(props.user);
+    // The row's pieces are in a flex line: ours goes after Discord's own (the boost icon stays next to the name) with a little space, and before the plugin texts of the engine (`order` 20).
+    return tag === null ? null : react.createElement("span", { style: { order: 10, marginLeft: "4px", display: "inline-flex", alignItems: "center", flex: "none" } }, tag);
 }
 
 const plugin: PluginCode & {

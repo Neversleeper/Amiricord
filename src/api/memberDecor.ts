@@ -36,7 +36,7 @@ const BODY_WAIT_MS = 100;
 const ROW_PREFIX = "members-";
 
 export const MEMBER_DECOR_CSS = `
-[${MEMBER_DECOR_ATTRIBUTE}] { margin-left: 4px; font-size: 0.7rem; font-weight: 600; color: var(--text-muted, #949ba4); white-space: nowrap; flex: none; }
+[${MEMBER_DECOR_ATTRIBUTE}] { margin-left: 4px; font-size: 0.7rem; font-weight: 600; color: var(--text-muted, #949ba4); white-space: nowrap; flex: none; order: 20; }
 `;
 
 /** The id of a person from the address of their avatar ("https://cdn.discordapp.com/avatars/<user id>/<hash>.webp"), or undefined (a default avatar has none). */
