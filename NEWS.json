@@ -1,5 +1,22 @@
 [
     {
+        "version": "0.7.3",
+        "date": "2026-10-30",
+        "title": "Typing Tweaks, Valid Reply, Who Reacted faces, server profile copy and more plugins",
+        "author": "Neversleeper",
+        "notes": [
+            "New plugin Typing Tweaks: a small picture in front of each name of who is typing, names in their role colour, a click on a name opens the profile, and a clear list of names when more than three people type.",
+            "New plugin Role Color Everywhere: role colours on mentions, on the name in a reply and on the role titles of the member list; the colour of the whole message text is optional.",
+            "New plugin Valid Reply: hover a reply that says \"Message could not be loaded\" to read the message, in the chat and in the search results.",
+            "Who Reacted now shows the pictures of who reacted next to each reaction.",
+            "Copy Profile: inside a server the right-click menu offers Copy Main Profile and Copy Server Profile. The server one takes the nickname, bio, picture, banner, pronouns and colours the person set in that server.",
+            "Profile Presets has its own tab in the Amiricord settings. The Amiricord tabs got a polish layer (wider page, smoother movement, thin scrollbars).",
+            "New plugins: Poll Maker, Ask Me To Mute, Ghost Typing, DM Away, Realtime Timestamps, Click Sparkles, No Edited Timestamp, Hide Suggested Channels, Zero Width Sanitizer, Show Typing Users, Voice Count and No Buttons (all off until you switch them on).",
+            "New User Indicator also marks the profile card, with a tooltip that shows at once. More User Tags no longer goes missing after a reload, and the username next to a name no longer pops in late.",
+            "View Icons no longer leaves the viewer on its loading screen. For plugin authors: the engine gets ctx.notices, ctx.memberDecor, ctx.profileBadges and a tooltip."
+        ]
+    },
+    {
         "version": "0.7.2",
         "date": "2026-10-30",
         "title": "Copy Profile copies exactly",

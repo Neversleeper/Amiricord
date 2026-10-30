@@ -13,7 +13,7 @@ describe("WhoReacted faces", () => {
     it("builds the picture address of a person", () => {
         assert.equal(avatarUrl({ id: "5", avatar: "abc" }), "https://cdn.discordapp.com/avatars/5/abc.webp?size=32");
         assert.equal(avatarUrl({ id: "5", avatar: "a_abc" }), "https://cdn.discordapp.com/avatars/5/a_abc.gif?size=32");
-        assert.match(avatarUrl({ id: "1564847328794382408", avatar: null }), /^https:\/\/cdn\.discordapp\.com\/embed\/avatars\/[0-5]\.png$/);
+        assert.match(avatarUrl({ id: "100000000000000003", avatar: null }), /^https:\/\/cdn\.discordapp\.com\/embed\/avatars\/[0-5]\.png$/);
         assert.equal(avatarUrl({ id: "x", avatar: null }), "https://cdn.discordapp.com/embed/avatars/0.png");
     });
 

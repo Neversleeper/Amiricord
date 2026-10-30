@@ -130,17 +130,17 @@ describe("notice time and x", () => {
 
 describe("member list decorations", () => {
     it("reads the person from an avatar address", () => {
-        assert.equal(idFromAvatarUrl("https://cdn.discordapp.com/avatars/1554145234173034508/c42877c.webp?size=32"), "1554145234173034508");
+        assert.equal(idFromAvatarUrl("https://cdn.discordapp.com/avatars/100000000000000001/c42877c.webp?size=32"), "100000000000000001");
         assert.equal(idFromAvatarUrl("https://cdn.discordapp.com/embed/avatars/3.png"), undefined);
         assert.equal(idFromAvatarUrl(null), undefined);
         assert.equal(idFromAvatarUrl(undefined), undefined);
     });
 
     it("reads the person of a row from the avatar, or from the component that drew it", () => {
-        const withAvatar = { querySelector: () => ({ getAttribute: () => "https://cdn.discordapp.com/avatars/1554145234173034508/x.webp" }) } as unknown as Element;
-        assert.equal(userIdOfRow(withAvatar), "1554145234173034508");
-        const row = { querySelector: () => null, __reactFiber$abc: { memoizedProps: {}, return: { memoizedProps: { user: { id: "175928847299117063" } }, return: null } } } as unknown as Element;
-        assert.equal(userIdOfRow(row), "175928847299117063");
+        const withAvatar = { querySelector: () => ({ getAttribute: () => "https://cdn.discordapp.com/avatars/100000000000000001/x.webp" }) } as unknown as Element;
+        assert.equal(userIdOfRow(withAvatar), "100000000000000001");
+        const row = { querySelector: () => null, __reactFiber$abc: { memoizedProps: {}, return: { memoizedProps: { user: { id: "100000000000000002" } }, return: null } } } as unknown as Element;
+        assert.equal(userIdOfRow(row), "100000000000000002");
         assert.equal(userIdOfRow({ querySelector: () => null } as unknown as Element), undefined);
     });
 
