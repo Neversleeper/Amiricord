@@ -1,0 +1,21 @@
+{
+    "schema": 1,
+    "id": "ClickableRoles",
+    "name": "Clickable Roles",
+    "version": "1.0.0",
+    "description": "Click a role in a profile, or a role's title in the member list, to see which people have it (the first 20 and how many more); click one to open their profile.",
+    "origin": "equicord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        { "name": "prism", "role": "original author" },
+        { "name": "Neversleeper", "role": "Amiricord port" }
+    ],
+    "credits": [
+        { "name": "Vendicated and contributors (Vencord), prism (Equicord), plugin ClickableRoles", "license": "GPL-3.0-or-later", "url": "https://github.com/Equicord/Equicord" }
+    ],
+    "tags": ["ui", "utility"],
+    "enabledByDefault": false,
+    "startAt": "domReady",
+    "entry": { "renderer": "index.ts" },
+    "permissions": {}
+}

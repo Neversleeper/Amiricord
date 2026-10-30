@@ -11,6 +11,8 @@
 // This is what Vencord's `SettingsPlugin.customEntries` is used for; written from scratch for Amiricord's own settings tree. Nothing here was tried in a real Discord.
 
 export const MAX_SETTINGS_TABS_PER_PLUGIN = 3;
+/** The key a tab gets when a plugin adds it with the short form, `add(tab)`. */
+const SINGLE_TAB_KEY = "main";
 const MAX_TITLE_CHARS = 40;
 const KEY_PATTERN = /^[a-z0-9][a-z0-9-]{0,31}$/i;
 
@@ -32,6 +34,8 @@ export interface PluginSettingsTabs {
      * component, a repeated key, more than three tabs) is written in the plugin's health report and the function does nothing. The tab goes by itself when the plugin stops.
      */
     add(key: string, tab: PluginSettingsTab): () => void;
+    /** The short form, for a plugin with a single tab: the same as `add("main", tab)`. */
+    add(tab: PluginSettingsTab): () => void;
 }
 
 /** One tab as the Settings plugin reads it. */
@@ -116,7 +120,9 @@ export const settingsTabs: SettingsTabHub = createSettingsTabHub();
 export function buildSettingsTabs(hub: SettingsTabHub, plugin: string, onDispose: (callback: () => void) => void, reportError: (source: string, error: unknown) => void): PluginSettingsTabs {
     onDispose(() => { hub.removeAll(plugin); });
     return {
-        add(key, tab) {
+        add(first: string | PluginSettingsTab, second?: PluginSettingsTab) {
+            const key = typeof first === "string" ? first : SINGLE_TAB_KEY;
+            const tab = typeof first === "string" ? second as PluginSettingsTab : first;
             let refused: string | null;
             try {
                 refused = hub.add(plugin, key, tab);

@@ -225,6 +225,8 @@ function frameWorld() {
     const timers = new Map<number, () => void>();
     const delays: number[] = [];
     let next = 1;
+    let pictureOpened = 0;
+    let pictureClosed = 0;
     const deps: FrameDeps = {
         deps: { fail: message => { failures.push(message); } },
         sleep: async () => undefined,
@@ -237,12 +239,13 @@ function frameWorld() {
             };
         },
         setTimer: (run, ms) => { const id = next++; timers.set(id, run); delays.push(ms); return id; },
-        clearTimer: id => { timers.delete(id as number); }
+        clearTimer: id => { timers.delete(id as number); },
+        decodePicture: async () => { pictureOpened++; return { width: 4, height: 4, close: () => { pictureClosed++; } }; }
     };
-    return { deps, failures, frames, renders, made, timers, delays };
+    return { deps, failures, pictures: () => [pictureOpened, pictureClosed], frames, renders, made, timers, delays };
 }
 
-const media = (buffer: ArrayBuffer, contentType = "image/gif"): CaptionMedia => ({ buffer, contentType, height: 4, width: 4, isVideo: false, release: () => undefined, url: "blob:x" });
+const media = (buffer: ArrayBuffer, contentType = "image/gif", isVideo = false): CaptionMedia => ({ buffer, contentType, height: 4, width: 4, isVideo, release: () => undefined, url: "blob:x" });
 
 describe("GifCaptioner: reading a GIF", () => {
     it("gives every frame to the renderer, then finishes", async () => {
@@ -304,8 +307,14 @@ describe("GifCaptioner: reading a GIF", () => {
         await captionMedia(gif.deps, media(makeGif(2)), transform({ width: 4, height: 4 }));
         assert.equal(gif.frames[0].kind, "gif");
         const video = frameWorld();
-        await captionMedia(video.deps, media(new ArrayBuffer(4), "video/mp4"), transform({ sourceVideo: null }));
+        await captionMedia(video.deps, media(new ArrayBuffer(4), "video/mp4", true), transform({ sourceVideo: null }));
         assert.deepEqual(video.failures, ["Failed to load video."], "no video element to play");
+        const still = frameWorld();
+        await captionMedia(still.deps, media(new ArrayBuffer(4), "image/png"), transform({ width: 4, height: 4 }));
+        assert.deepEqual(still.failures, [], "a PNG is not a video");
+        assert.deepEqual(still.frames, [{ kind: "video", delay: 100 }]);
+        assert.deepEqual(still.renders, ["render"]);
+        assert.deepEqual(still.pictures(), [1, 1], "the picture is opened and closed");
     });
 });
 

@@ -7,11 +7,10 @@
     "origin": "testcord",
     "license": "GPL-3.0-or-later",
     "authors": [
-        { "name": "nnenaza" },
-        { "name": "x2b" }
+        { "name": "Neversleeper", "discordId": "1564847328794382408", "github": "https://github.com/Neversleeper" }
     ],
     "credits": [
-        { "name": "Vendicated and contributors (Vencord), plugin GifTransfer by nnenaza and x2b", "license": "GPL-3.0-or-later", "url": "https://github.com/TestcordDev/TestCord" }
+        { "name": "Vendicated and contributors (Vencord), plugin GifTransfer by Neversleeper (under her earlier name nnenaza)", "license": "GPL-3.0-or-later", "url": "https://github.com/TestcordDev/TestCord" }
     ],
     "tags": ["media", "utility"],
     "enabledByDefault": false,

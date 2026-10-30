@@ -1,0 +1,21 @@
+{
+    "schema": 1,
+    "id": "GifCollections",
+    "name": "Gif Collections",
+    "version": "1.0.0",
+    "description": "Your own collections of GIFs in Discord's GIF picker. Add a GIF to a collection from its right-click menu; manage, move, export and import them in the plugin's settings.",
+    "origin": "equicord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        { "name": "creations", "role": "original author" },
+        { "name": "Neversleeper", "role": "Amiricord port" }
+    ],
+    "credits": [
+        { "name": "Vendicated and contributors (Vencord), creations (Equicord), plugin GifCollections", "license": "GPL-3.0-or-later", "url": "https://github.com/Equicord/Equicord" }
+    ],
+    "tags": ["chat", "media"],
+    "enabledByDefault": false,
+    "startAt": "domReady",
+    "entry": { "renderer": "index.ts" },
+    "permissions": {}
+}

@@ -6,14 +6,14 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any -- Discord's stores and answers have no types */
 
-// Adapted for Amiricord (2026) from the plugin ProfileCopyButton (authors x2b and nnenaza) as found in TestCord. Differences from the original:
+// Adapted for Amiricord (2026) from the plugin ProfileCopyButton (by Neversleeper, who was called nnenaza) as found in TestCord. Differences from the original:
 //  - the editor fields (picture, banner, name, pronouns, bio, colours) are only FILLED in Discord's profile editor, as in the original: nothing is saved until the person presses Save.
 //    The other things the original did are kept because they are the point of the plugin, and each one is announced on screen: the custom status (with its emoji) is set at once,
 //    the public server behind the profile's server tag is joined (through its vanity link, only when it has one) and set as your tag, and the custom emojis of the bio that you do
 //    not have are uploaded to a server YOU pick in a window (or removed from the bio if you skip). The game widgets are copied too (a setting, on by default);
 //  - no button in the editor (its anchor no longer exists in Discord's web build 653945). The entries are the right-click menu of a user (`user-context`, a name that could not
 //    be checked in the readable part of the build) and a box in this plugin's own settings window, which does not depend on any patch;
-//  - profile effect and name styles are not copied (the editor's format for them was not checked).
+//  - the name style, profile effect, nameplate, avatar decoration and profile frame are copied through the editor's pending fields when you have Nitro (their names come from Discord's editor code; NOT yet seen working in a real Discord).
 // The editor fields and the shape of the avatar change were read in that build (`USER_PROFILE_SETTINGS_SET_PENDING_CHANGES`, `pendingAvatar` with `assetOrigin`/`imageUri`).
 // Not tried in a real Discord at the time of writing.
 
@@ -28,7 +28,8 @@ const CDN = "https://cdn.discordapp.com";
 const MANAGE_EXPRESSIONS = 1n << 30n;
 
 const settings = definePluginSettings({
-    copyGameWidgets: { type: "boolean", default: true, description: "Also copy their game widgets (favourite game, currently playing, want to play...). Applied at once, not through Save." }
+    copyGameWidgets: { type: "boolean", default: true, description: "Also copy their game widgets (favourite game, currently playing, want to play...). Applied at once, not through Save." },
+    copyShopItems: { type: "boolean", default: false, description: "Also copy their shop items: name style, profile effect, nameplate, avatar decoration and profile frame. Discord refuses to save your profile if you do not own one of them, so this is off by default; turn it on only if you own what they wear." }
 });
 
 let context: EnginePluginContext | undefined;
@@ -357,6 +358,8 @@ export async function copyProfile(targetId: string): Promise<void> {
     const profile = body?.user_profile;
     if (!user) { toast(`Could not load that profile (Discord answered with: ${body && typeof body === "object" ? Object.keys(body).slice(0, 6).join(", ") || "nothing" : String(body)}).`, "error"); return; }
     const nitro = (me.premiumType ?? 0) >= 1;
+    // Shop items belong to whoever bought them: copying one you do not own makes Discord refuse the whole save, so they are copied only when the person asked for it.
+    const shop = nitro && settings.store.copyShopItems;
     emojiGuild = undefined;
     let copied = 0;
 
@@ -365,6 +368,21 @@ export async function copyProfile(targetId: string): Promise<void> {
     if (profile?.bio) { setPending({ pendingBio: nitro ? await resolveBioEmojis(profile.bio) : cleanBio(profile.bio, false) }); copied++; }
     if (nitro && Array.isArray(profile?.theme_colors)) { setPending({ pendingThemeColors: [...profile.theme_colors] }); copied++; }
     if (nitro && typeof profile?.accent_color === "number") { setPending({ pendingAccentColor: profile.accent_color }); copied++; }
+    // Name style, profile effect and nameplate (only with the setting "copyShopItems"): the editor's own pending fields (names read in Discord's editor code, build 653945; only `skuId` is read from the last two). Need Nitro or its trial.
+    const style = user.display_name_styles;
+    if (shop && style && typeof style.font_id === "number" && typeof style.effect_id === "number" && Array.isArray(style.colors)) {
+        setPending({ pendingDisplayNameStyles: { fontId: style.font_id, effectId: style.effect_id, colors: [...style.colors] } });
+        copied++;
+    }
+    const effectSku = profile?.profile_effect?.sku_id;
+    if (shop && typeof effectSku === "string") { setPending({ pendingProfileEffect: { skuId: effectSku } }); copied++; }
+    const plateSku = user.collectibles?.nameplate?.sku_id;
+    if (shop && typeof plateSku === "string") { setPending({ pendingNameplate: { skuId: plateSku } }); copied++; }
+    // The avatar decoration is `user.avatar_decoration_data`; the profile frame is the profile's collectible of type 3 (type 1 is the effect). Seen in a real profile answer.
+    const decoration = user.avatar_decoration_data;
+    if (shop && typeof decoration?.sku_id === "string") { setPending({ pendingAvatarDecoration: { skuId: decoration.sku_id, asset: decoration.asset } }); copied++; }
+    const frameSku = (Array.isArray(profile?.collectibles) ? profile.collectibles : []).find((item: { type?: number; }) => item?.type === 3)?.sku_id;
+    if (shop && typeof frameSku === "string") { setPending({ pendingProfileFrame: { skuId: frameSku } }); copied++; }
 
     if (user.avatar) {
         const uri = await toDataUri(imageUrl("avatars", targetId, user.avatar, 512));
@@ -373,7 +391,7 @@ export async function copyProfile(targetId: string): Promise<void> {
     const banner = profile?.banner ?? user.banner;
     if (nitro && banner) {
         const uri = await toDataUri(imageUrl("banners", targetId, banner, 1024));
-        if (uri) { setPending({ pendingBanner: uri }); copied++; }
+        if (uri) { setPending({ pendingBanner: { assetOrigin: "NEW_ASSET", imageUri: uri, description: `profile-copy-${targetId}` } }); copied++; }
     }
 
     const statusResult = await copyStatus(targetId);

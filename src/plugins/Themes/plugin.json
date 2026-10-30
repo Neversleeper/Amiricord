@@ -1,0 +1,27 @@
+{
+    "schema": 1,
+    "id": "Themes",
+    "name": "Themes",
+    "version": "0.1.0",
+    "description": "A Themes tab in the Amiricord settings: Quick CSS that applies as you type, themes (BetterDiscord-style CSS files or your own, edited live) and one file to export and import your plugin choices, plugin settings, quick CSS and themes. A theme that asks other computers for files asks you first.",
+    "origin": "amiricord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        { "name": "Neversleeper", "discordId": "1564847328794382408", "github": "https://github.com/Neversleeper" }
+    ],
+    "credits": [],
+    "tags": ["ui"],
+    "core": true,
+    "enabledByDefault": true,
+    "startAt": "domReady",
+    "entry": { "renderer": "index.ts", "main": "native.ts" },
+    "permissions": {
+        "files": "user-chosen",
+        "network": [
+            { "host": "themes.equicord.org", "from": "main", "why": "read the library of themes, fetch a theme and the preview pictures of the ones you look at, only when you open the library or press Add" },
+            { "host": "raw.githubusercontent.com", "from": "main", "why": "fetch a theme by the address you type, only when you press Add from address" },
+            { "host": "gist.githubusercontent.com", "from": "main", "why": "fetch a theme by the address you type, only when you press Add from address" }
+        ],
+        "native": { "functions": ["library", "themeCss", "textAt", "thumbnail"] }
+    }
+}

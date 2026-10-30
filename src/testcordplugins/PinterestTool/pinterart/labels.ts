@@ -29,6 +29,19 @@ export const isApplyLabel = (value: string | null | undefined) => APPLY.includes
 export const isCancelLabel = (value: string | null | undefined) => CANCEL.includes(normal(value));
 export const isCloseLabel = (value: string | null | undefined) => CLOSE.includes(normal(value));
 
+/**
+ * Whether a dialog is a real window of Discord (the "Select an image" one is) and not a pop-up that also has the role "dialog". Discord's windows say `aria-modal="true"`;
+ * the expressions picker (GIFs, stickers, emoji) does not. Seen in Discord build 653945: "Selecciona una imagen" has it, "Selector de expresiones" has none.
+ */
+export function isModalDialog(dialog: { getAttribute(name: string): string | null; }): boolean {
+    return dialog.getAttribute("aria-modal") === "true";
+}
+
+/** Whether a box is as big as one of the two large tiles of the picker ("Upload image", "Choose GIF"): 150 by 100 pixels or more. */
+export function isBigTile(box: { width: number; height: number; }): boolean {
+    return box.width >= 150 && box.height >= 100;
+}
+
 /** The "Choose GIF" tile of the picker, in any language: its label is short and always has the word GIF in it ("Choose GIF", "Elegir GIF", "GIF auswählen"). */
 export function isGifTileLabel(text: string | null | undefined) {
     const value = (text ?? "").trim();

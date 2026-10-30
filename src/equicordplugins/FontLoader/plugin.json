@@ -1,0 +1,26 @@
+{
+    "schema": 1,
+    "id": "FontLoader",
+    "name": "Font Loader",
+    "version": "1.0.0",
+    "description": "Use any font from Google Fonts in Discord: type its name in the settings. Loading a font tells Google's servers your address; nothing is requested while no font is chosen.",
+    "origin": "equicord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        { "name": "vmohammad", "role": "original author" },
+        { "name": "Neversleeper", "role": "Amiricord port" }
+    ],
+    "credits": [
+        { "name": "Vendicated and contributors (Vencord), vmohammad (Equicord), plugin FontLoader", "license": "GPL-3.0-or-later", "url": "https://github.com/Equicord/Equicord" }
+    ],
+    "tags": ["ui"],
+    "enabledByDefault": false,
+    "startAt": "domReady",
+    "entry": { "renderer": "index.ts" },
+    "permissions": {
+        "network": [
+            { "host": "fonts.googleapis.com", "from": "renderer", "why": "get the style of the font you chose" },
+            { "host": "fonts.gstatic.com", "from": "renderer", "why": "get the font file itself" }
+        ]
+    }
+}

@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-// Adapted for Amiricord (2026) from the plugin GifTransfer (authors nnenaza and x2b) as found in TestCord (commit af92dba of its public repository).
+// Adapted for Amiricord (2026) from the plugin GifTransfer (by Neversleeper, who was called nnenaza) as found in TestCord (commit af92dba of its public repository).
 // Export, import and verify the favourite GIFs of the account as a JSON file, and lift Discord's limit on how many favourites there can be. The favourites are
 // Discord's own "frecency" user settings: they are read from its store and added through its own action (the same call its heart button makes), so the GIFs
 // appear in Discord as any other favourite. The import file is read here and nothing is sent anywhere but to Discord's own settings.

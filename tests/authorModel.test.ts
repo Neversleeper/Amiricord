@@ -7,9 +7,23 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import { authorInfo, avatarUrl, isDiscordId } from "../src/plugins/Settings/authorModel";
+import { authorInfo, avatarUrl, githubUser, isDiscordId } from "../src/plugins/Settings/authorModel";
 
 const ID = "1564847328794382408";
+
+describe("the GitHub profile of an author", () => {
+    it("reads the user name from a profile link, with or without the last slash", () => {
+        assert.equal(githubUser("https://github.com/Neversleeper"), "Neversleeper");
+        assert.equal(githubUser("https://github.com/szlcx404/"), "szlcx404");
+        assert.equal(githubUser("https://github.com/a-b"), "a-b");
+    });
+
+    it("gives nothing for a link to another site, to a repository or a page, or for something that is not text", () => {
+        for (const link of ["https://evil.example/Neversleeper", "http://github.com/Neversleeper", "https://github.com/Neversleeper/Amiricord", "https://github.com.evil.example/x", "https://github.com/-bad", "https://github.com/bad-", "javascript:alert(1)", "", "Neversleeper", 5, null, undefined]) {
+            assert.equal(githubUser(link), null, String(link));
+        }
+    });
+});
 
 describe("the Discord name and picture of an author", () => {
     it("builds the picture address on Discord's own image host, a GIF when the picture is animated", () => {

@@ -1,0 +1,20 @@
+{
+    "schema": 1,
+    "id": "UnlimitedFavoriteGIFs",
+    "name": "Unlimited Favorite GIFs",
+    "version": "1.0.0",
+    "description": "Lifts Discord's limit on how many favourite GIFs your account can have, so you can save as many as you want. GifTransfer lifts the same limit; use this one when you only want that.",
+    "origin": "testcord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        { "name": "Neversleeper", "discordId": "1564847328794382408", "github": "https://github.com/Neversleeper" }
+    ],
+    "credits": [
+        { "name": "Vendicated and contributors (Vencord), plugin UnlimitedFavoriteGIFs by Neversleeper (under another account), as found in TestCord", "license": "GPL-3.0-or-later", "url": "https://github.com/TestcordDev/TestCord" }
+    ],
+    "tags": ["media", "utility"],
+    "enabledByDefault": false,
+    "startAt": "init",
+    "entry": { "renderer": "index.ts" },
+    "permissions": {}
+}

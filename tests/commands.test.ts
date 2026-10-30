@@ -89,4 +89,11 @@ describe("slash commands from plugins", () => {
         const base: unknown[] = [];
         assert.equal(hub.withCommands(base), base);
     });
+
+    it("gives Discord the option types for a user, a channel and a role", () => {
+        const hub = createCommandHub();
+        assert.equal(hub.add("P", definition("who", { options: [{ name: "u", description: "a user", type: "user" }, { name: "c", description: "a channel", type: "channel" }, { name: "r", description: "a role", type: "role" }] }), quiet), true);
+        const added = (hub.withCommands([]) as Array<{ options: Array<{ type: number; }>; }>)[0];
+        assert.deepEqual(added.options.map(option => option.type), [6, 7, 8]);
+    });
 });

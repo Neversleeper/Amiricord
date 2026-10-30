@@ -10,10 +10,10 @@
 // reading how Vencord's CommandsAPI fills in a command (not copied). Not tried in a real Discord. Not covered: sub-commands, autocomplete, commands that need
 // a server (the plugin checks that itself), and answering with a message that only the person sees.
 
-export type CommandOptionType = "string" | "integer" | "boolean" | "number";
+export type CommandOptionType = "string" | "integer" | "boolean" | "number" | "user" | "channel" | "role";
 
 /** The numbers Discord uses for the option types. */
-export const OPTION_TYPES: Readonly<Record<CommandOptionType, number>> = { string: 3, integer: 4, boolean: 5, number: 10 };
+export const OPTION_TYPES: Readonly<Record<CommandOptionType, number>> = { string: 3, integer: 4, boolean: 5, user: 6, channel: 7, role: 8, number: 10 };
 
 /** The command's `inputType`: "builtin" runs without writing anything in the chat box; "text" also takes the text typed as the message. */
 export type CommandInput = "builtin" | "text";

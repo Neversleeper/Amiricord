@@ -13,8 +13,11 @@
 import { currentReact } from "../../api/jsxRuntime";
 import type { PluginCard } from "../../api/pluginCards";
 import type { PluginSettingsAnswer, PluginSettingsComponent, SettingInfo } from "../../api/pluginSettings";
+import { OWNERS } from "../../shared/project";
 import type { JsonValue } from "../../shared/settings";
-import { type AuthorInfo, isDiscordId } from "./authorModel";
+import { type AuthorInfo, githubUser, isDiscordId } from "./authorModel";
+import { GitHubIcon } from "./icon";
+import { hueOf, initialsOf } from "./PluginItem";
 import { cardBadges } from "./pluginsModel";
 import {
     boxText, checkNumber, checkText, emptyText, RESET_QUESTION, RESTART_NOTE, RESTART_TAG, RISKY_QUESTION, RISKY_TAG, settingTitle
@@ -60,21 +63,30 @@ export const GONE_TEXT = "This plugin is no longer available.";
 
 export function makePluginWindow(deps: PluginWindowDeps) {
     /** One author: the name in the manifest and, when there is a Discord id and Discord knows the person, their picture and name as Discord shows them now. */
-    function Author({ name, discordId }: { name: string; discordId?: string; }) {
+    function Author({ name, discordId, github }: { name: string; discordId?: string; github?: string; }) {
         const react = currentReact();
         const [info, setInfo] = react.useState<AuthorInfo | null>(null);
+        // An owner of the project is known by name, so the plugins that do not list their Discord id or GitHub profile still show them.
+        const owner = OWNERS.find(candidate => candidate.name.toLowerCase() === name.toLowerCase());
+        const id = discordId ?? owner?.discordId;
+        const user = githubUser(github) ?? owner?.github ?? null;
         react.useEffect(() => {
             let alive = true;
-            if (discordId && isDiscordId(discordId) && deps.lookupAuthor) {
-                deps.lookupAuthor(discordId).then(found => { if (alive) setInfo(found); }, () => undefined);
+            if (id && isDiscordId(id) && deps.lookupAuthor) {
+                deps.lookupAuthor(id).then(found => { if (alive) setInfo(found); }, () => undefined);
             }
             return () => { alive = false; };
-        }, [discordId]);
+        }, [id]);
         return (
             <span className="amiricord-pwin-author">
                 {info?.avatarUrl && <img className="amiricord-pwin-avatar" src={info.avatarUrl} alt="" />}
                 <span>{name}</span>
                 {info && <span className="amiricord-hint">{info.displayName === name ? `@${info.username}` : `${info.displayName} (@${info.username})`}</span>}
+                {user !== null && (
+                    <a className="amiricord-pwin-link" href={`https://github.com/${user}`} target="_blank" rel="noreferrer noopener" title={`Open ${user} on GitHub`} aria-label={`${name} on GitHub`}>
+                        <GitHubIcon />
+                    </a>
+                )}
             </span>
         );
     }
@@ -98,6 +110,23 @@ export function makePluginWindow(deps: PluginWindowDeps) {
         // A plugin that draws its own settings is not "without settings" even if it declares none.
         const empty = Custom ? null : emptyText(answer);
         const list: SettingInfo[] = answer.state === "ready" ? answer.settings : [];
+
+        // A number or a text is written when the person leaves the box, but closing the window with the box still focused (Escape, the X) never leaves it, so what was typed
+        // and is valid is written when the window goes away (a setting that asks first is not: nobody is there to answer).
+        const [flush] = react.useState(() => ({ current: (): void => undefined }));
+        flush.current = () => {
+            for (const info of list) {
+                const text = drafts[info.key];
+                if (text === undefined || info.risky || info.type === "boolean" || info.type === "select") continue;
+                if (info.type === "number") {
+                    const check = checkNumber(text, info);
+                    if (check.ok && check.value !== info.value) deps.setSetting(id, info.key, check.value);
+                } else if (checkText(text, info) === null && text !== info.value) {
+                    deps.setSetting(id, info.key, text);
+                }
+            }
+        };
+        react.useEffect(() => () => { flush.current(); }, []);
 
         const fail = (key: string, error: string) => setErrors(previous => ({ ...previous, [key]: error }));
 
@@ -232,20 +261,23 @@ export function makePluginWindow(deps: PluginWindowDeps) {
         return (
             <ModalRoot size="medium" label={card.name} onClose={onClose}>
                 <ModalHeader>
-                    <div className="amiricord-pwin-title">{card.name}<span className="amiricord-plugin-version">v{card.version}</span></div>
+                    <div className="amiricord-pwin-head">
+                        <div className="amiricord-plugin-avatar" aria-hidden="true" style={{ "--amiricord-hue": hueOf(card.name) }}>{initialsOf(card.name)}</div>
+                        <div className="amiricord-pwin-title">{card.name}<span className="amiricord-plugin-version">v{card.version}</span></div>
+                    </div>
                     <ModalCloseButton onClick={onClose} />
                 </ModalHeader>
                 <ModalContent>
                     <p className="amiricord-pwin-desc">{card.description || "This plugin has no description."}</p>
                     <div className="amiricord-plugin-badges">
-                        {cardBadges(card).map((badge, index) => <span key={`${index}:${badge.text}`} className={`amiricord-plugin-badge amiricord-plugin-badge-${badge.tone}`}>{badge.text}</span>)}
+                        {cardBadges(card).map((badge, index) => <span key={`${index}:${badge.text}`} className={`amiricord-plugin-badge amiricord-plugin-badge-${badge.tone}`} data-origin={index === 0 ? card.origin : undefined}>{badge.text}</span>)}
                     </div>
 
                     <section className="amiricord-pwin-section">
                         <div className="amiricord-pwin-heading">Authors</div>
                         <div className="amiricord-pwin-authors">
                             {authors.length > 0
-                                ? authors.map(author => <Author key={author.name} name={author.name} discordId={author.discordId} />)
+                                ? authors.map(author => <Author key={author.name} name={author.name} discordId={author.discordId} github={author.github} />)
                                 : <span className="amiricord-hint">No authors listed.</span>}
                         </div>
                     </section>

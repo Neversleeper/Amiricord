@@ -1,0 +1,21 @@
+{
+    "schema": 1,
+    "id": "AvatarGrabber",
+    "name": "Avatar Grabber",
+    "version": "1.0.0",
+    "description": "/avatar sends the full-size picture of a user's avatar (yours when you leave the user empty).",
+    "origin": "testcord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        { "name": "Sharp", "role": "original author" },
+        { "name": "Neversleeper", "github": "https://github.com/Neversleeper", "role": "Amiricord port" }
+    ],
+    "credits": [
+        { "name": "Vendicated and contributors (Vencord), plugin AvatarGrabber by Sharp", "license": "GPL-3.0-or-later", "url": "https://github.com/TestcordDev/TestCord" }
+    ],
+    "tags": ["utility", "chat"],
+    "enabledByDefault": false,
+    "startAt": "webpackReady",
+    "entry": { "renderer": "index.ts" },
+    "permissions": {}
+}

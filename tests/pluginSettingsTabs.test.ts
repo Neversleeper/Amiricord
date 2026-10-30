@@ -91,6 +91,18 @@ describe("what a plugin gets as ctx.settingsTabs", () => {
         assert.equal(errors.length, 1);
         assert.match(errors[0], /^settings tab: the key of a settings tab/);
     });
+
+    it("takes the short form add(tab) for a plugin with one tab (Themes and Token Login use it), under the key \"main\"", () => {
+        const hub = createSettingsTabHub();
+        const errors: string[] = [];
+        const tabs = buildSettingsTabs(hub, "Themes", () => undefined, (source, error) => { errors.push(`${source}: ${(error as Error).message}`); });
+        const remove = tabs.add({ title: "Themes", panelTitle: "Themes and Quick CSS", Component: Tab });
+        assert.deepEqual(hub.list().map(entry => [entry.key, entry.title, entry.panelTitle]), [["Themes:main", "Themes", "Themes and Quick CSS"]]);
+        remove();
+        assert.equal(hub.list().length, 0);
+        tabs.add({ title: " ", Component: Tab });
+        assert.equal(errors.length, 1, "a refused short form is reported like any other");
+    });
 });
 
 describe("the Settings plugin with a tab from another plugin", () => {

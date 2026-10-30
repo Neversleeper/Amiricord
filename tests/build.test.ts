@@ -131,7 +131,7 @@ describe("the build", () => {
         assert.deepEqual(events.map(e => e.type), ["enabled", "discord-build", "self-test", "started", "started", "started", "started", "started", "started"]);
         const selfTest = events.find(e => e.type === "self-test");
         assert.ok(selfTest && selfTest.type === "self-test" && selfTest.name === "first-gateway-message" && selfTest.status === "not-seen");
-        assert.deepEqual(events[0], { type: "enabled", plugins: ["Badges", "BetterDiscord", "ContextMenuApi", "CrashFixes", "DevToolsShortcut", "NoDevtoolsWarning", "NoTrack", "Settings", "UiApi"] });
+        assert.deepEqual(events[0], { type: "enabled", plugins: ["Badges", "BetterDiscord", "ContextMenuApi", "CrashFixes", "DevToolsShortcut", "NoDevtoolsWarning", "NoTrack", "Settings", "Themes", "UiApi"] });
     });
 
     it("includes a plugin's code in the page script and starts it", async () => {
@@ -157,7 +157,7 @@ describe("the build", () => {
 
         const { events, page } = await runPage(readFileSync(join(out, "renderer.js"), "utf8"));
         assert.equal((page as Record<string, unknown>).startedBy, "Demo");
-        assert.deepEqual(events.find(e => e.type === "enabled"), { type: "enabled", plugins: ["Badges", "BetterDiscord", "ContextMenuApi", "CrashFixes", "Demo", "DevToolsShortcut", "NoDevtoolsWarning", "NoTrack", "Settings", "UiApi"] });
+        assert.deepEqual(events.find(e => e.type === "enabled"), { type: "enabled", plugins: ["Badges", "BetterDiscord", "ContextMenuApi", "CrashFixes", "Demo", "DevToolsShortcut", "NoDevtoolsWarning", "NoTrack", "Settings", "Themes", "UiApi"] });
         assert.equal(events.some(e => e.type === "started" && e.plugin === "Demo"), true);
     });
 
@@ -183,7 +183,7 @@ describe("the build", () => {
 
     it("does not run any code of a plugin that is switched off, even what its file does outside start()", async () => {
         const { page, events } = await buildWithFlagPlugin(false);
-        assert.deepEqual(events.find(e => e.type === "enabled"), { type: "enabled", plugins: ["Badges", "BetterDiscord", "ContextMenuApi", "CrashFixes", "DevToolsShortcut", "NoDevtoolsWarning", "NoTrack", "Settings", "UiApi"] });
+        assert.deepEqual(events.find(e => e.type === "enabled"), { type: "enabled", plugins: ["Badges", "BetterDiscord", "ContextMenuApi", "CrashFixes", "DevToolsShortcut", "NoDevtoolsWarning", "NoTrack", "Settings", "Themes", "UiApi"] });
         assert.equal((page as Record<string, unknown>).flagFileRan, undefined);
     });
 

@@ -1,0 +1,27 @@
+{
+    "schema": 1,
+    "id": "GuildCopier",
+    "name": "Guild Copier",
+    "version": "1.0.0",
+    "description": "Right-click a server's icon: Copy Guild makes a new server with the same roles, channels, categories, permissions, emojis and stickers; Transfer To does the same into a server you already have, after DELETING all its roles and channels. Both ask first. Made for copying a server that is yours.",
+    "origin": "testcord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        { "name": "Neversleeper", "discordId": "1564847328794382408", "github": "https://github.com/Neversleeper" }
+    ],
+    "credits": [
+        { "name": "Vendicated and contributors (Vencord), plugin GuildCopier by Neversleeper (under her earlier name nnenaza), as found in TestCord and in her own repository Mixi-Plugins", "license": "GPL-3.0-or-later", "url": "https://github.com/TestcordDev/TestCord" }
+    ],
+    "tags": ["utility"],
+    "enabledByDefault": false,
+    "startAt": "webpackReady",
+    "entry": { "renderer": "index.ts" },
+    "permissions": {
+        "network": [
+            { "host": "cdn.discordapp.com", "from": "renderer", "why": "download the pictures of the emojis to copy" },
+            { "host": "media.discordapp.net", "from": "renderer", "why": "download the files of the stickers to copy" }
+        ],
+        "account": { "write": ["servers"] },
+        "messages": { "read": "none", "send": true }
+    }
+}
