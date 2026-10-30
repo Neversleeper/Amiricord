@@ -11,7 +11,7 @@ import type { PluginCode } from "../../renderer/engine";
 // The class name ends in a hash that changes with every build, so only the word before it is matched.
 // The span around the label is hidden too: left empty it keeps its own line height (22px), taller than the one-line reply preview (18px), and pushed the preview text down so its lower part was cut off (seen live in a reply).
 export const CSS = `[class^="edited_"], [class*=" edited_"] { display: none !important; }
-[class*="timestamp_"]:has(> time > [class*="edited_"]) { display: none !important; }`;
+[class*="timestamp_"]:has(time > [class*="edited_"]) { display: none !important; }`;
 
 const plugin: PluginCode = {
     start(ctx) {
