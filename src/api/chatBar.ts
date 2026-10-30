@@ -39,6 +39,7 @@ export const MAX_BUTTONS_PER_PLUGIN = 5;
 export const BUTTON_ATTRIBUTE = "data-amiricord-chatbar";
 const STYLE_NAME = "chat-bar";
 const SYNC_DELAY_MS = 60;
+const BODY_WAIT_MS = 100;
 const SVG_NAMESPACE = "http://www.w3.org/2000/svg";
 
 export const CHAT_BAR_CSS = `
@@ -95,9 +96,16 @@ export class ChatBarHub {
 
     private start(): void {
         if (this.observer) return;
+        // A plugin that starts before the page has a body (the "init" stage) gets its buttons as soon as the body exists
+        const body = this.page.document.body as HTMLElement | null;
+        if (!body) {
+            this.page.setTimeout(() => { if (this.entries.size > 0) this.start(); }, BODY_WAIT_MS);
+            return;
+        }
         if (!this.styled) { this.styled = true; this.addStyle(CHAT_BAR_CSS, STYLE_NAME); }
         this.observer = new this.page.MutationObserver(() => { this.schedule(); });
-        this.observer.observe(this.page.document.body, { childList: true, subtree: true });
+        this.observer.observe(body, { childList: true, subtree: true });
+        this.schedule();
     }
 
     private stop(): void {

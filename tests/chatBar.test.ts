@@ -65,6 +65,21 @@ describe("chat bar buttons", () => {
     });
 });
 
+describe("chat bar before the page has a body", () => {
+    it("waits for the body and then starts watching", () => {
+        const { page, state } = fakePage();
+        const document = page.document as unknown as { body: unknown; };
+        const body = document.body;
+        document.body = null;
+        const hub = new ChatBarHub(page, () => undefined, () => undefined);
+        assert.equal(hub.add("P", button("one")), true);
+        assert.equal(state.observers, 0);
+        document.body = body;
+        for (const run of state.timers.splice(0)) run();
+        assert.equal(state.observers, 1);
+    });
+});
+
 describe("quick message", () => {
     it("sends nothing for an empty draft and a silent message by default", () => {
         assert.equal(messageBody(undefined, true, "1"), undefined);
