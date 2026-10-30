@@ -7,14 +7,18 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import { idsOfRow, pickMessage, previewText } from "../src/vencordplugins/ValidReply/index";
+import { pickMessage, previewText, referenceInFiber } from "../src/vencordplugins/ValidReply/index";
 
 describe("ValidReply", () => {
-    it("reads the ids of a message row", () => {
-        assert.deepEqual(idsOfRow("chat-messages-123-456"), { channelId: "123", messageId: "456" });
-        assert.equal(idsOfRow("chat-messages-123"), undefined);
-        assert.equal(idsOfRow("message-reply-context-1"), undefined);
-        assert.equal(idsOfRow(undefined), undefined);
+    it("reads what a reply answers from the component's props, a few levels up", () => {
+        const reply = { memoizedProps: { baseMessage: { channel_id: "9", messageReference: { channel_id: "7", message_id: "5" } } }, return: null };
+        const leaf = { memoizedProps: {}, return: { memoizedProps: null, return: reply } };
+        assert.deepEqual(referenceInFiber(leaf), { channelId: "7", messageId: "5" });
+        const noChannel = { memoizedProps: { baseMessage: { channel_id: "9", messageReference: { message_id: "5" } } } };
+        assert.deepEqual(referenceInFiber(noChannel), { channelId: "9", messageId: "5" });
+        assert.equal(referenceInFiber({ memoizedProps: { baseMessage: { messageReference: null } } }), undefined);
+        assert.equal(referenceInFiber({ memoizedProps: {} }), undefined);
+        assert.equal(referenceInFiber(undefined), undefined);
     });
 
     it("writes the preview as name and text on one line", () => {

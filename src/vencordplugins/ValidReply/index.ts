@@ -19,12 +19,6 @@ const KEEP_MAX = 300;
 const PREVIEW_CHARS = 160;
 export const DELETED_TEXT = "Original message was deleted";
 
-/** The channel and message ids of a message row (`chat-messages-<channel>-<message>`). */
-export function idsOfRow(id: string | null | undefined): { channelId: string; messageId: string; } | undefined {
-    const match = /^chat-messages-(\d+)-(\d+)$/.exec(id ?? "");
-    return match ? { channelId: match[1], messageId: match[2] } : undefined;
-}
-
 export interface FetchedMessage {
     id?: unknown;
     content?: unknown;
@@ -53,7 +47,27 @@ export function pickMessage(body: unknown, id: string): FetchedMessage | undefin
 }
 
 interface Rest { get(options: { url: string; query?: Record<string, unknown>; }): Promise<{ body?: unknown; }>; }
-interface Store { getMessage(channelId: string, messageId: string): { messageReference?: { channel_id?: string; message_id?: string; } | null; } | undefined; }
+interface FiberLike { memoizedProps?: { baseMessage?: { messageReference?: { channel_id?: unknown; message_id?: unknown; } | null; channel_id?: unknown; } | null; } | null; return?: FiberLike | null; }
+
+const FIBER_LEVELS = 30;
+
+/** The channel and message a reply answers, from the props of the reply component (`baseMessage`, read in Discord's page: it is a few levels above the placeholder, in the chat and in the search results). */
+export function referenceInFiber(fiber: FiberLike | null | undefined): { channelId: string; messageId: string; } | undefined {
+    let node = fiber;
+    for (let level = 0; level < FIBER_LEVELS && node; level++, node = node.return) {
+        const base = node.memoizedProps?.baseMessage;
+        if (!base) continue;
+        const messageId = base.messageReference?.message_id;
+        const channelId = base.messageReference?.channel_id ?? base.channel_id;
+        return typeof messageId === "string" && typeof channelId === "string" ? { channelId, messageId } : undefined;
+    }
+    return undefined;
+}
+
+function referenceOf(element: Element): { channelId: string; messageId: string; } | undefined {
+    const key = Object.keys(element).find(name => name.startsWith("__reactFiber"));
+    return key ? referenceInFiber((element as unknown as Record<string, FiberLike | undefined>)[key]) : undefined;
+}
 
 let stop: (() => void) | undefined;
 
@@ -61,7 +75,6 @@ const plugin: PluginCode = {
     start(ctx) {
         const page = (globalThis as unknown as { document: Document; }).document;
         const rest = ctx.finders.byProps<Rest>("get", "post", "put", "patch", "del", "!Request", "!getXHR");
-        const messages = ctx.common.MessageStore;
         const known = new Map<string, string>();
         const waiting = new Set<string>();
         const retryAt = new Map<string, number>();
@@ -76,12 +89,9 @@ const plugin: PluginCode = {
         const onOver = (event: Event) => {
             const placeholder = (event.target as Element | null)?.closest?.(PLACEHOLDER);
             if (!placeholder) return;
-            const row = idsOfRow(placeholder.closest("li[id^=\"chat-messages-\"]")?.id);
-            if (!row) return;
-            const reference = (messages.get() as unknown as Store | undefined)?.getMessage(row.channelId, row.messageId)?.messageReference;
-            const channelId = reference?.channel_id ?? row.channelId;
-            const messageId = reference?.message_id;
-            if (!messageId) return;
+            const reference = referenceOf(placeholder);
+            if (!reference) return;
+            const { channelId, messageId } = reference;
             const key = `${channelId}:${messageId}`;
             const cached = known.get(key);
             if (cached !== undefined) { show(placeholder, cached); return; }
@@ -95,9 +105,7 @@ const plugin: PluginCode = {
                     const text = found ? previewText(found) : DELETED_TEXT;
                     remember(key, text);
                     for (const spot of page.querySelectorAll(PLACEHOLDER)) {
-                        const spotRow = idsOfRow(spot.closest("li[id^=\"chat-messages-\"]")?.id);
-                        const spotRef = spotRow && (messages.get() as unknown as Store | undefined)?.getMessage(spotRow.channelId, spotRow.messageId)?.messageReference;
-                        if (spotRef?.message_id === messageId) show(spot, text);
+                        if (referenceOf(spot)?.messageId === messageId) show(spot, text);
                     }
                 })
                 .catch(() => { retryAt.set(key, Date.now() + RETRY_COOLDOWN_MS); })
