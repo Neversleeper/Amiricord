@@ -11,7 +11,7 @@ import { isServerMutedHere } from "../src/testcordplugins/AskMeToMute/index";
 import { type AwayState, MAX_REPLIES, shouldReply } from "../src/testcordplugins/DMAway/index";
 import { stillActive } from "../src/testcordplugins/GhostTyping/index";
 import { pollText } from "../src/testcordplugins/PollMaker/index";
-import { chips } from "../src/vencordplugins/TypingAvatars/index";
+import { typistNamed } from "../src/vencordplugins/TypingAvatars/index";
 
 describe("ported plugins, tenth batch", () => {
     it("makes a poll", () => {
@@ -42,11 +42,13 @@ describe("ported plugins, tenth batch", () => {
         assert.deepEqual(stillActive(started, 99 * 60000, 10), []);
     });
 
-    it("limits the typing avatars", () => {
-        assert.deepEqual(chips(["a", "b", "c"], 5), { shown: ["a", "b", "c"], more: 0 });
-        assert.deepEqual(chips(["a", "b", "c", "d"], 2), { shown: ["a", "b"], more: 2 });
-        assert.deepEqual(chips([], 3), { shown: [], more: 0 });
-        assert.deepEqual(chips(["a", "b"], 0), { shown: ["a"], more: 1 });
+    it("matches a typing name to one person only", () => {
+        const typists = [{ id: "1", name: "Ana" }, { id: "2", name: "Leo" }, { id: "3", name: "Leo" }];
+        assert.equal(typistNamed("Ana", typists)?.id, "1");
+        assert.equal(typistNamed(" Ana ", typists)?.id, "1");
+        assert.equal(typistNamed("Leo", typists), undefined);
+        assert.equal(typistNamed("Zed", typists), undefined);
+        assert.equal(typistNamed("", [{ id: "9", name: "" }]), undefined);
     });
 
     it("answers a direct message once per cooldown, and only the right ones", () => {

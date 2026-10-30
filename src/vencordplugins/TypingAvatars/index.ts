@@ -4,19 +4,18 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-// Adapted for Amiricord (2026) from the plugin TypingTweaks (authors zt, sadan, MrDiamond) as found in TestCord's copy of Vencord's plugins. The original patched Discord's typing text to put an avatar before each name. Here nothing of Discord's code is touched: a small row of round avatars is drawn over the right end of the message box (the people read from Discord's typing store on each typing event, you and blocked or ignored people left out), and a person's name is the tooltip of their avatar. Discord's own "is typing..." text stays as it is. NOT seen live: nobody was typing while it was built.
+// Adapted for Amiricord (2026) from the plugin TypingTweaks (authors zt, sadan, MrDiamond) as found in TestCord's copy of Vencord's plugins. The original patched Discord's typing text to put a round avatar before each name. Here nothing of Discord's code is touched: the typing text above the message box (`typing_*` > `text_*`, with each name in a `strong`, read in her running Discord, build 655747) gets a small avatar put in front of every name that matches someone typing in the channel (read from Discord's typing store; the match is by the name Discord shows, and a name that two people share is left without an avatar). The avatars are taken away again when the plugin stops or nobody types.
 
-import { definePluginSettings } from "../../api/pluginSettings";
 import type { PluginCode } from "../../renderer/engine";
 
-const settings = definePluginSettings({
-    maxAvatars: { type: "number", default: 5, min: 1, max: 10, integer: true, description: "How many avatars to show before \"+N\"" }
-});
+export interface Typist { id: string; name: string; }
 
-/** The ids to draw and how many are left out. */
-export function chips(ids: readonly string[], max: number): { shown: string[]; more: number; } {
-    const limit = Math.max(1, max);
-    return { shown: ids.slice(0, limit), more: Math.max(0, ids.length - limit) };
+/** The person whose name is exactly this text, or undefined when nobody or more than one person has it. */
+export function typistNamed(text: string, typists: readonly Typist[]): Typist | undefined {
+    const wanted = text.trim();
+    if (wanted === "") return undefined;
+    const found = typists.filter(typist => typist.name === wanted);
+    return found.length === 1 ? found[0] : undefined;
 }
 
 interface TypingStore { getTypingUsers(channelId: string): Record<string, number> | undefined; }
@@ -25,17 +24,15 @@ interface Users { getCurrentUser(): { id: string; } | undefined; getUser(id: str
 interface Members { getNick?(guildId: string, userId: string): string | null | undefined; }
 interface Relationships { isBlockedOrIgnored?(id: string): boolean; }
 
-const COMPOSER = "[role=\"textbox\"][data-slate-editor=\"true\"]";
+const MARK = "amiricord-typing-avatar";
+const NAMES = "[class*=\"typing_\"] [class*=\"text_\"][aria-hidden=\"true\"] strong";
 const CSS = `
-.amiricord-typing-avatars { position: fixed; z-index: 100; display: flex; align-items: center; pointer-events: none; }
-.amiricord-typing-avatars img, .amiricord-typing-avatars span { width: 20px; height: 20px; border-radius: 50%; box-sizing: border-box; border: 2px solid var(--background-base-lower, var(--background-primary, #313338)); background: var(--background-base-low, #2b2d31); margin-left: -6px; object-fit: cover; pointer-events: auto; }
-.amiricord-typing-avatars span { display: inline-flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 600; color: var(--text-muted, #949ba4); }
+img.${MARK} { width: 16px; height: 16px; border-radius: 50%; object-fit: cover; vertical-align: middle; margin: -2px 4px 0 0; }
 `;
 
 let stop: (() => void) | undefined;
 
 const plugin: PluginCode & { refresh?(): void; } = {
-    settings,
     start(ctx) {
         ctx.addStyle(CSS, "typing-avatars");
         const page = (globalThis as unknown as { document: Document; }).document;
@@ -46,62 +43,47 @@ const plugin: PluginCode & { refresh?(): void; } = {
         const members = ctx.common.GuildMemberStore;
         const guilds = ctx.common.SelectedGuildStore;
         const relationships = ctx.common.RelationshipStore;
-        let row: HTMLElement | undefined;
-        const hide = () => { row?.remove(); row = undefined; };
+        const clear = () => { for (const image of page.querySelectorAll(`img.${MARK}`)) image.remove(); };
         const update = () => {
             const channelId = channels.get()?.getChannelId();
             const store = typing.get();
             const userStore = users.get() as unknown as Users | undefined;
-            const editor = page.querySelector(COMPOSER);
-            if (!channelId || !store || !userStore || !editor) { hide(); return; }
+            const strongs = [...page.querySelectorAll(NAMES)];
+            if (!channelId || !store || !userStore || strongs.length === 0) { if (strongs.length === 0) clear(); return; }
             const me = userStore.getCurrentUser()?.id;
             const guildId = guilds.get()?.getGuildId() ?? null;
             const nicks = members.get() as unknown as Members | undefined;
             const blocked = relationships.get() as unknown as Relationships | undefined;
-            const ids = Object.keys(store.getTypingUsers(channelId) ?? {}).filter(id => id !== me && blocked?.isBlockedOrIgnored?.(id) !== true);
-            const box = (editor.closest("form") ?? editor).getBoundingClientRect();
-            if (ids.length === 0 || box.width === 0) { hide(); return; }
-            const { shown, more } = chips(ids, settings.store.maxAvatars);
-            if (!row) {
-                row = page.createElement("div");
-                row.className = "amiricord-typing-avatars";
-                page.body.append(row);
-            }
-            row.replaceChildren();
-            for (const id of shown) {
+            const typists: Typist[] = [];
+            for (const id of Object.keys(store.getTypingUsers(channelId) ?? {})) {
+                if (id === me || blocked?.isBlockedOrIgnored?.(id) === true) continue;
                 const user = userStore.getUser(id);
-                const name = (guildId && nicks?.getNick?.(guildId, id)) || user?.globalName || user?.username || "Someone";
-                const src = user?.getAvatarURL?.(guildId, 32);
-                if (src) {
-                    const image = page.createElement("img");
-                    image.src = src;
-                    image.alt = "";
-                    image.title = name;
-                    row.append(image);
-                } else {
-                    const letter = page.createElement("span");
-                    letter.textContent = name.slice(0, 1).toUpperCase();
-                    letter.title = name;
-                    row.append(letter);
-                }
+                typists.push({ id, name: (guildId && nicks?.getNick?.(guildId, id)) || user?.globalName || user?.username || "" });
             }
-            if (more > 0) {
-                const rest = page.createElement("span");
-                rest.textContent = `+${more}`;
-                row.append(rest);
+            for (const strong of strongs) {
+                const typist = typistNamed(strong.textContent ?? "", typists);
+                const before = strong.previousElementSibling;
+                const has = before?.classList.contains(MARK) === true;
+                if (!typist) { if (has) before!.remove(); continue; }
+                const src = userStore.getUser(typist.id)?.getAvatarURL?.(guildId, 32);
+                if (!src) continue;
+                if (has && before!.getAttribute("data-user") === typist.id) continue;
+                if (has) before!.remove();
+                const image = page.createElement("img");
+                image.className = MARK;
+                image.setAttribute("data-user", typist.id);
+                image.alt = "";
+                image.src = src;
+                strong.before(image);
             }
-            row.style.left = `${Math.max(0, box.right - row.offsetWidth - 14)}px`;
-            row.style.top = `${Math.max(0, box.top - 24)}px`;
         };
-        plugin.refresh = update;
-        // Discord ends a person's typing by itself without an event, so the row is also read again while it is shown.
-        const timer = view.setInterval(() => { if (row) update(); }, 1500);
-        view.addEventListener("resize", update);
+        plugin.refresh = () => { update(); view.setTimeout(update, 60); };
+        // The text is drawn again by Discord when the names change, which can drop the avatars, so they are checked now and then.
+        const timer = view.setInterval(update, 800);
         stop = () => {
             view.clearInterval(timer);
-            view.removeEventListener("resize", update);
             plugin.refresh = undefined;
-            hide();
+            clear();
         };
     },
     flux: {
