@@ -99,6 +99,35 @@ describe("notices", () => {
     });
 });
 
+describe("notice time and x", () => {
+    it("keeps a time inside its limits and runs onClose only for the x", () => {
+        assert.equal(cleanNotice({ id: "a", text: "x", timeoutMs: 10 })?.timeoutMs, 500);
+        assert.equal(cleanNotice({ id: "a", text: "x", timeoutMs: 9e9 })?.timeoutMs, 60000);
+        assert.equal(cleanNotice({ id: "a", text: "x", timeoutMs: Number.NaN })?.timeoutMs, undefined);
+        const { page, document } = fakePage();
+        const hub = new NoticesHub(page as unknown as NoticesPage, () => undefined, () => undefined);
+        let closed = 0;
+        hub.show("P", { id: "a", text: "x", onClose: () => { closed++; } });
+        const close = document.querySelector("[data-notice-close]")!;
+        close.dispatchEvent({ type: "click", target: close });
+        assert.equal(closed, 1);
+        assert.equal(document.querySelectorAll(`[${NOTICE_ATTRIBUTE}]`).length, 0);
+        hub.show("P", { id: "b", text: "x", onClose: () => { closed++; } });
+        hub.dismiss("P", "b");
+        assert.equal(closed, 1);
+    });
+
+    it("takes the bar away by itself after its time", () => {
+        const { page, document, timers } = fakePage();
+        const hub = new NoticesHub(page as unknown as NoticesPage, () => undefined, () => undefined);
+        hub.show("P", { id: "a", text: "x", timeoutMs: 3000 });
+        assert.equal(document.querySelectorAll(`[${NOTICE_ATTRIBUTE}]`).length, 1);
+        const waiting = [...timers.values()].find(timer => timer.ms === 3000)!;
+        waiting.run();
+        assert.equal(document.querySelectorAll(`[${NOTICE_ATTRIBUTE}]`).length, 0);
+    });
+});
+
 describe("member list decorations", () => {
     it("reads the person from an avatar address", () => {
         assert.equal(idFromAvatarUrl("https://cdn.discordapp.com/avatars/1554145234173034508/c42877c.webp?size=32"), "1554145234173034508");

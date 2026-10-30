@@ -25,6 +25,10 @@ export interface NoticeDefinition {
     buttons?: NoticeButton[];
     /** Whether the person may close the bar with the x. Default true. */
     closable?: boolean;
+    /** Take the bar away by itself after this many milliseconds (500 to 60000). Without it the bar stays. */
+    timeoutMs?: number;
+    /** Runs when the person closes the bar with the x (not when it times out, is replaced or a button closes it). */
+    onClose?(): void;
 }
 
 export interface PluginNotices {
@@ -45,19 +49,20 @@ const HOST_ID = "amiricord-notices";
 
 export const NOTICES_CSS = `
 #${HOST_ID} { position: fixed; top: 0; left: 0; right: 0; z-index: 9998; display: flex; flex-direction: column; pointer-events: none; }
-[${NOTICE_ATTRIBUTE}] { pointer-events: auto; display: flex; align-items: center; justify-content: center; gap: 12px; padding: 6px 40px 6px 16px; font-size: 14px; font-weight: 500; color: #fff; background: var(--notice-bg, #5865f2); position: relative; }
-[${NOTICE_ATTRIBUTE}][data-kind="success"] { background: #248046; }
-[${NOTICE_ATTRIBUTE}][data-kind="warning"] { background: #9a6700; }
-[${NOTICE_ATTRIBUTE}][data-kind="danger"] { background: #d83c3e; }
-[${NOTICE_ATTRIBUTE}] button { cursor: pointer; border: 1px solid rgba(255, 255, 255, 0.7); border-radius: 4px; background: transparent; color: #fff; font: inherit; font-size: 13px; padding: 1px 10px; }
-[${NOTICE_ATTRIBUTE}] button:hover { background: rgba(255, 255, 255, 0.15); }
-[${NOTICE_ATTRIBUTE}] [data-notice-close] { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); border: 0; font-size: 18px; line-height: 1; padding: 0 6px; }
+[${NOTICE_ATTRIBUTE}] { --notice-accent: var(--brand-500, #5865f2); pointer-events: auto; display: flex; align-items: center; justify-content: center; gap: 12px; padding: 6px 40px 6px 16px; font-size: 14px; font-weight: 500; color: var(--text-default, var(--text-normal, #dbdee1)); background: var(--background-base-lower, var(--background-secondary-alt, #1e1f22)); border-bottom: 2px solid var(--notice-accent); position: relative; }
+[${NOTICE_ATTRIBUTE}][data-kind="success"] { --notice-accent: var(--status-positive, #23a55a); }
+[${NOTICE_ATTRIBUTE}][data-kind="warning"] { --notice-accent: var(--status-warning, #f0b232); }
+[${NOTICE_ATTRIBUTE}][data-kind="danger"] { --notice-accent: var(--status-danger, #f23f43); }
+[${NOTICE_ATTRIBUTE}] button { cursor: pointer; border: 0; border-radius: 4px; background: var(--notice-accent); color: #fff; font: inherit; font-size: 13px; padding: 2px 10px; }
+[${NOTICE_ATTRIBUTE}] button:hover { filter: brightness(1.1); }
+[${NOTICE_ATTRIBUTE}] [data-notice-close] { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); background: transparent; color: var(--interactive-normal, #b5bac1); font-size: 20px; line-height: 1; padding: 0 6px; }
+[${NOTICE_ATTRIBUTE}] [data-notice-close]:hover { color: var(--interactive-hover, #dbdee1); filter: none; }
 `;
 
 const KINDS: readonly string[] = ["info", "success", "warning", "danger"];
 
 /** The definition cleaned up (texts cut to their limits, extra buttons dropped), or undefined when it cannot be shown. */
-export function cleanNotice(notice: unknown): Required<Pick<NoticeDefinition, "id" | "text" | "kind" | "closable">> & { buttons: NoticeButton[]; } | undefined {
+export function cleanNotice(notice: unknown): Required<Pick<NoticeDefinition, "id" | "text" | "kind" | "closable">> & { buttons: NoticeButton[]; timeoutMs?: number; onClose?: () => void; } | undefined {
     const value = notice as Partial<NoticeDefinition> | null | undefined;
     if (!value || typeof value.id !== "string" || value.id.length === 0 || value.id.length > 64) return undefined;
     if (typeof value.text !== "string" || value.text.trim().length === 0) return undefined;
@@ -71,7 +76,9 @@ export function cleanNotice(notice: unknown): Required<Pick<NoticeDefinition, "i
         text: text.length > MAX_NOTICE_TEXT ? `${text.slice(0, MAX_NOTICE_TEXT - 1)}…` : text,
         kind: typeof value.kind === "string" && KINDS.includes(value.kind) ? value.kind : "info",
         closable: value.closable !== false,
-        buttons
+        buttons,
+        ...(typeof value.timeoutMs === "number" && Number.isFinite(value.timeoutMs) ? { timeoutMs: Math.min(60000, Math.max(500, Math.round(value.timeoutMs))) } : {}),
+        ...(typeof value.onClose === "function" ? { onClose: value.onClose } : {})
     };
 }
 
@@ -185,11 +192,18 @@ export class NoticesHub {
             close.setAttribute("data-notice-close", "");
             close.setAttribute("aria-label", "Close");
             close.textContent = "×";
-            close.addEventListener("click", () => { this.dismiss(plugin, notice.id); });
+            close.addEventListener("click", () => {
+                try { notice.onClose?.(); } catch (error) { this.onError(plugin, `notice ${notice.id}`, error); }
+                this.dismiss(plugin, notice.id);
+            });
             element.append(close);
         }
         host.append(element);
         this.entries.set(`${plugin}:${notice.id}`, { plugin, id: notice.id, element });
+        if (notice.timeoutMs !== undefined && this.page.setTimeout) {
+            // Only this very bar goes: a bar that was replaced under the same id keeps its own time.
+            this.page.setTimeout(() => { if (this.entries.get(`${plugin}:${notice.id}`)?.element === element) this.dismiss(plugin, notice.id); }, notice.timeoutMs);
+        }
         return true;
     }
 }

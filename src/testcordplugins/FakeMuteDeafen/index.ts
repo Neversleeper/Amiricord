@@ -19,7 +19,7 @@ const settings = definePluginSettings({
     combinedContextItem: { type: "boolean", default: false, description: "Also show one Fake Mute & Deafen entry in the audio device menu" },
     autoMute: { type: "boolean", default: true, description: "Fake deafen also fakes mute" },
     showOnMyScreen: { type: "boolean", default: true, description: "Also show the fake on your own screen (the microphone and headphones in the user panel and your row in the voice list go red). Only what Discord shows you changes; your real microphone and speakers are not touched" },
-    showBanner: { type: "boolean", default: false, description: "Show a bar across the top of Discord while a fake is on, with a button to turn it off (so you never forget it)" },
+    showBanner: { type: "boolean", default: false, description: "Show a bar across the top of Discord for a few seconds when a fake is turned on, with a button to turn it off. Closing it with the x switches this off for good" },
     muteKeybind: { type: "string", default: "ctrl+j", description: "Key shortcut for fake mute only (modifier+key, for example ctrl+j)" },
     deafenKeybind: { type: "string", default: "ctrl+l", description: "Key shortcut for fake deafen and fake mute (modifier+key, for example ctrl+l)" }
 });
@@ -291,7 +291,7 @@ const plugin: PluginCode = {
         updateBanner = () => {
             const text = settings.store.showBanner ? bannerText(fake, settings.store.autoMute) : undefined;
             if (text === undefined) { ctx.notices.dismiss("fake-on"); return; }
-            ctx.notices.show({ id: "fake-on", kind: "warning", text, closable: false, buttons: [{ label: "Turn off", onClick: () => { fake.mute = fake.deaf = fake.video = false; changed(); } }] });
+            ctx.notices.show({ id: "fake-on", kind: "warning", text, timeoutMs: 4000, onClose: () => { settings.store.showBanner = false; }, buttons: [{ label: "Turn off", onClick: () => { fake.mute = fake.deaf = fake.video = false; changed(); } }] });
         };
         void ctx.storage.get(STATE_KEY).then(saved => {
             const state = saved as { mute?: unknown; deaf?: unknown; video?: unknown; } | undefined;

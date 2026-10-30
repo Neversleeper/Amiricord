@@ -1,0 +1,37 @@
+{
+    "schema": 1,
+    "id": "GhostTyping",
+    "name": "Ghost Typing",
+    "version": "1.0.0",
+    "description": "Look like you are typing in a channel until you switch it off, from the message box or /ghosttyping. Switches itself off after a time you choose.",
+    "origin": "testcord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        {
+            "name": "sirphantom89",
+            "role": "original author"
+        },
+        {
+            "name": "Neversleeper",
+            "github": "https://github.com/Neversleeper",
+            "role": "Amiricord port"
+        }
+    ],
+    "credits": [
+        {
+            "name": "Vendicated and contributors (Vencord), sirphantom89 (TestCord), plugin GhostTyping",
+            "license": "GPL-3.0-or-later",
+            "url": "https://github.com/TestcordDev/TestCord"
+        }
+    ],
+    "tags": [
+        "chat",
+        "utility"
+    ],
+    "enabledByDefault": false,
+    "startAt": "init",
+    "entry": {
+        "renderer": "index.ts"
+    },
+    "permissions": {}
+}

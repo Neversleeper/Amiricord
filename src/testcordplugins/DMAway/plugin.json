@@ -1,0 +1,42 @@
+{
+    "schema": 1,
+    "id": "DMAway",
+    "name": "DM Away",
+    "version": "1.0.0",
+    "description": "A moon button in the channel header answers direct messages with your away message, once per person per cooldown.",
+    "origin": "testcord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        {
+            "name": "Sharp",
+            "role": "original author"
+        },
+        {
+            "name": "Neversleeper",
+            "github": "https://github.com/Neversleeper",
+            "role": "Amiricord port"
+        }
+    ],
+    "credits": [
+        {
+            "name": "Vendicated and contributors (Vencord), Sharp (TestCord), plugin DMAway",
+            "license": "GPL-3.0-or-later",
+            "url": "https://github.com/TestcordDev/TestCord"
+        }
+    ],
+    "tags": [
+        "chat",
+        "utility"
+    ],
+    "enabledByDefault": false,
+    "startAt": "init",
+    "entry": {
+        "renderer": "index.ts"
+    },
+    "permissions": {
+        "messages": {
+            "read": "none",
+            "send": true
+        }
+    }
+}
