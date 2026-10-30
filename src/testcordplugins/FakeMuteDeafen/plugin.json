@@ -1,0 +1,21 @@
+{
+    "schema": 1,
+    "id": "FakeMuteDeafen",
+    "name": "Fake Mute Deafen",
+    "version": "1.0.0",
+    "description": "Show other people that you are muted, deafened or have your camera on while you can still talk and hear. A button in the user panel, entries in the voice device menus, two key shortcuts and optional slash commands. Changes what Discord tells the others about your voice state.",
+    "origin": "testcord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        { "name": "x2b, dot, sirphantom89 and hyyven", "role": "original authors" },
+        { "name": "Neversleeper", "github": "https://github.com/Neversleeper", "role": "Amiricord port" }
+    ],
+    "credits": [
+        { "name": "Vendicated and contributors (Vencord), plugin FakeMuteDeafen by x2b, dot, sirphantom89 and hyyven", "license": "GPL-3.0-or-later", "url": "https://github.com/TestcordDev/TestCord" }
+    ],
+    "tags": ["voice", "privacy"],
+    "enabledByDefault": false,
+    "startAt": "webpackReady",
+    "entry": { "renderer": "index.ts" },
+    "permissions": {}
+}
