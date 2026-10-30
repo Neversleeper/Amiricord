@@ -1,0 +1,23 @@
+{
+    "schema": 1,
+    "id": "QuickReply",
+    "name": "Quick Reply",
+    "version": "1.0.0",
+    "description": "Reply to messages with Ctrl+Up and Ctrl+Down, and edit your own with Ctrl+Shift+Up and Ctrl+Shift+Down, without touching the mouse.",
+    "origin": "vencord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        { "name": "fawn", "role": "original author" },
+        { "name": "Ven", "role": "original author" },
+        { "name": "pylix", "role": "original author" },
+        { "name": "Neversleeper", "github": "https://github.com/Neversleeper", "role": "Amiricord port" }
+    ],
+    "credits": [
+        { "name": "Vendicated and contributors (Vencord), plugin QuickReply by fawn, Ven, pylix", "license": "GPL-3.0-or-later", "url": "https://github.com/Vendicated/Vencord" }
+    ],
+    "tags": ["chat", "utility"],
+    "enabledByDefault": false,
+    "startAt": "domReady",
+    "entry": { "renderer": "index.ts" },
+    "permissions": {}
+}

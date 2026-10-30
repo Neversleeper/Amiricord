@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { hasContext } from "../amiricord/context";
 import { type Quest, QuestTaskType } from "../discordTypes";
 import { getQuestifySettings, useQuestifySettings } from "../settings/access";
 import { ignoredQuestIDsKey } from "../settings/def";
@@ -233,7 +234,8 @@ export function getQuestPanelOverride(creative: QuestPanelCreative, questType: n
         return creative;
     }
 
-    const nextQuest = getAutoCompleteShowcaseQuest() ?? getMostRecentlyCompletedUnclaimedQuest();
+    // Discord can draw the panel before the engine has started this plugin; the stores need that context
+    const nextQuest = hasContext() ? getAutoCompleteShowcaseQuest() ?? getMostRecentlyCompletedUnclaimedQuest() : null;
 
     if (nextQuest) {
         return { ...creative, type: questType, quest: nextQuest };

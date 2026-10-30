@@ -1,0 +1,26 @@
+{
+    "schema": 1,
+    "id": "ScheduledMessages",
+    "name": "Scheduled Messages",
+    "version": "1.0.0",
+    "description": "A /schedule command that sends a message later (after a delay such as 10m or 2h30m), and a Scheduled tab that lists what is waiting, with Send now and Cancel.",
+    "origin": "equicord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        { "name": "mmeta", "role": "original author" },
+        { "name": "prism", "role": "original author" },
+        { "name": "Neversleeper", "github": "https://github.com/Neversleeper", "role": "Amiricord port" }
+    ],
+    "credits": [
+        { "name": "Vendicated and contributors (Vencord), plugin ScheduledMessages by mmeta, prism", "license": "GPL-3.0-or-later", "url": "https://github.com/Equicord/Equicord" }
+    ],
+    "tags": ["chat", "utility"],
+    "enabledByDefault": false,
+    "startAt": "domReady",
+    "entry": { "renderer": "index.ts" },
+    "permissions": {
+        "messages": {
+            "send": true
+        }
+    }
+}

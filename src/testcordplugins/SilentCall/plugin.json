@@ -1,0 +1,21 @@
+{
+    "schema": 1,
+    "id": "SilentCall",
+    "name": "Silent Call",
+    "version": "1.0.0",
+    "description": "Stops your phone-call style ringing from starting when you open a call in a direct message or group chat.",
+    "origin": "testcord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        { "name": "x2b", "role": "original author" },
+        { "name": "Neversleeper", "github": "https://github.com/Neversleeper", "role": "Amiricord port" }
+    ],
+    "credits": [
+        { "name": "Vendicated and contributors (Vencord), plugin SilentCall by x2b", "license": "GPL-3.0-or-later", "url": "https://github.com/TestcordDev/TestCord" }
+    ],
+    "tags": ["utility", "chat"],
+    "enabledByDefault": false,
+    "startAt": "init",
+    "entry": { "renderer": "index.ts" },
+    "permissions": {}
+}

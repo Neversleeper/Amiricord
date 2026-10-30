@@ -1,0 +1,21 @@
+{
+    "schema": 1,
+    "id": "UnitConverter",
+    "name": "Unit Converter",
+    "version": "1.0.0",
+    "description": "A button on messages that converts the units in the message (feet, pounds, miles, Fahrenheit and so on to metric, or metric to imperial) and shows the result.",
+    "origin": "equicord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        { "name": "sadan", "role": "original author" },
+        { "name": "Neversleeper", "github": "https://github.com/Neversleeper", "role": "Amiricord port" }
+    ],
+    "credits": [
+        { "name": "Vendicated and contributors (Vencord), plugin UnitConverter by sadan", "license": "GPL-3.0-or-later", "url": "https://github.com/Equicord/Equicord" }
+    ],
+    "tags": ["chat", "utility"],
+    "enabledByDefault": false,
+    "startAt": "init",
+    "entry": { "renderer": "index.ts" },
+    "permissions": {}
+}

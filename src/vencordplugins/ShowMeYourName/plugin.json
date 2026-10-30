@@ -1,0 +1,21 @@
+{
+    "schema": 1,
+    "id": "ShowMeYourName",
+    "name": "Show Me Your Name",
+    "version": "1.0.0",
+    "description": "Shows the account name (@username) next to the nickname or display name of a message's author, when they are different.",
+    "origin": "vencord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        { "name": "Equicord contributors", "role": "original author" },
+        { "name": "Neversleeper", "github": "https://github.com/Neversleeper", "role": "Amiricord port" }
+    ],
+    "credits": [
+        { "name": "Vendicated and contributors (Vencord), plugin ShowMeYourName by Equicord contributors", "license": "GPL-3.0-or-later", "url": "https://github.com/Vendicated/Vencord" }
+    ],
+    "tags": ["chat", "ui"],
+    "enabledByDefault": false,
+    "startAt": "domReady",
+    "entry": { "renderer": "index.ts" },
+    "permissions": {}
+}

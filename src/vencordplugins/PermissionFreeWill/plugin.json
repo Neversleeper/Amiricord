@@ -1,0 +1,21 @@
+{
+    "schema": 1,
+    "id": "PermissionFreeWill",
+    "name": "Permission Free Will",
+    "version": "1.0.0",
+    "description": "Turns off Discord's client-side limits when you change channel permissions.",
+    "origin": "vencord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        { "name": "lewisakura", "role": "original author" },
+        { "name": "Neversleeper", "github": "https://github.com/Neversleeper", "role": "Amiricord port" }
+    ],
+    "credits": [
+        { "name": "Vendicated and contributors (Vencord), plugin PermissionFreeWill by lewisakura", "license": "GPL-3.0-or-later", "url": "https://github.com/Vendicated/Vencord" }
+    ],
+    "tags": ["utility"],
+    "enabledByDefault": false,
+    "startAt": "init",
+    "entry": { "renderer": "index.ts" },
+    "permissions": {}
+}

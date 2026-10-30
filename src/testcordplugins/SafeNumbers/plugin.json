@@ -1,0 +1,21 @@
+{
+    "schema": 1,
+    "id": "SafeNumbers",
+    "name": "Safe Numbers",
+    "version": "1.0.0",
+    "description": "Writes the digits of your messages with look-alike digits, so numbers in them are not picked up by programs that scan chats for numbers. A button next to the message box turns it on and off.",
+    "origin": "testcord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        { "name": "x2b", "role": "original author" },
+        { "name": "Neversleeper", "github": "https://github.com/Neversleeper", "role": "Amiricord port" }
+    ],
+    "credits": [
+        { "name": "Vendicated and contributors (Vencord), plugin SafeNumbers by x2b", "license": "GPL-3.0-or-later", "url": "https://github.com/TestcordDev/TestCord" }
+    ],
+    "tags": ["chat", "privacy"],
+    "enabledByDefault": false,
+    "startAt": "domReady",
+    "entry": { "renderer": "index.ts" },
+    "permissions": {}
+}

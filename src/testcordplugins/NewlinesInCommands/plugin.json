@@ -1,0 +1,21 @@
+{
+    "schema": 1,
+    "id": "NewlinesInCommands",
+    "name": "Newlines In Commands",
+    "version": "1.0.0",
+    "description": "Lets Shift+Enter make a new line in the boxes of slash command options, where Enter would normally send the command.",
+    "origin": "testcord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        { "name": "x2b", "role": "original author" },
+        { "name": "Neversleeper", "github": "https://github.com/Neversleeper", "role": "Amiricord port" }
+    ],
+    "credits": [
+        { "name": "Vendicated and contributors (Vencord), plugin NewlinesInCommands by x2b", "license": "GPL-3.0-or-later", "url": "https://github.com/TestcordDev/TestCord" }
+    ],
+    "tags": ["chat", "utility"],
+    "enabledByDefault": false,
+    "startAt": "domReady",
+    "entry": { "renderer": "index.ts" },
+    "permissions": {}
+}

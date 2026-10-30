@@ -1,0 +1,27 @@
+{
+    "schema": 1,
+    "id": "CopyStickerLinks",
+    "name": "Copy Sticker Links",
+    "version": "1.0.0",
+    "description": "Adds \"Copy Sticker Link\" and \"Open Sticker Link\" to the right-click menu of a sticker, in a message or in the sticker picker.",
+    "origin": "vencord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        { "name": "Ven", "role": "original author" },
+        { "name": "Byeoon", "role": "original author" },
+        { "name": "Neversleeper", "github": "https://github.com/Neversleeper", "role": "Amiricord port" }
+    ],
+    "credits": [
+        { "name": "Vendicated and contributors (Vencord), plugin CopyStickerLinks by Ven, Byeoon", "license": "GPL-3.0-or-later", "url": "https://github.com/Vendicated/Vencord" }
+    ],
+    "tags": ["chat", "utility"],
+    "enabledByDefault": false,
+    "startAt": "domReady",
+    "entry": { "renderer": "index.ts" },
+    "permissions": {
+        "system": {
+            "clipboard": true,
+            "openExternal": true
+        }
+    }
+}

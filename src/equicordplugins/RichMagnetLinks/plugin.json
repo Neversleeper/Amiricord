@@ -1,0 +1,23 @@
+{
+    "schema": 1,
+    "id": "RichMagnetLinks",
+    "name": "Rich Magnet Links",
+    "version": "1.0.0",
+    "description": "Shows a magnet link in a message as a small link with the name of the file, like Discord does with message links.",
+    "origin": "equicord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        { "name": "cassie", "role": "original author" },
+        { "name": "mochienya", "role": "original author" },
+        { "name": "secp192k1", "role": "original author" },
+        { "name": "Neversleeper", "github": "https://github.com/Neversleeper", "role": "Amiricord port" }
+    ],
+    "credits": [
+        { "name": "Vendicated and contributors (Vencord), plugin RichMagnetLinks by cassie, mochienya, secp192k1", "license": "GPL-3.0-or-later", "url": "https://github.com/Equicord/Equicord" }
+    ],
+    "tags": ["chat", "ui"],
+    "enabledByDefault": false,
+    "startAt": "init",
+    "entry": { "renderer": "index.ts" },
+    "permissions": {}
+}

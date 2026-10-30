@@ -1,0 +1,21 @@
+{
+    "schema": 1,
+    "id": "BetterGifAltText",
+    "name": "Better GIF Alt Text",
+    "version": "1.0.0",
+    "description": "A GIF's alt text says what is in its file name or tags, instead of just \"GIF\".",
+    "origin": "vencord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        { "name": "Ven", "role": "original author" },
+        { "name": "Neversleeper", "github": "https://github.com/Neversleeper", "role": "Amiricord port" }
+    ],
+    "credits": [
+        { "name": "Vendicated and contributors (Vencord), plugin BetterGifAltText by Ven", "license": "GPL-3.0-or-later", "url": "https://github.com/Vendicated/Vencord" }
+    ],
+    "tags": ["media", "ui"],
+    "enabledByDefault": false,
+    "startAt": "init",
+    "entry": { "renderer": "index.ts" },
+    "permissions": {}
+}

@@ -1,0 +1,23 @@
+{
+    "schema": 1,
+    "id": "SedEnhanced",
+    "name": "Sed Enhanced",
+    "version": "1.0.0",
+    "description": "Adds a /sed command: s/old/new/flags changes the last message you sent (or the one you are replying to), with regular expressions and flags.",
+    "origin": "equicord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        { "name": "dawn", "role": "original author" },
+        { "name": "Willow", "role": "original author" },
+        { "name": "kat", "role": "original author" },
+        { "name": "Neversleeper", "github": "https://github.com/Neversleeper", "role": "Amiricord port" }
+    ],
+    "credits": [
+        { "name": "Vendicated and contributors (Vencord), plugin SedEnhanced by dawn, Willow, kat", "license": "GPL-3.0-or-later", "url": "https://github.com/Equicord/Equicord" }
+    ],
+    "tags": ["chat", "utility"],
+    "enabledByDefault": false,
+    "startAt": "init",
+    "entry": { "renderer": "index.ts" },
+    "permissions": {}
+}

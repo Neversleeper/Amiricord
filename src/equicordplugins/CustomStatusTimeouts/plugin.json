@@ -1,0 +1,22 @@
+{
+    "schema": 1,
+    "id": "CustomStatusTimeouts",
+    "name": "Custom Status Timeouts",
+    "version": "1.0.0",
+    "description": "Adds your own \"for N minutes / hours / days\" choices to the status timer menu.",
+    "origin": "equicord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        { "name": "Kiri", "role": "original author" },
+        { "name": "thororen", "role": "original author" },
+        { "name": "Neversleeper", "github": "https://github.com/Neversleeper", "role": "Amiricord port" }
+    ],
+    "credits": [
+        { "name": "Vendicated and contributors (Vencord), plugin CustomStatusTimeouts by Kiri, thororen", "license": "GPL-3.0-or-later", "url": "https://github.com/Equicord/Equicord" }
+    ],
+    "tags": ["utility", "ui"],
+    "enabledByDefault": false,
+    "startAt": "init",
+    "entry": { "renderer": "index.ts" },
+    "permissions": {}
+}

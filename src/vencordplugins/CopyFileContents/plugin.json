@@ -1,0 +1,26 @@
+{
+    "schema": 1,
+    "id": "CopyFileContents",
+    "name": "Copy File Contents",
+    "version": "1.0.0",
+    "description": "Adds a button to the preview of a text file attachment that copies what is in the file.",
+    "origin": "vencord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        { "name": "Obsidian", "role": "original author" },
+        { "name": "Nuckyz", "role": "original author" },
+        { "name": "Neversleeper", "github": "https://github.com/Neversleeper", "role": "Amiricord port" }
+    ],
+    "credits": [
+        { "name": "Vendicated and contributors (Vencord), plugin CopyFileContents by Obsidian, Nuckyz", "license": "GPL-3.0-or-later", "url": "https://github.com/Vendicated/Vencord" }
+    ],
+    "tags": ["chat", "utility"],
+    "enabledByDefault": false,
+    "startAt": "domReady",
+    "entry": { "renderer": "index.ts" },
+    "permissions": {
+        "system": {
+            "clipboard": true
+        }
+    }
+}

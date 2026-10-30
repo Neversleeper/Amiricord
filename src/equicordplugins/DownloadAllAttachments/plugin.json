@@ -1,0 +1,34 @@
+{
+    "schema": 1,
+    "id": "DownloadAllAttachments",
+    "name": "Download All Attachments",
+    "version": "1.0.0",
+    "description": "Adds a button to the bar over a message that downloads all its attachments at once.",
+    "origin": "equicord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        { "name": "dhopcs", "role": "original author" },
+        { "name": "Neversleeper", "github": "https://github.com/Neversleeper", "role": "Amiricord port" }
+    ],
+    "credits": [
+        { "name": "Vendicated and contributors (Vencord), plugin DownloadAllAttachments by dhopcs", "license": "GPL-3.0-or-later", "url": "https://github.com/Equicord/Equicord" }
+    ],
+    "tags": ["utility", "chat"],
+    "enabledByDefault": false,
+    "startAt": "domReady",
+    "entry": { "renderer": "index.ts" },
+    "permissions": {
+        "network": [
+            {
+                "host": "cdn.discordapp.com",
+                "from": "renderer",
+                "why": "download the attachments of a message"
+            },
+            {
+                "host": "media.discordapp.net",
+                "from": "renderer",
+                "why": "download the attachments of a message"
+            }
+        ]
+    }
+}

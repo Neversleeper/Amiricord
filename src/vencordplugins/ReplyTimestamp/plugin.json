@@ -1,0 +1,21 @@
+{
+    "schema": 1,
+    "id": "ReplyTimestamp",
+    "name": "Reply Timestamp",
+    "version": "1.0.0",
+    "description": "Shows the time of the original message in the small preview that appears above a reply.",
+    "origin": "vencord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        { "name": "Kyuuhachi", "role": "original author" },
+        { "name": "Neversleeper", "github": "https://github.com/Neversleeper", "role": "Amiricord port" }
+    ],
+    "credits": [
+        { "name": "Vendicated and contributors (Vencord), plugin ReplyTimestamp by Kyuuhachi", "license": "GPL-3.0-or-later", "url": "https://github.com/Vendicated/Vencord" }
+    ],
+    "tags": ["chat", "ui"],
+    "enabledByDefault": false,
+    "startAt": "domReady",
+    "entry": { "renderer": "index.ts" },
+    "permissions": {}
+}

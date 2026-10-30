@@ -1,0 +1,26 @@
+{
+    "schema": 1,
+    "id": "ReverseImageSearch",
+    "name": "Reverse Image Search",
+    "version": "1.0.0",
+    "description": "Adds \"Search Image\" entries (Google, Yandex, SauceNAO, IQDB, Bing, TinEye, ImgOps) to the right-click menu of an image.",
+    "origin": "vencord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        { "name": "Ven", "role": "original author" },
+        { "name": "Nuckyz", "role": "original author" },
+        { "name": "Neversleeper", "github": "https://github.com/Neversleeper", "role": "Amiricord port" }
+    ],
+    "credits": [
+        { "name": "Vendicated and contributors (Vencord), plugin ReverseImageSearch by Ven, Nuckyz", "license": "GPL-3.0-or-later", "url": "https://github.com/Vendicated/Vencord" }
+    ],
+    "tags": ["media", "utility"],
+    "enabledByDefault": false,
+    "startAt": "init",
+    "entry": { "renderer": "index.ts" },
+    "permissions": {
+        "system": {
+            "openExternal": true
+        }
+    }
+}

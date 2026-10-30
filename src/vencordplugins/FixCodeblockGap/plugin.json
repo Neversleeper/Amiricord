@@ -1,0 +1,21 @@
+{
+    "schema": 1,
+    "id": "FixCodeblockGap",
+    "name": "Fix Codeblock Gap",
+    "version": "1.0.0",
+    "description": "Removes the gap between a code block and the text below it.",
+    "origin": "vencord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        { "name": "Grzesiek11", "role": "original author" },
+        { "name": "Neversleeper", "github": "https://github.com/Neversleeper", "role": "Amiricord port" }
+    ],
+    "credits": [
+        { "name": "Vendicated and contributors (Vencord), plugin FixCodeblockGap by Grzesiek11", "license": "GPL-3.0-or-later", "url": "https://github.com/Vendicated/Vencord" }
+    ],
+    "tags": ["ui", "chat"],
+    "enabledByDefault": false,
+    "startAt": "init",
+    "entry": { "renderer": "index.ts" },
+    "permissions": {}
+}

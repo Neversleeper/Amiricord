@@ -1,0 +1,26 @@
+{
+    "schema": 1,
+    "id": "MessageLogger",
+    "name": "Message Logger",
+    "version": "1.0.0",
+    "description": "Keeps, in memory, the messages that people delete or edit while you watch, and lists them in a window opened with /deletedlog.",
+    "origin": "vencord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        { "name": "rushii", "role": "original author" },
+        { "name": "Aria", "role": "original author" },
+        { "name": "Neversleeper", "github": "https://github.com/Neversleeper", "role": "Amiricord port" }
+    ],
+    "credits": [
+        { "name": "Vendicated and contributors (Vencord), plugin MessageLogger by rushii, Aria", "license": "GPL-3.0-or-later", "url": "https://github.com/Vendicated/Vencord" }
+    ],
+    "tags": ["privacy", "utility"],
+    "enabledByDefault": false,
+    "startAt": "domReady",
+    "entry": { "renderer": "index.ts" },
+    "permissions": {
+        "messages": {
+            "read": "visible"
+        }
+    }
+}

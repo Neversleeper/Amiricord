@@ -1,0 +1,21 @@
+{
+    "schema": 1,
+    "id": "SilenceUsers",
+    "name": "Silence Users",
+    "version": "1.0.0",
+    "description": "Silences the pings and badge counts of @mentions from the people you list. Their regular messages and DMs stay as they are.",
+    "origin": "equicord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        { "name": "dka", "role": "original author" },
+        { "name": "Neversleeper", "github": "https://github.com/Neversleeper", "role": "Amiricord port" }
+    ],
+    "credits": [
+        { "name": "Vendicated and contributors (Vencord), plugin SilenceUsers by dka", "license": "GPL-3.0-or-later", "url": "https://github.com/Equicord/Equicord" }
+    ],
+    "tags": ["chat", "utility"],
+    "enabledByDefault": false,
+    "startAt": "init",
+    "entry": { "renderer": "index.ts" },
+    "permissions": {}
+}

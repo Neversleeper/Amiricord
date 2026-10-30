@@ -1,0 +1,21 @@
+{
+    "schema": 1,
+    "id": "MessageStatistics",
+    "name": "Message Statistics",
+    "version": "1.0.0",
+    "description": "Counts the messages you send each day and shows today, this week, this month, the total and your streak in a Message Stats tab; set a daily goal to keep a streak.",
+    "origin": "testcord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        { "name": "MallCord", "role": "original author" },
+        { "name": "Neversleeper", "github": "https://github.com/Neversleeper", "role": "Amiricord port" }
+    ],
+    "credits": [
+        { "name": "Vendicated and contributors (Vencord), plugin MessageStatistics by MallCord", "license": "GPL-3.0-or-later", "url": "https://github.com/TestcordDev/TestCord" }
+    ],
+    "tags": ["chat", "utility"],
+    "enabledByDefault": false,
+    "startAt": "domReady",
+    "entry": { "renderer": "index.ts" },
+    "permissions": {}
+}

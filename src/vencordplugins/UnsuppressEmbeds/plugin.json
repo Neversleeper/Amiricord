@@ -1,0 +1,26 @@
+{
+    "schema": 1,
+    "id": "UnsuppressEmbeds",
+    "name": "Unsuppress Embeds",
+    "version": "1.0.0",
+    "description": "Adds \"Suppress Embeds\" and \"Unsuppress Embeds\" to the right-click menu of a message, to hide or bring back its link previews.",
+    "origin": "vencord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        { "name": "rad", "role": "original author" },
+        { "name": "HypedDomi", "role": "original author" },
+        { "name": "Neversleeper", "github": "https://github.com/Neversleeper", "role": "Amiricord port" }
+    ],
+    "credits": [
+        { "name": "Vendicated and contributors (Vencord), plugin UnsuppressEmbeds by rad, HypedDomi", "license": "GPL-3.0-or-later", "url": "https://github.com/Vendicated/Vencord" }
+    ],
+    "tags": ["chat", "utility"],
+    "enabledByDefault": false,
+    "startAt": "init",
+    "entry": { "renderer": "index.ts" },
+    "permissions": {
+        "account": {
+            "write": ["edit-message-embeds"]
+        }
+    }
+}

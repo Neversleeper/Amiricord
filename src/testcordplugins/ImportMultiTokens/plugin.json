@@ -1,0 +1,21 @@
+{
+    "schema": 1,
+    "id": "ImportMultiTokens",
+    "name": "Import Multiple Tokens",
+    "version": "1.0.0",
+    "description": "Opens a window where you paste a block of your own account tokens (one per line, comma-separated, or three lines each) and choose which one to log in with.",
+    "origin": "testcord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        { "name": "x2b", "role": "original author" },
+        { "name": "Neversleeper", "github": "https://github.com/Neversleeper", "role": "Amiricord port" }
+    ],
+    "credits": [
+        { "name": "Vendicated and contributors (Vencord), plugin ImportMultiTokens by x2b", "license": "GPL-3.0-or-later", "url": "https://github.com/TestcordDev/TestCord" }
+    ],
+    "tags": ["privacy", "utility"],
+    "enabledByDefault": false,
+    "startAt": "domReady",
+    "entry": { "renderer": "index.ts" },
+    "permissions": {}
+}

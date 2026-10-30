@@ -1,0 +1,22 @@
+{
+    "schema": 1,
+    "id": "GoogleThat",
+    "name": "Google That",
+    "version": "1.0.0",
+    "description": "Adds /googlethat, which sends a link to a search of what you write, on the search site you choose.",
+    "origin": "equicord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        { "name": "Samwich", "role": "original author" },
+        { "name": "KrystalSkull", "role": "original author" },
+        { "name": "Neversleeper", "github": "https://github.com/Neversleeper", "role": "Amiricord port" }
+    ],
+    "credits": [
+        { "name": "Vendicated and contributors (Vencord), plugin GoogleThat by Samwich, KrystalSkull", "license": "GPL-3.0-or-later", "url": "https://github.com/Equicord/Equicord" }
+    ],
+    "tags": ["chat", "utility"],
+    "enabledByDefault": false,
+    "startAt": "init",
+    "entry": { "renderer": "index.ts" },
+    "permissions": {}
+}

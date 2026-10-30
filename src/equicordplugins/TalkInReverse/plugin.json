@@ -1,0 +1,21 @@
+{
+    "schema": 1,
+    "id": "TalkInReverse",
+    "name": "Talk In Reverse",
+    "version": "1.0.0",
+    "description": "A button next to the message box that, when it is on (green), writes every message you send backwards.",
+    "origin": "equicord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        { "name": "Tolgchu", "role": "original author" },
+        { "name": "Neversleeper", "github": "https://github.com/Neversleeper", "role": "Amiricord port" }
+    ],
+    "credits": [
+        { "name": "Vendicated and contributors (Vencord), Equicord contributors, plugin TalkInReverse by Tolgchu", "license": "GPL-3.0-or-later", "url": "https://github.com/Equicord/Equicord" }
+    ],
+    "tags": ["chat"],
+    "enabledByDefault": false,
+    "startAt": "webpackReady",
+    "entry": { "renderer": "index.ts" },
+    "permissions": {}
+}

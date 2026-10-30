@@ -1,0 +1,26 @@
+{
+    "schema": 1,
+    "id": "RepeatMessages",
+    "name": "Repeat Messages",
+    "version": "1.0.0",
+    "description": "Adds a button to the bar over a message that sends the same message again; with Shift held it replies to the original.",
+    "origin": "equicord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        { "name": "Tolgchu", "role": "original author" },
+        { "name": "thororen", "role": "original author" },
+        { "name": "Neversleeper", "github": "https://github.com/Neversleeper", "role": "Amiricord port" }
+    ],
+    "credits": [
+        { "name": "Vendicated and contributors (Vencord), plugin RepeatMessages by Tolgchu, thororen", "license": "GPL-3.0-or-later", "url": "https://github.com/Equicord/Equicord" }
+    ],
+    "tags": ["chat"],
+    "enabledByDefault": false,
+    "startAt": "domReady",
+    "entry": { "renderer": "index.ts" },
+    "permissions": {
+        "messages": {
+            "send": true
+        }
+    }
+}

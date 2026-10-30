@@ -1,0 +1,21 @@
+{
+    "schema": 1,
+    "id": "AntiMoveDeco",
+    "name": "Anti Move Deco",
+    "version": "1.0.0",
+    "description": "A button in the user panel keeps you in your voice channel: if someone moves you or disconnects you, you join it again.",
+    "origin": "testcord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        { "name": "Nightcord", "role": "original author" },
+        { "name": "Neversleeper", "github": "https://github.com/Neversleeper", "role": "Amiricord port" }
+    ],
+    "credits": [
+        { "name": "Vendicated and contributors (Vencord), plugin AntiMoveDeco by Nightcord", "license": "GPL-3.0-or-later", "url": "https://github.com/TestcordDev/TestCord" }
+    ],
+    "tags": ["voice"],
+    "enabledByDefault": false,
+    "startAt": "webpackReady",
+    "entry": { "renderer": "index.ts" },
+    "permissions": {}
+}

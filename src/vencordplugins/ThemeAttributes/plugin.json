@@ -1,0 +1,22 @@
+{
+    "schema": 1,
+    "id": "ThemeAttributes",
+    "name": "Theme Attributes",
+    "version": "1.0.0",
+    "description": "Adds data attributes to tabs, messages and avatars so themes can target them, and a size-by-size avatar picture variable.",
+    "origin": "vencord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        { "name": "Ven", "role": "original author" },
+        { "name": "Board", "role": "original author" },
+        { "name": "Neversleeper", "github": "https://github.com/Neversleeper", "role": "Amiricord port" }
+    ],
+    "credits": [
+        { "name": "Vendicated and contributors (Vencord), plugin ThemeAttributes by Ven, Board", "license": "GPL-3.0-or-later", "url": "https://github.com/Vendicated/Vencord" }
+    ],
+    "tags": ["ui", "developer"],
+    "enabledByDefault": false,
+    "startAt": "init",
+    "entry": { "renderer": "index.ts" },
+    "permissions": {}
+}

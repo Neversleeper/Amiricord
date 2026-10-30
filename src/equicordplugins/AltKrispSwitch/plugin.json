@@ -1,0 +1,21 @@
+{
+    "schema": 1,
+    "id": "AltKrispSwitch",
+    "name": "Alt Krisp Switch",
+    "version": "1.0.0",
+    "description": "The noise suppression popup switches between None and Krisp, instead of between Krisp and Standard.",
+    "origin": "equicord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        { "name": "newwares", "role": "original author" },
+        { "name": "Neversleeper", "github": "https://github.com/Neversleeper", "role": "Amiricord port" }
+    ],
+    "credits": [
+        { "name": "Vendicated and contributors (Vencord), plugin AltKrispSwitch by newwares", "license": "GPL-3.0-or-later", "url": "https://github.com/Equicord/Equicord" }
+    ],
+    "tags": ["voice", "utility"],
+    "enabledByDefault": false,
+    "startAt": "init",
+    "entry": { "renderer": "index.ts" },
+    "permissions": {}
+}

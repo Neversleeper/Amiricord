@@ -1,0 +1,25 @@
+{
+    "schema": 1,
+    "id": "QuickDelete",
+    "name": "Quick Delete",
+    "version": "1.0.0",
+    "description": "Deletes your last message in the channel you are in with a keyboard shortcut.",
+    "origin": "testcord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        { "name": "Sharp", "role": "original author" },
+        { "name": "Neversleeper", "github": "https://github.com/Neversleeper", "role": "Amiricord port" }
+    ],
+    "credits": [
+        { "name": "Vendicated and contributors (Vencord), plugin QuickDelete by Sharp", "license": "GPL-3.0-or-later", "url": "https://github.com/TestcordDev/TestCord" }
+    ],
+    "tags": ["chat", "utility"],
+    "enabledByDefault": false,
+    "startAt": "init",
+    "entry": { "renderer": "index.ts" },
+    "permissions": {
+        "account": {
+            "write": ["delete-own-messages"]
+        }
+    }
+}

@@ -1,0 +1,26 @@
+{
+    "schema": 1,
+    "id": "ChannelGallery",
+    "name": "Channel Gallery",
+    "version": "1.0.0",
+    "description": "Adds a /gallery command that shows the pictures of the channel you are in (attachments and, if you want, embed pictures and GIFs) as a grid of thumbnails; pressing one opens it.",
+    "origin": "testcord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        { "name": "x2b", "role": "original author" },
+        { "name": "Equicord contributors", "role": "original author" },
+        { "name": "Neversleeper", "github": "https://github.com/Neversleeper", "role": "Amiricord port" }
+    ],
+    "credits": [
+        { "name": "Vendicated and contributors (Vencord), plugin ChannelGallery by x2b, Equicord contributors", "license": "GPL-3.0-or-later", "url": "https://github.com/TestcordDev/TestCord" }
+    ],
+    "tags": ["media", "chat"],
+    "enabledByDefault": false,
+    "startAt": "domReady",
+    "entry": { "renderer": "index.ts" },
+    "permissions": {
+        "system": {
+            "openExternal": true
+        }
+    }
+}

@@ -1,0 +1,30 @@
+{
+    "schema": 1,
+    "id": "ClearURLs",
+    "name": "Clear URLs",
+    "version": "1.0.0",
+    "description": "Removes tracking parts from the links in the messages you send, using the public ClearURLs list of rules.",
+    "origin": "vencord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        { "name": "adryd", "role": "original author" },
+        { "name": "thororen", "role": "original author" },
+        { "name": "Neversleeper", "github": "https://github.com/Neversleeper", "role": "Amiricord port" }
+    ],
+    "credits": [
+        { "name": "Vendicated and contributors (Vencord), plugin ClearURLs by adryd, thororen", "license": "GPL-3.0-or-later", "url": "https://github.com/Vendicated/Vencord" }
+    ],
+    "tags": ["privacy", "utility"],
+    "enabledByDefault": false,
+    "startAt": "init",
+    "entry": { "renderer": "index.ts" },
+    "permissions": {
+        "network": [
+            {
+                "host": "raw.githubusercontent.com",
+                "from": "renderer",
+                "why": "get the public ClearURLs list of tracking rules"
+            }
+        ]
+    }
+}

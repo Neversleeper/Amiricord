@@ -1,0 +1,21 @@
+{
+    "schema": 1,
+    "id": "ExportDM",
+    "name": "Export DM",
+    "version": "1.0.0",
+    "description": "Adds a /exportdm command that saves the latest messages of the conversation you are in as a text, JSON, CSV or Markdown file.",
+    "origin": "testcord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        { "name": "x2b", "role": "original author" },
+        { "name": "Neversleeper", "github": "https://github.com/Neversleeper", "role": "Amiricord port" }
+    ],
+    "credits": [
+        { "name": "Vendicated and contributors (Vencord), plugin ExportDM by x2b", "license": "GPL-3.0-or-later", "url": "https://github.com/TestcordDev/TestCord" }
+    ],
+    "tags": ["chat", "utility"],
+    "enabledByDefault": false,
+    "startAt": "domReady",
+    "entry": { "renderer": "index.ts" },
+    "permissions": {}
+}

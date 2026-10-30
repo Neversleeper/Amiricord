@@ -1,0 +1,26 @@
+{
+    "schema": 1,
+    "id": "CopyEmojiMarkdown",
+    "name": "Copy Emoji Markdown",
+    "version": "1.0.0",
+    "description": "Adds \"Copy Emoji Markdown\" to the right-click menu of an emoji in the emoji picker, to copy it as text like <:name:id>.",
+    "origin": "vencord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        { "name": "HappyEnderman", "role": "original author" },
+        { "name": "Vishnya", "role": "original author" },
+        { "name": "Neversleeper", "github": "https://github.com/Neversleeper", "role": "Amiricord port" }
+    ],
+    "credits": [
+        { "name": "Vendicated and contributors (Vencord), plugin CopyEmojiMarkdown by HappyEnderman, Vishnya", "license": "GPL-3.0-or-later", "url": "https://github.com/Vendicated/Vencord" }
+    ],
+    "tags": ["chat", "utility"],
+    "enabledByDefault": false,
+    "startAt": "init",
+    "entry": { "renderer": "index.ts" },
+    "permissions": {
+        "system": {
+            "clipboard": true
+        }
+    }
+}

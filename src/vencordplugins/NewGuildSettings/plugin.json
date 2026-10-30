@@ -1,0 +1,27 @@
+{
+    "schema": 1,
+    "id": "NewGuildSettings",
+    "name": "New Guild Settings",
+    "version": "1.0.0",
+    "description": "When you join a new server, your notification settings for it are set to the ones you chose here (muted, no @everyone or role pings, no highlights and so on). A right-click on a server icon applies them to a server you are already in.",
+    "origin": "vencord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        { "name": "Glitch", "role": "original author" },
+        { "name": "Nuckyz", "role": "original author" },
+        { "name": "carince", "role": "original author" },
+        { "name": "Neversleeper", "github": "https://github.com/Neversleeper", "role": "Amiricord port" }
+    ],
+    "credits": [
+        { "name": "Vendicated and contributors (Vencord), plugin NewGuildSettings by Glitch, Nuckyz, carince", "license": "GPL-3.0-or-later", "url": "https://github.com/Vendicated/Vencord" }
+    ],
+    "tags": ["utility"],
+    "enabledByDefault": false,
+    "startAt": "domReady",
+    "entry": { "renderer": "index.ts" },
+    "permissions": {
+        "account": {
+            "write": ["server-notification-settings"]
+        }
+    }
+}

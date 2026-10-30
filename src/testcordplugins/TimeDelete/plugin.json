@@ -1,0 +1,25 @@
+{
+    "schema": 1,
+    "id": "TimeDelete",
+    "name": "Time Delete",
+    "version": "1.0.0",
+    "description": "Deletes the messages you send after a delay you choose. A button next to the message box turns it on and off.",
+    "origin": "testcord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        { "name": "x2b", "role": "original author" },
+        { "name": "Neversleeper", "github": "https://github.com/Neversleeper", "role": "Amiricord port" }
+    ],
+    "credits": [
+        { "name": "Vendicated and contributors (Vencord), plugin TimeDelete by x2b", "license": "GPL-3.0-or-later", "url": "https://github.com/TestcordDev/TestCord" }
+    ],
+    "tags": ["chat", "privacy"],
+    "enabledByDefault": false,
+    "startAt": "domReady",
+    "entry": { "renderer": "index.ts" },
+    "permissions": {
+        "account": {
+            "write": ["delete-own-messages"]
+        }
+    }
+}

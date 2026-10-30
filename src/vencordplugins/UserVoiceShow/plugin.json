@@ -1,0 +1,23 @@
+{
+    "schema": 1,
+    "id": "UserVoiceShow",
+    "name": "User Voice Show",
+    "version": "1.0.0",
+    "description": "Shows next to the name of a message's author the voice channel they are in right now, when you can see it.",
+    "origin": "vencord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        { "name": "LordElias", "role": "original author" },
+        { "name": "Ven", "role": "original author" },
+        { "name": "Sqaaakoi", "role": "original author" },
+        { "name": "Neversleeper", "github": "https://github.com/Neversleeper", "role": "Amiricord port" }
+    ],
+    "credits": [
+        { "name": "Vendicated and contributors (Vencord), plugin UserVoiceShow by LordElias, Ven, Sqaaakoi", "license": "GPL-3.0-or-later", "url": "https://github.com/Vendicated/Vencord" }
+    ],
+    "tags": ["voice", "ui"],
+    "enabledByDefault": false,
+    "startAt": "domReady",
+    "entry": { "renderer": "index.ts" },
+    "permissions": {}
+}

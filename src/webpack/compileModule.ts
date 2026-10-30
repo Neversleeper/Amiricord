@@ -9,6 +9,7 @@
 // Design: docs/design-02-core.md section 5.
 
 import { PROJECT_NAME } from "../shared/project";
+import { expandIntl } from "./intl";
 
 export interface PatchReplacement {
     /** Text or regular expression to look for in the module. `\i` in a regular expression matches a minified identifier. */
@@ -131,7 +132,7 @@ const preparedRegExps = new WeakMap<RegExp, RegExp>();
 function prepare(regex: RegExp): RegExp {
     let prepared = preparedRegExps.get(regex);
     if (!prepared) {
-        prepared = new RegExp(expandIdentifiers(regex.source), regex.flags);
+        prepared = new RegExp(expandIdentifiers(expandIntl(regex.source, true)), regex.flags);
         preparedRegExps.set(regex, prepared);
     }
     prepared.lastIndex = 0;
@@ -166,12 +167,12 @@ const now = () => (typeof performance !== "undefined" ? performance.now() : Date
 const displayOf = (value: string | RegExp) => String(value);
 
 function finds(source: string, find: string | RegExp): boolean {
-    if (typeof find === "string") return source.includes(find);
+    if (typeof find === "string") return source.includes(expandIntl(find, false));
     return prepare(find).test(source);
 }
 
 function applyReplacement(code: string, replacement: PatchReplacement, self: string): string {
-    const match = typeof replacement.match === "string" ? replacement.match : prepare(replacement.match);
+    const match = typeof replacement.match === "string" ? expandIntl(replacement.match, false) : prepare(replacement.match);
     const { replace } = replacement;
     if (typeof replace === "string") {
         return code.replace(match, replace.split("$self").join(self.replaceAll("$", "$$$$")));

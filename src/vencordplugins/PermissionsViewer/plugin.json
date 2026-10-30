@@ -1,0 +1,22 @@
+{
+    "schema": 1,
+    "id": "PermissionsViewer",
+    "name": "Permissions Viewer",
+    "version": "1.0.0",
+    "description": "Right-click a person in a server and choose View Permissions to see what they are allowed to do there and which role gives each permission.",
+    "origin": "vencord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        { "name": "Nuckyz", "role": "original author" },
+        { "name": "Ven", "role": "original author" },
+        { "name": "Neversleeper", "github": "https://github.com/Neversleeper", "role": "Amiricord port" }
+    ],
+    "credits": [
+        { "name": "Vendicated and contributors (Vencord), plugin PermissionsViewer by Nuckyz, Ven", "license": "GPL-3.0-or-later", "url": "https://github.com/Vendicated/Vencord" }
+    ],
+    "tags": ["utility"],
+    "enabledByDefault": false,
+    "startAt": "domReady",
+    "entry": { "renderer": "index.ts" },
+    "permissions": {}
+}

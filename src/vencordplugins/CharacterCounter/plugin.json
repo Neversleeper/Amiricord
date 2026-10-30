@@ -1,0 +1,22 @@
+{
+    "schema": 1,
+    "id": "CharacterCounter",
+    "name": "Character Counter",
+    "version": "1.0.0",
+    "description": "Shows how many characters are in the message you are writing, with colours as you get close to Discord's limit (2000, or 4000 with Nitro).",
+    "origin": "vencord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        { "name": "thororen", "role": "original author" },
+        { "name": "creations", "role": "original author" },
+        { "name": "Neversleeper", "github": "https://github.com/Neversleeper", "role": "Amiricord port" }
+    ],
+    "credits": [
+        { "name": "Vendicated and contributors (Vencord), plugin CharacterCounter by thororen, creations", "license": "GPL-3.0-or-later", "url": "https://github.com/Vendicated/Vencord" }
+    ],
+    "tags": ["utility", "chat"],
+    "enabledByDefault": false,
+    "startAt": "domReady",
+    "entry": { "renderer": "index.ts" },
+    "permissions": {}
+}

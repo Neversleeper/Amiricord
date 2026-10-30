@@ -1,0 +1,22 @@
+{
+    "schema": 1,
+    "id": "SuperReactionTweaks",
+    "name": "Super Reaction Tweaks",
+    "version": "1.0.0",
+    "description": "Sets how many super reactions play at once, and makes the reaction picker open on super reactions.",
+    "origin": "vencord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        { "name": "FieryFlames", "role": "original author" },
+        { "name": "ant0n", "role": "original author" },
+        { "name": "Neversleeper", "github": "https://github.com/Neversleeper", "role": "Amiricord port" }
+    ],
+    "credits": [
+        { "name": "Vendicated and contributors (Vencord), plugin SuperReactionTweaks by FieryFlames, ant0n", "license": "GPL-3.0-or-later", "url": "https://github.com/Vendicated/Vencord" }
+    ],
+    "tags": ["chat", "ui"],
+    "enabledByDefault": false,
+    "startAt": "init",
+    "entry": { "renderer": "index.ts" },
+    "permissions": {}
+}

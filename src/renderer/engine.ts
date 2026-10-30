@@ -9,6 +9,7 @@
 // It never touches Electron or the DOM directly (they come in through options), so it is tested with fakes.
 // Design: docs/design-02-core.md sections 4 to 8.
 
+import { buildChatBar, ChatBarHub, type ChatBarPage, type PluginChatBar } from "../api/chatBar";
 import { buildCommands, commandHub, type PluginCommands } from "../api/commands";
 import type { ReactLike } from "../api/common";
 import { buildCommon, PluginCommon } from "../api/commonStores";
@@ -17,12 +18,17 @@ import { buildContextMenus, ContextMenuHub, type MenuPage, type PluginContextMen
 import { COMPONENT_NAMES, declareCommon, PluginComponents } from "../api/discordComponents";
 import { FALLBACK_CSS } from "../api/fallbackStyles";
 import { FluxDispatcherLike, FluxHandlers, subscribeFlux } from "../api/flux";
+import { buildHeaderBar, HeaderBarHub, type HeaderBarPage, type PluginHeaderBar } from "../api/headerBar";
 import { setReactSource } from "../api/jsxRuntime";
 import { LifecycleEvent, LifecycleOptions, PluginContext, PluginLifecycle, PluginRuntime } from "../api/lifecycle";
 import { locateMenuParts, type MenuParts } from "../api/menuParts";
+import { buildMessageButtons, MessageButtonsHub, type MessageButtonsPage, type PluginMessageButtons } from "../api/messageButtons";
+import { buildMessageDecor, MessageDecorHub, type MessageDecorPage, type PluginMessageDecor } from "../api/messageDecor";
+import { buildMessageEvents, messageEventHub, type PluginMessageEvents } from "../api/messageEvents";
 import { buildModals, PluginModals } from "../api/modals";
 import { buildNative, PluginNativeCaller } from "../api/native";
 import { type NativeMenuHub, nativeMenus } from "../api/nativeMenus";
+import { navigate as goToChannel, type NavigatePage } from "../api/navigate";
 import { createNotificationLog, logSizeOf, type NotificationLog } from "../api/notificationLog";
 import { createNotificationLayer, type PluginNotifications } from "../api/notifications";
 import { buildPluginCards, PluginCard, PluginSource } from "../api/pluginCards";
@@ -168,10 +174,22 @@ export interface EnginePluginContext extends PluginContext {
     settingsTabs: PluginSettingsTabs;
     /** Slash commands. They go when the plugin stops. See `src/api/commands.ts`. */
     commands: PluginCommands;
+    /** Buttons in the row at the right of the message box. They go when the plugin stops. See `src/api/chatBar.ts`. */
+    chatBar: PluginChatBar;
+    /** Buttons in the small bar over a message when the pointer is on it. They go when the plugin stops. See `src/api/messageButtons.ts`. */
+    messageButtons: PluginMessageButtons;
+    /** Buttons in the row of icons in the header of a channel. They go when the plugin stops. See `src/api/headerBar.ts`. */
+    headerBar: PluginHeaderBar;
+    /** A short text next to the name of the person who wrote a message. They go when the plugin stops. See `src/api/messageDecor.ts`. */
+    messageDecor: PluginMessageDecor;
+    /** Change the text of a message just before it is sent. They go when the plugin stops. See `src/api/messageEvents.ts`. */
+    messageEvents: PluginMessageEvents;
     /** A short message at the bottom of the page. See `src/api/toasts.ts`. */
     toasts: PluginToasts;
     /** Opens Discord's dialogs and closes what this plugin left open when it stops. See `src/api/modals.ts`. */
     modals: PluginModals;
+    /** Go to a channel: `ctx.navigate("/channels/<server>/<channel>")`. False for any other address. See `src/api/navigate.ts`. */
+    navigate(path: string): boolean;
     /** Small cards inside Discord's window, taken away when the plugin stops. No permission needed. See `src/api/notifications.ts`. */
     notifications: PluginNotifications;
     /** Discord's own sounds by name: `list()` and `play(name, volume)`; stopped when the plugin stops. No permission needed. See `src/api/sounds.ts`. */
@@ -627,6 +645,18 @@ export function startEngine(options: EngineOptions): Engine {
     const menuHub = havePage
         ? new ContextMenuHub(globalThis as unknown as MenuPage, css => { addCommonStyle(css, "context-menus"); }, (plugin, source, error) => { send({ type: "runtime-error", plugin, source, error: describe(error) }); })
         : undefined;
+    const chatBarHub = havePage && (globalThis as unknown as Partial<ChatBarPage>).setTimeout !== undefined
+        ? new ChatBarHub(globalThis as unknown as ChatBarPage, (css, name) => { addCommonStyle(css, name); }, (plugin, source, error) => { send({ type: "runtime-error", plugin, source, error: describe(error) }); })
+        : undefined;
+    const messageButtonsHub = havePage && (globalThis as unknown as Partial<MessageButtonsPage>).setTimeout !== undefined
+        ? new MessageButtonsHub(globalThis as unknown as MessageButtonsPage, (css, name) => { addCommonStyle(css, name); }, (plugin, source, error) => { send({ type: "runtime-error", plugin, source, error: describe(error) }); })
+        : undefined;
+    const messageDecorHub = havePage && (globalThis as unknown as Partial<MessageDecorPage>).setTimeout !== undefined
+        ? new MessageDecorHub(globalThis as unknown as MessageDecorPage, (css, name) => { addCommonStyle(css, name); }, (plugin, source, error) => { send({ type: "runtime-error", plugin, source, error: describe(error) }); })
+        : undefined;
+    const headerBarHub = havePage && (globalThis as unknown as Partial<HeaderBarPage>).setTimeout !== undefined
+        ? new HeaderBarHub(globalThis as unknown as HeaderBarPage, (css, name) => { addCommonStyle(css, name); }, (plugin, source, error) => { send({ type: "runtime-error", plugin, source, error: describe(error) }); })
+        : undefined;
     const makeRuntime = (id: string): PluginRuntime => {
         const info = byId.get(id)!;
         const context = (ctx: PluginContext): EnginePluginContext => {
@@ -641,6 +671,12 @@ export function startEngine(options: EngineOptions): Engine {
                 userArea: buildUserArea(userArea, id, ctx.onDispose),
                 settingsTabs: buildSettingsTabs(settingsTabs, id, ctx.onDispose, reportError),
                 commands: buildCommands(commandHub, id, ctx.onDispose, reportError),
+                messageEvents: buildMessageEvents(messageEventHub, id, ctx.onDispose, reportError),
+                chatBar: chatBarHub ? buildChatBar(chatBarHub, id, ctx.onDispose) : { add: () => false, refresh: () => undefined },
+                navigate: path => havePage && goToChannel(globalThis as unknown as NavigatePage, path),
+                headerBar: headerBarHub ? buildHeaderBar(headerBarHub, id, ctx.onDispose) : { add: () => false, refresh: () => undefined },
+                messageDecor: messageDecorHub ? buildMessageDecor(messageDecorHub, id, ctx.onDispose) : { add: () => false, refresh: () => undefined },
+                messageButtons: messageButtonsHub ? buildMessageButtons(messageButtonsHub, id, ctx.onDispose) : { add: () => false, refresh: () => undefined },
                 toasts: havePage ? buildToasts(globalThis as unknown as ToastPage, css => { addCommonStyle(css, "toasts"); }, ctx.onDispose) : { show: () => undefined },
                 modals: buildModals(pluginFinders, ctx.onDispose, reportError),
                 notifications: notificationLayer.forPlugin(id, ctx.onDispose, reportError),

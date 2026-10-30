@@ -1,0 +1,21 @@
+{
+    "schema": 1,
+    "id": "QuickMention",
+    "name": "Quick Mention",
+    "version": "1.0.0",
+    "description": "Adds a button to the bar over a message that writes a mention of its author in your message box.",
+    "origin": "vencord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        { "name": "kemo", "role": "original author" },
+        { "name": "Neversleeper", "github": "https://github.com/Neversleeper", "role": "Amiricord port" }
+    ],
+    "credits": [
+        { "name": "Vendicated and contributors (Vencord), plugin QuickMention by kemo", "license": "GPL-3.0-or-later", "url": "https://github.com/Vendicated/Vencord" }
+    ],
+    "tags": ["chat"],
+    "enabledByDefault": false,
+    "startAt": "domReady",
+    "entry": { "renderer": "index.ts" },
+    "permissions": {}
+}

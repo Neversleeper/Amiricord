@@ -1,0 +1,21 @@
+{
+    "schema": 1,
+    "id": "NoSystemBadge",
+    "name": "No System Badge",
+    "version": "1.0.0",
+    "description": "Turns off the number of unread messages on the taskbar icon and in the system tray.",
+    "origin": "vencord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        { "name": "rushii", "role": "original author" },
+        { "name": "Neversleeper", "github": "https://github.com/Neversleeper", "role": "Amiricord port" }
+    ],
+    "credits": [
+        { "name": "Vendicated and contributors (Vencord), plugin NoSystemBadge by rushii", "license": "GPL-3.0-or-later", "url": "https://github.com/Vendicated/Vencord" }
+    ],
+    "tags": ["ui", "utility"],
+    "enabledByDefault": false,
+    "startAt": "init",
+    "entry": { "renderer": "index.ts" },
+    "permissions": {}
+}
