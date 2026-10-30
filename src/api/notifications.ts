@@ -72,6 +72,10 @@ export interface NotificationLayerDeps {
     clearTimeout(timer: unknown): void;
     /** Put the cards' CSS into the page (called once, the first time a card is shown). */
     addStyle(css: string): void;
+    /** Told about every notification a plugin asks for (a title or a body that is not empty), whether or not a card is drawn: the notification log keeps them. */
+    record?(plugin: string, title: string, body: string): void;
+    /** Whether cards are drawn at all. A notification is still recorded when this says no. Default: yes. */
+    enabled?(): boolean;
 }
 
 export const NOTIFICATION_CSS = `
@@ -145,6 +149,12 @@ export function createNotificationLayer(deps: NotificationLayerDeps) {
                     const title = textOf(input.title, TITLE_MAX);
                     const body = textOf(input.body, BODY_MAX);
                     if (title === "" && body === "") return none;
+                    try {
+                        deps.record?.(id, title, body);
+                    } catch (error) {
+                        reportError("notification log", error);
+                    }
+                    if (deps.enabled && !deps.enabled()) return none;
                     const page = deps.document;
                     const where = corner();
                     if (!page || !where) return none;

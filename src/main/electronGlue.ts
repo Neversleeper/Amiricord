@@ -20,6 +20,7 @@ import { PROJECT_VERSION, UPDATE_REPO } from "../shared/project";
 import { readTextFile, writeTextAtomic } from "./atomicFile";
 import { buildBlockLog, exportName, exportText } from "./blockLog";
 import { makeCensus } from "./census";
+import { makeConsoleErrorListener } from "./consoleErrors";
 import { applyDns, dnsOff, dnsText } from "./dns/apply";
 import { chooseDns } from "./dns/config";
 import { FetchLike, verifyProvider } from "./dns/verify";
@@ -34,6 +35,7 @@ import { nativeModules } from "./nativeModules";
 import { type NativeTable, nativeTableFromRegistry } from "./nativeTable";
 import { nativeWindowOf } from "./nativeWindow";
 import { openDataFolder } from "./openFolder";
+import { openOwn } from "./openOwn";
 import { makePause } from "./pause";
 import { buildPrivacyAnswer, makeProviderTester } from "./privacyAnswer";
 import { makePrivacyChanger, weakensTelemetry } from "./privacyChange";
@@ -42,9 +44,12 @@ import { RequestHub, WebRequestLike } from "./requestHub";
 import { answerSecretCall, declaredSecrets, SecretStore } from "./secretStore";
 import { makeTokenGuard } from "./tokenGuard";
 import { TokenHosts, tokenHostsFromRegistry } from "./tokenHosts";
+import { probeTopBar } from "./topBarProbe";
 import { trace } from "./trace";
 import { createUpdater } from "./updater";
 import { answerUpdateRequest, type FetchLike as UpdateFetch, makeFetchBytes, realFiles } from "./updatesGlue";
+import { anyCreationChoice, creationChoicesOf, hookBrowserWindow } from "./windowHook";
+import { anyWindowOption, applyWindowOptions, type WindowLike, windowOptionsOf } from "./windowOptions";
 
 export interface MainOptions {
     /** Absolute path of our preload script. */
@@ -80,6 +85,39 @@ export function startMain(options: MainOptions): MainController | null {
 
     const controller = new MainController({ dataDir });
     controller.start(options.build ?? null);
+
+    // The window options of the main tab (no minimum size, Ctrl+Q to close, the Windows background effect): read once now, applied to each window as Discord creates it. Nothing is
+    // done when none is on or when Discord is in safe mode, and a failure here is only written in the boot trace: it must never keep Discord from starting or from opening a window.
+    try {
+        const windowChoices = windowOptionsOf(key => controller.pluginValue("Settings", key));
+        if (anyWindowOption(windowChoices) && !controller.bootInfo().safeMode) {
+            const applyToWindow = (win: unknown) => { applyWindowOptions(win as WindowLike, windowChoices, text => { trace(dataDir, text); }); };
+            app.on("browser-window-created", (_event, win) => { applyToWindow(win); });
+            for (const win of BrowserWindow.getAllWindows()) applyToWindow(win);
+            trace(dataDir, `window options: on (minimum size ${windowChoices.removeMinimumSize ? "removed" : "kept"}, Ctrl+Q ${windowChoices.ctrlQ ? "on" : "off"}, background effect ${windowChoices.material})`);
+        }
+    } catch (error) {
+        trace(dataDir, `window options: FAILED ${error instanceof Error ? error.message : String(error)}`);
+    }
+
+    // The two options that Electron only reads when a window is created (Windows title bar, transparent window): the window constructor is swapped before Discord asks for it.
+    try {
+        const creation = creationChoicesOf(key => controller.pluginValue("Settings", key));
+        if (anyCreationChoice(creation) && !controller.bootInfo().safeMode) {
+            hookBrowserWindow({ resolve: id => require.resolve(id), cache: require.cache }, creation, text => { trace(dataDir, text); });
+            // Discord's crash screen keeps its error to itself, so while these options are on the red errors of its page are copied to the boot trace (src/main/consoleErrors.ts).
+            if (creation.nativeTitleBar || creation.transparent) app.on("browser-window-created", (_event, win) => {
+                try {
+                    win.webContents.on("console-message", makeConsoleErrorListener(text => { trace(dataDir, text); }) as never);
+                    if (creation.nativeTitleBar) probeTopBar(win.webContents, text => { trace(dataDir, text); });
+                } catch (error) {
+                    trace(dataDir, `window options: the page error diagnostic could not be added: ${error instanceof Error ? error.message : String(error)}`);
+                }
+            });
+        }
+    } catch (error) {
+        trace(dataDir, `window options: the creation options FAILED ${error instanceof Error ? error.message : String(error)}`);
+    }
 
     ipcMain.on(IPC.bootInfo, event => {
         event.returnValue = isTrustedSender(senderUrl(event)) ? controller.bootInfo() : null;
@@ -143,6 +181,17 @@ export function startMain(options: MainOptions): MainController | null {
     ipcMain.handle(IPC.privacyChange, (event, change: unknown) => (isTrustedSender(senderUrl(event)) ? privacyChange(change) : null));
     ipcMain.on(IPC.leaveSafeMode, event => {
         if (isTrustedSender(senderUrl(event))) controller.leaveSafeMode();
+    });
+    ipcMain.on(IPC.openOwn, (event, place: unknown) => {
+        // Only a fixed word: the file and the address are ours (`src/main/openOwn.ts`).
+        if (!isTrustedSender(senderUrl(event))) return;
+        void openOwn(place, {
+            folder: dataDir,
+            open: path => shell.openPath(path),
+            reveal: path => { shell.showItemInFolder(path); },
+            openExternal: url => shell.openExternal(url),
+            trace: text => { trace(dataDir, text); }
+        });
     });
     ipcMain.on(IPC.openDataFolder, event => {
         // The folder is ours (not sent by the page), so the page cannot make the explorer open anything else.

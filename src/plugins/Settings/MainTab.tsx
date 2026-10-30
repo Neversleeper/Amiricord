@@ -91,8 +91,25 @@ function Tile({ item }: { item: QuickActionItem; }) {
     return <button type="button" className="amiricord-action" onClick={item.run}><Icon />{item.title}</button>;
 }
 
-/** A switch that follows the look of Discord's: a pill with a round knob. It is drawn off, and a soon entry cannot be changed. */
+/** A switch that follows the look of Discord's: a pill with a round knob. A working one follows its feature and can be changed; a soon one is drawn off and cannot. */
 function SwitchRow({ item }: { item: SettingItem; }) {
+    const react = currentReact();
+    const live = item.live;
+    const [on, setOn] = react.useState(live ? live.get() : false);
+    // Heard from somewhere else (the editor window turns it on), so the page never shows an old answer.
+    react.useEffect(() => (live ? live.subscribe(() => setOn(live.get())) : undefined), [live]);
+    const toggle = () => {
+        if (!live) return;
+        const next = !on;
+        setOn(next);
+        live.set(next);
+    };
+    const key = (event: { key?: string; preventDefault?(): void; }) => {
+        if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault?.();
+            toggle();
+        }
+    };
     return (
         <div className={`amiricord-switch-row${item.soon ? " amiricord-soon" : ""}`}>
             <div className="amiricord-switch-text">
@@ -104,12 +121,20 @@ function SwitchRow({ item }: { item: SettingItem; }) {
                 <div className="amiricord-switch-desc">{item.description}</div>
                 {item.warning && <div className="amiricord-warning"><WarningIcon /><span>{item.warning}</span></div>}
             </div>
-            <div role="switch" aria-checked="false" aria-disabled={item.soon ? "true" : "false"} aria-label={item.title} className="amiricord-switch"><span className="amiricord-knob" /></div>
+            <div
+                role="switch" aria-checked={live && on ? "true" : "false"} aria-disabled={live ? "false" : "true"} aria-label={item.title}
+                tabIndex={live ? 0 : -1} className={`amiricord-switch${live ? " amiricord-switch-live" : ""}`} onClick={live ? toggle : undefined} onKeyDown={live ? key : undefined}
+            ><span className="amiricord-knob" /></div>
         </div>
     );
 }
 
 function ChoiceRow({ item }: { item: ChoiceItem; }) {
+    const react = currentReact();
+    const live = item.live;
+    const [picked, setPicked] = react.useState(live ? live.get() : 0);
+    // Heard from somewhere else, so the page never shows an old answer.
+    react.useEffect(() => (live ? live.subscribe(() => setPicked(live.get())) : undefined), [live]);
     return (
         <div className={`amiricord-choice${item.soon ? " amiricord-soon" : ""}`}>
             <div className="amiricord-switch-title">
@@ -118,7 +143,21 @@ function ChoiceRow({ item }: { item: ChoiceItem; }) {
                 {item.restart && <Tag>{RESTART_TEXT}</Tag>}
             </div>
             <div className="amiricord-switch-desc">{item.description}</div>
-            <div className="amiricord-select" role="combobox" aria-disabled={item.soon ? "true" : "false"} aria-expanded="false" aria-label={item.title}>{item.choices[0]}</div>
+            {live
+                ? (
+                    <select
+                        className="amiricord-plugins-select" aria-label={item.title} value={String(picked)}
+                        onChange={(event: { target: { value: string; }; }) => {
+                            const next = Number(event.target.value);
+                            if (!Number.isInteger(next) || next < 0 || next >= item.choices.length) return;
+                            setPicked(next);
+                            live.set(next);
+                        }}
+                    >
+                        {item.choices.map((label, index) => <option key={label} value={String(index)}>{label}</option>)}
+                    </select>
+                )
+                : <div className="amiricord-select" role="combobox" aria-disabled={item.soon ? "true" : "false"} aria-expanded="false" aria-label={item.title}>{item.choices[0]}</div>}
         </div>
     );
 }

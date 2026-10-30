@@ -110,6 +110,40 @@ describe("MoreAlts", () => {
         for (const bad of [0, 1, 4, -1, 101, 2.5]) assert.throws(() => { store.amtOfAcounts = bad; }, TypeError, String(bad));
     });
 
+    // The list of accounts in the profile panel (build 653945), cut down: Discord's menu with one row per account and "Manage Accounts" last.
+    const registeredList: RegisteredPatch = { ...plugin.patches![2], plugin: "MoreAlts" };
+    const listModule = `function(e,t,n){return(0,i.jsx)(eU,{navId:"switch-accounts-submenu","aria-label":"Switch accounts",onClose:t,children:D})}`;
+
+    it("gives the list of accounts in the profile panel a class of ours, and only that menu", () => {
+        const third = plugin.patches![2] as { find: string; lazy?: boolean; required?: boolean; };
+        assert.equal(third.find, "navId:\"switch-accounts-submenu\"");
+        assert.equal(third.lazy, true);
+        assert.equal(third.required, false);
+        const result = compileModule("1", listModule, [registeredList]);
+        assert.equal(result.outcomes[0].status, "applied");
+        assert.ok(result.code.includes("navId:\"switch-accounts-submenu\",className:\"amiricord-account-list\",\"aria-label\""));
+        assert.equal(result.code.split("amiricord-account-list").length - 1, 1);
+        const other = compileModule("1", listModule.replace("switch-accounts-submenu", "set-status-submenu"), [registeredList]);
+        assert.ok(!other.code.includes("amiricord-account-list"));
+    });
+
+    it("adds the style that makes that list scroll", () => {
+        const styles: Array<{ css: string; name?: string; }> = [];
+        plugin.start!({ addStyle: (css: string, name?: string) => { styles.push({ css, name }); return { update() {}, remove() {} }; } } as never);
+        assert.equal(styles.length, 1);
+        assert.match(styles[0].css, /^\.amiricord-account-list\{[^}]*max-height:[^}]*overflow-y:auto/);
+    });
+
+    const realList = "probe/module-search-switcher.json";
+    it("finds the menu in the real code of build 653945 once, with no class of Discord's on it (only when the probe dump is on this machine)", { skip: !existsSync(realList) }, () => {
+        const dump = JSON.parse(readFileSync(realList, "utf8")) as { hits: Record<string, Array<{ snippet: string; }>>; };
+        const snippet = dump.hits["switch-accounts-submenu"][0].snippet;
+        const match = (plugin.patches![2] as { replacements: Array<{ match: RegExp; }>; }).replacements[0].match;
+        assert.equal(snippet.split("navId:\"switch-accounts-submenu\",").length - 1, 1);
+        assert.ok(match.test(snippet));
+        assert.ok(!/navId:"switch-accounts-submenu",className:/.test(snippet));
+    });
+
     it("declares a patch plugin that starts early and asks for nothing", () => {
         assert.equal(manifest.startAt, "init");
         assert.deepEqual(manifest.permissions, {});

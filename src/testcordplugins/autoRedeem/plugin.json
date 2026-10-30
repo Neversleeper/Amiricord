@@ -1,0 +1,58 @@
+{
+  "schema": 1,
+  "id": "autoRedeem",
+  "name": "AutoRedeem",
+  "version": "1.0.0",
+  "description": "Automatically redeems any Discord gift link (Nitro, decorations, etc.) sent in any channel.",
+  "origin": "testcord",
+  "license": "GPL-3.0-or-later",
+  "authors": [
+    { "name": "x2b", "role": "Original author" },
+    { "name": "irritably", "role": "Original author" },
+    { "name": "szlcx404", "github": "https://github.com/szlcx404", "role": "Amiricord port" }
+  ],
+  "credits": [
+    { "name": "x2b", "license": "GPL-3.0-or-later" },
+    { "name": "irritably", "license": "GPL-3.0-or-later" }
+  ],
+  "tags": ["chat", "utility"],
+  "dependencies": [],
+  "enabledByDefault": false,
+  "experimental": true,
+  "legacy": false,
+  "replacedBy": null,
+  "requiresRestart": "auto",
+  "startAt": "domReady",
+  "deferrable": false,
+  "core": false,
+  "discord": { "minBuild": null, "maxBuild": null },
+  "entry": { "renderer": "index.tsx", "main": "native.ts" },
+  "permissions": {
+    "network": [
+      { "host": "api.nonecap.com", "from": "main", "why": "Solves the hCaptcha that Discord asks for when a gift is redeemed (NoneCap). Only when NoneCap is the chosen service and its key is saved." },
+      { "host": "api.nocaptchaai.com", "from": "main", "why": "Solves the hCaptcha that Discord asks for when a gift is redeemed (NoCaptchaAI). Only when NoCaptchaAI is the chosen service and its key is saved." },
+      { "host": "api.voidsolver.tech", "from": "main", "why": "Solves the hCaptcha that Discord asks for when a gift is redeemed (VoidSolver). Only when VoidSolver is the chosen service and its key is saved." },
+      { "host": "discord.com", "from": "main", "why": "Posts the result of each redeem attempt to the Discord webhook you saved." },
+      { "host": "discordapp.com", "from": "main", "why": "Posts the result of each redeem attempt to a Discord webhook saved with the older discordapp.com address." }
+    ],
+    "native": {
+      "functions": [
+        "solveCaptcha",
+        "cancelAll",
+        "sendWebhook",
+        "startNightyAltDetection",
+        "waitForNightyGiftCode",
+        "stopNightyAltDetection"
+      ]
+    },
+    "account": { "write": ["redeem"] },
+    "messages": { "read": "all-channels", "send": false },
+    "token": false,
+    "files": "paths",
+    "system": { "spawn": false, "clipboard": false, "listen": [], "openExternal": false, "devtools": false },
+    "code": { "dynamic": false },
+    "telemetry": { "send": [] }
+  },
+  "secrets": ["noneCapApiKey", "noCaptchaAiApiKey", "voidSolverApiKey", "voidSolverProxy", "webhookUrl"],
+  "riskySettings": ["speedMode", "instantMode", "watchNightyAlts"]
+}

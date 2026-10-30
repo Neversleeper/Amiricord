@@ -30,6 +30,8 @@ export const IPC = {
     restart: `${prefix}:restart`,
     /** The page asks to open the data folder in the file explorer. The folder is the main process's own; the page cannot name another. */
     openDataFolder: `${prefix}:open-data-folder`,
+    /** The page asks to open one of two places of our own: the health report file in the explorer, or the project's page in the browser. The place is a fixed word checked in the main process; the page cannot name a path or an address. */
+    openOwn: `${prefix}:open-own`,
     /** The page asks to leave safe mode (the Settings page, after the user clicked). It takes effect at the next start, so the page restarts Discord right after. */
     leaveSafeMode: `${prefix}:leave-safe-mode`,
     /** The page asks how many requests the network firewall cancelled. Read only; the answer is counts and nothing else. */

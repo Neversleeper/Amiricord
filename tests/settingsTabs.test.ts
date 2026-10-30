@@ -139,8 +139,10 @@ function mainTab(extra: Partial<MainTabDeps> = {}, hooks: { initial?: unknown[];
     const log: string[] = [];
     const deps: MainTabDeps = {
         status: () => status(), leaveSafeMode: () => { log.push("leave-safe-mode"); }, cards: () => [],
-        quickActions: defaultQuickActions({ openDataFolder: () => { log.push("folder"); }, restart: () => { log.push("restart"); } }),
-        settings: defaultSettings(), choices: defaultChoices(), buttonGroups: defaultButtonGroups(),
+        quickActions: defaultQuickActions({
+            openDataFolder: () => { log.push("folder"); }, openNotificationLog: () => { log.push("log"); }, openNotificationOptions: () => { log.push("options"); }, openCssEditor: () => { log.push("css"); }, openHealthReport: () => { log.push("health"); }, openSourceCode: () => { log.push("source"); }, restart: () => { log.push("restart"); }
+        }),
+        settings: defaultSettings(), choices: defaultChoices(), buttonGroups: defaultButtonGroups({ openNotificationLog: () => { log.push("log"); }, openNotificationOptions: () => { log.push("options"); } }),
         logo: "data:image/webp;base64,AAAA", editor: () => ({ type: "div", props: { className: "editor-stub" }, children: [] }), ...extra
     };
     const tree = render(makeMainTab(deps)()) as El;
@@ -228,13 +230,13 @@ describe("the main tab", () => {
         assert.equal(findAll(mainTab({ logo: "" }).tree, el => hasClass(el, "amiricord-logo-fallback")).length, 1);
     });
 
-    it("has the six tiles in the order of TestCord's grid; the two that work are live and the rest look the same, do nothing and name why on hover", () => {
+    it("has the six tiles in the order of TestCord's grid; all six work now; an entry that does not yet work looks the same, does nothing and names why on hover", () => {
         const t = mainTab();
         const [actions] = findAll(t.tree, el => hasClass(el, "amiricord-actions"));
         const tiles = findAll(actions, el => el.type === "button");
         assert.deepEqual(tiles.map(textOf), ["Notification Log", "Edit Custom CSS", "Relaunch Discord", "Open Settings Folder", "Health Report", "View Source Code"]);
         const soon = tiles.filter(tile => hasClass(tile, "amiricord-soon"));
-        assert.deepEqual(soon.map(textOf), ["Notification Log", "Edit Custom CSS", "Health Report", "View Source Code"]);
+        assert.deepEqual(soon.map(textOf), []);
         for (const tile of soon) {
             assert.equal(tile.props["aria-disabled"], "true");
             assert.equal(tile.props["data-soon"], "Coming soon");
@@ -244,14 +246,67 @@ describe("the main tab", () => {
         assert.equal(hasClass(open, "amiricord-soon"), false);
         (open.props.onClick as () => void)();
         assert.deepEqual(t.log, ["folder"]);
+        for (const name of ["Health Report", "View Source Code", "Edit Custom CSS", "Notification Log"]) {
+            const tile = tiles.find(candidate => textOf(candidate) === name)!;
+            assert.equal(hasClass(tile, "amiricord-soon"), false, name);
+            (tile.props.onClick as () => void)();
+        }
+        assert.deepEqual(t.log, ["folder", "health", "source", "css", "log"]);
     });
 
-    it("lists the window and behavior settings: seven switches, all off and marked, with a note that says they are not built yet; telemetry is not here, it belongs to Privacy & Security", () => {
+    it("draws a working switch from its feature, flips it on a click or the Enter and space keys, and keeps listening for changes made elsewhere", () => {
+        const log: string[] = [];
+        let value = true;
+        const listeners: Array<() => void> = [];
+        const live = { get: () => value, set: (on: boolean) => { log.push(String(on)); value = on; }, subscribe: (listener: () => void) => { listeners.push(listener); return () => undefined; } };
+        const t = mainTab({ settings: defaultSettings({ "custom-css": live }) });
+        const row = findAll(t.tree, el => hasClass(el, "amiricord-switch-row")).find(candidate => textOf(candidate).startsWith("Custom CSS"))!;
+        assert.ok(!textOf(row).includes("Coming soon"));
+        assert.equal(hasClass(row, "amiricord-soon"), false);
+        const [toggle] = findAll(row, el => el.props.role === "switch");
+        assert.equal(toggle.props["aria-checked"], "true");
+        assert.equal(toggle.props["aria-disabled"], "false");
+        assert.equal(toggle.props.tabIndex, 0);
+        assert.ok(hasClass(toggle, "amiricord-switch-live"));
+        (toggle.props.onClick as () => void)();
+        let prevented = 0;
+        (toggle.props.onKeyDown as (event: { key: string; preventDefault(): void; }) => void)({ key: " ", preventDefault: () => { prevented++; } });
+        (toggle.props.onKeyDown as (event: { key: string; preventDefault(): void; }) => void)({ key: "a", preventDefault: () => { prevented++; } });
+        assert.deepEqual(log, ["false", "false"], "each press asks for the opposite of what the page showed when it was drawn");
+        assert.equal(prevented, 1, "only Enter and space are taken");
+        assert.deepEqual(t.calls.slice(0, 2), [false, false]);
+        const others = findAll(t.tree, el => hasClass(el, "amiricord-switch-row")).filter(candidate => candidate !== row);
+        assert.equal(others.length, 5);
+        assert.ok(others.every(candidate => textOf(candidate).includes("Coming soon")), "the rest still wait");
+    });
+
+    it("draws a working drop-down from its feature, keeps the pick when another is chosen, and ignores a position that is not one of the choices", () => {
+        const picks: number[] = [];
+        const live = { get: () => 2, set: (index: number) => { picks.push(index); }, subscribe: () => () => undefined };
+        const t = mainTab({ choices: defaultChoices({ "background-material": live }) });
+        const [choice] = findAll(t.tree, el => hasClass(el, "amiricord-choice"));
+        assert.match(textOf(choice), /Window background effect/);
+        assert.ok(!textOf(choice).includes("Coming soon"));
+        assert.equal(hasClass(choice, "amiricord-soon"), false);
+        const [select] = findAll(choice, el => el.type === "select");
+        assert.equal(select.props.value, "2", "the position the feature says is picked");
+        assert.deepEqual(findAll(select, el => el.type === "option").map(option => option.props.value), ["0", "1", "2", "3"]);
+        const change = (value: string) => (select.props.onChange as (event: { target: { value: string; }; }) => void)({ target: { value } });
+        change("3");
+        change("4");
+        change("-1");
+        change("1.5");
+        change("abc");
+        assert.deepEqual(picks, [3]);
+        assert.equal(findAll(choice, el => el.props.role === "combobox").length, 0, "no dead drop-down next to the working one");
+    });
+
+    it("lists the window and behavior settings: six switches, all off and marked, with a note that says they are not built yet; telemetry is not here, it belongs to Privacy & Security", () => {
         const { tree } = mainTab();
         const rows = findAll(tree, el => hasClass(el, "amiricord-switch-row"));
         assert.deepEqual(rows.map(row => textOf(findAll(row, el => hasClass(el, "amiricord-switch-title"))[0]).replace(/Coming soon|Restart/g, "")), [
             "Show the Amiricord logo", "Custom CSS", "Windows title bar",
-            "Transparent window", "Remove minimum window size", "Ctrl+Q to quit", "React Developer Tools"
+            "Transparent window", "Remove minimum window size", "Ctrl+Q to quit"
         ]);
         for (const row of rows) {
             const [toggle] = findAll(row, el => el.props.role === "switch");
@@ -260,13 +315,14 @@ describe("the main tab", () => {
             assert.ok(textOf(row).includes("Coming soon"));
             assert.equal(toggle.props.onClick, undefined);
         }
-        assert.equal(rows.filter(row => textOf(row).includes("Restart")).length, 5, "the five window options say they need a restart");
+        assert.equal(rows.filter(row => textOf(row).includes("Restart")).length, 4, "the four window options say they need a restart");
         assert.equal(findAll(tree, el => hasClass(el, "amiricord-warning")).length, 1, "only transparency carries a warning");
         assert.match(textOf(findAll(tree, el => hasClass(el, "amiricord-notice"))[0]), /not built yet/);
     });
 
     it("has the window background drop-down and the Notifications buttons after the switches", () => {
-        const { tree } = mainTab();
+        const t = mainTab();
+        const { tree } = t;
         const [choice] = findAll(tree, el => hasClass(el, "amiricord-choice"));
         assert.match(textOf(choice), /Window background effect/);
         assert.match(textOf(choice), /Coming soon/);
@@ -277,14 +333,17 @@ describe("the main tab", () => {
         assert.match(textOf(group), /Discord's own message notifications are not affected/);
         const buttons = findAll(group, el => el.type === "button");
         assert.deepEqual(buttons.map(textOf), ["Notification options", "Open the log"]);
-        assert.ok(buttons.every(button => button.props["aria-disabled"] === "true" && button.props.onClick === undefined));
+        assert.ok(buttons.every(button => button.props["aria-disabled"] === undefined && typeof button.props.onClick === "function"), "both work now");
+        const before = t.log.length;
+        for (const button of buttons) (button.props.onClick as () => void)();
+        assert.deepEqual(t.log.slice(before), ["options", "log"]);
     });
 
     it("turns an entry live when its feature exists: no tag, an active switch, a working tile and a working button", () => {
         const log: string[] = [];
         const { tree } = mainTab({
             quickActions: [{ id: "x", title: "Do X", Icon: () => null, run: () => { log.push("x"); } }],
-            settings: [{ id: "s", title: "Setting S", description: "d" }],
+            settings: [{ id: "s", title: "Setting S", description: "d", live: { get: () => false, set: () => { log.push("s"); }, subscribe: () => () => undefined } }],
             choices: [{ id: "c", title: "Choice C", description: "d", choices: ["A", "B"] }],
             buttonGroups: [{ id: "g", title: "Group G", description: "d", buttons: [{ id: "b", title: "Button B", run: () => { log.push("b"); } }] }]
         });
@@ -296,6 +355,8 @@ describe("the main tab", () => {
         const row = findAll(tree, el => hasClass(el, "amiricord-switch-row"))[0];
         assert.ok(!textOf(row).includes("Coming soon"));
         assert.equal(findAll(row, el => el.props.role === "switch")[0].props["aria-disabled"], "false");
+        (findAll(row, el => el.props.role === "switch")[0].props.onClick as () => void)();
+        assert.deepEqual(log, ["x", "b", "s"]);
         assert.ok(!textOf(findAll(tree, el => hasClass(el, "amiricord-choice"))[0]).includes("Coming soon"));
         assert.equal(findAll(tree, el => hasClass(el, "amiricord-soon")).length, 0);
     });

@@ -42,8 +42,21 @@ const plugin: PluginCode & { altLimit(): number; } = {
                 { match: /(\i\.length<)5(&&\i\(!1\))/, replace: "$1$self.altLimit()$2" },
                 { match: /maxNumAccounts:5/, replace: "maxNumAccounts:$self.altLimit()" }
             ]
+        },
+        {
+            // The list of accounts that opens from the profile panel at the bottom left (build 653945: a submenu, `navId:"switch-accounts-submenu"`, with one row per account and
+            // "Manage Accounts" last). With more than five accounts it grows taller than the window and the last row, the one that opens Manage Accounts, falls off the screen.
+            // The patch gives the menu a class of ours and `start` adds the CSS that makes it scroll.
+            find: "navId:\"switch-accounts-submenu\"",
+            lazy: true,
+            required: false,
+            replacements: [{ match: /navId:"switch-accounts-submenu",/, replace: "navId:\"switch-accounts-submenu\",className:\"amiricord-account-list\"," }]
         }
     ],
+
+    start(ctx) {
+        ctx.addStyle(".amiricord-account-list{max-height:min(60vh,26rem);overflow-y:auto}", "more-alts");
+    },
 
     /** Called by the patched Discord code in place of its fixed limit. */
     altLimit() {
