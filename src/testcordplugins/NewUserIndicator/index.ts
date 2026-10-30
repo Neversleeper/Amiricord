@@ -9,7 +9,7 @@
 // was made), so nothing is asked of anyone and nothing is sent.
 // Where it hooks was read in a running Discord (build 653945): the header of a message (`hideSystemTag:` is in it once; the badges of the name are the `null!=ev?ev:null` that
 // follows the lobby name) and the row of the member list (the same place MoreUserTags uses). Differences from the original: the profile mark is a badge added through
-// `ctx.profileBadges` (new, drawn by Discord with the same hover text; it uses a red disc with a white "!" instead of the emoji), and the explanation ("Account created N days ago") is shown by `src/api/tooltip.ts`, a tooltip drawn like Discord's own that appears at once (the browser's hover text was slow and plain), instead of Discord's tooltip component. NOT seen on screen yet.
+// `ctx.profileBadges` (new, drawn by Discord with the same hover text; its picture is the same red "!" as the mark beside names, drawn as a vector image), and the explanation ("Account created N days ago") is shown by `src/api/tooltip.ts`, a tooltip drawn like Discord's own that appears at once (the browser's hover text was slow and plain), instead of Discord's tooltip component. NOT seen on screen yet.
 
 import { currentReact } from "../../api/jsxRuntime";
 import { definePluginSettings } from "../../api/pluginSettings";
@@ -18,8 +18,8 @@ import type { PluginCode } from "../../renderer/engine";
 
 const DISCORD_EPOCH = 1_420_070_400_000n;
 const DAY_MS = 86_400_000;
-/** A red exclamation mark on a white disc, the picture of the profile badge (a small vector image kept inside the program). */
-const BADGE_ICON = `data:image/svg+xml;charset=utf-8,${encodeURIComponent("<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 32 32\"><circle cx=\"16\" cy=\"16\" r=\"16\" fill=\"#f23f43\"/><rect x=\"14\" y=\"6\" width=\"4\" height=\"12.5\" rx=\"2\" fill=\"#fff\"/><circle cx=\"16\" cy=\"24\" r=\"2.4\" fill=\"#fff\"/></svg>")}`;
+/** A red exclamation mark, like the ❗ emoji, with no disc behind it: the picture of the profile badge (a small vector image kept inside the program). */
+const BADGE_ICON = `data:image/svg+xml;charset=utf-8,${encodeURIComponent("<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 32 32\"><path d=\"M16 2c-2.6 0-4.6 2.2-4.4 4.8l1 12.6c.1 1.5 1.5 2.6 3.4 2.6s3.3-1.1 3.4-2.6l1-12.6C20.6 4.2 18.6 2 16 2z\" fill=\"#e5322d\"/><circle cx=\"16\" cy=\"27\" r=\"3.6\" fill=\"#e5322d\"/></svg>")}`;
 const SNOWFLAKE = /^\d{15,25}$/;
 
 const settings = definePluginSettings({
