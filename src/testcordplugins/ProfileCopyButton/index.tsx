@@ -72,6 +72,17 @@ export function serverProfileOf(body: any, guildId: string, userId: string): Ser
     return { nick, bio, avatarUrl: avatar ? image("avatars", avatar, 512) : undefined, bannerUrl: banner ? image("banners", banner, 1024) : undefined };
 }
 
+/** The main profile with everything the person set in the server on top of it (pronouns, colours, effect...); what they left empty there stays as in the main one. */
+export function withServerProfile(main: any, own: any): any {
+    if (!own || typeof own !== "object") return main;
+    const merged = { ...(main && typeof main === "object" ? main : {}) };
+    for (const [key, value] of Object.entries(own)) {
+        const empty = value === null || value === undefined || value === "" || (Array.isArray(value) && value.length === 0);
+        if (!empty) merged[key] = value;
+    }
+    return merged;
+}
+
 async function toDataUri(url: string): Promise<string | null> {
     try {
         const answer = await fetch(url);
@@ -373,7 +384,7 @@ export async function copyProfile(targetId: string, guildId?: string): Promise<v
         return;
     }
     const user = body?.user;
-    const profile = body?.user_profile;
+    const profile = guildId ? withServerProfile(body?.user_profile, body?.guild_member_profile) : body?.user_profile;
     if (!user) { toast(`Could not load that profile (Discord answered with: ${body && typeof body === "object" ? Object.keys(body).slice(0, 6).join(", ") || "nothing" : String(body)}).`, "error"); return; }
     const nitro = (me.premiumType ?? 0) >= 1;
     // Shop items belong to whoever bought them: copying one you do not own makes Discord refuse the whole save, so they are copied only when the person asked for it.

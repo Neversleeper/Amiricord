@@ -13,7 +13,7 @@ import { channelName, isExempted } from "../src/equicordplugins/Ghosted/index";
 import { firstMessageOf } from "../src/equicordplugins/LastActive/index";
 import { OUTGOING_REQUEST } from "../src/equicordplugins/PendingFriendRequest/index";
 import { pickUsers } from "../src/equicordplugins/UniversalMention/index";
-import { customStatusSettings, serverProfileOf } from "../src/testcordplugins/ProfileCopyButton/index";
+import { customStatusSettings, serverProfileOf, withServerProfile } from "../src/testcordplugins/ProfileCopyButton/index";
 import { matchExperiment } from "../src/vencordplugins/Experiments/index";
 
 describe("LastActive", () => {
@@ -139,5 +139,16 @@ describe("ProfileCopyButton, server profile", () => {
         assert.equal(serverProfileOf({ guild_member: { nick: null, avatar: null } }, "5", "9"), undefined);
         assert.equal(serverProfileOf({}, "5", "9"), undefined);
         assert.equal(serverProfileOf(undefined, "5", "9"), undefined);
+    });
+});
+
+describe("ProfileCopyButton, server colours and pronouns", () => {
+    it("puts what was set in the server over the main profile and keeps the rest", () => {
+        const main = { pronouns: "she", theme_colors: [1, 2], accent_color: 0, bio: "main" };
+        const own = { pronouns: "he", theme_colors: [9, 8], accent_color: null, bio: "", banner: "b" };
+        assert.deepEqual(withServerProfile(main, own), { pronouns: "he", theme_colors: [9, 8], accent_color: 0, bio: "main", banner: "b" });
+        assert.deepEqual(withServerProfile(main, undefined), main);
+        assert.deepEqual(withServerProfile(undefined, { pronouns: "x" }), { pronouns: "x" });
+        assert.equal(withServerProfile(undefined, undefined), undefined);
     });
 });
