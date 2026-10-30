@@ -49,7 +49,12 @@ const plugin: PluginCode & { refresh?(): void; } = {
             const store = typing.get();
             const userStore = users.get() as unknown as Users | undefined;
             const strongs = [...page.querySelectorAll(NAMES)];
-            if (!channelId || !store || !userStore || strongs.length === 0) { if (strongs.length === 0) clear(); return; }
+            // Discord draws the text again when the people change, which leaves our pictures behind (seen live: several in front of each name). Only the one right before a name stays.
+            const wanted = new Set<Element | null>(strongs);
+            for (const image of page.querySelectorAll(`img.${MARK}`)) {
+                if (!wanted.has(image.nextElementSibling)) image.remove();
+            }
+            if (!channelId || !store || !userStore || strongs.length === 0) return;
             const me = userStore.getCurrentUser()?.id;
             const guildId = guilds.get()?.getGuildId() ?? null;
             const nicks = members.get() as unknown as Members | undefined;
