@@ -11,7 +11,7 @@
             "Who Reacted now shows the pictures of who reacted next to each reaction.",
             "Copy Profile: inside a server the right-click menu offers Copy Main Profile and Copy Server Profile. The server one takes the nickname, bio, picture, banner, pronouns and colours the person set in that server.",
             "Profile Presets has its own tab in the Amiricord settings. The Amiricord tabs got a polish layer (wider page, smoother movement, thin scrollbars).",
-            "New plugins: Poll Maker, Ask Me To Mute, Ghost Typing, DM Away, Realtime Timestamps, Click Sparkles, No Edited Timestamp, Hide Suggested Channels, Zero Width Sanitizer, Show Typing Users, Voice Count and No Buttons (all off until you switch them on).",
+            "New plugins, all off until you switch them on: Poll Maker, Ask Me To Mute, Ghost Typing, DM Away, Realtime Timestamps, Click Sparkles, No Edited Timestamp, Zero Width Sanitizer, Voice Count and more.",
             "New User Indicator also marks the profile card, with a tooltip that shows at once. More User Tags no longer goes missing after a reload, and the username next to a name no longer pops in late.",
             "View Icons no longer leaves the viewer on its loading screen. For plugin authors: the engine gets ctx.notices, ctx.memberDecor, ctx.profileBadges and a tooltip."
         ]
