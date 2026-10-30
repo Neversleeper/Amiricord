@@ -319,9 +319,10 @@ export function sanitizeWidgets(widgets: any[]): any[] {
 }
 
 async function copyWidgets(widgets: unknown): Promise<string | null> {
-    if (!Array.isArray(widgets) || widgets.length === 0) return null;
-    const body = sanitizeWidgets(widgets);
-    if (body.length === 0) return null;
+    // No list at all: Discord did not say, so yours stay. An empty list: they have none, so yours are taken off (the same `PUT /users/@me/widgets`, with an empty list; this was NOT seen in action). A list this plugin cannot read: yours stay.
+    if (!Array.isArray(widgets)) return null;
+    const body = widgets.length === 0 ? [] : sanitizeWidgets(widgets);
+    if (widgets.length > 0 && body.length === 0) return null;
     try {
         await rest.put({ url: "/users/@me/widgets", body: { widgets: body }, oldFormErrors: true, rejectWithError: true });
         return "";
@@ -364,25 +365,28 @@ export async function copyProfile(targetId: string): Promise<void> {
     let copied = 0;
 
     if (user.global_name) { setPending({ pendingGlobalName: user.global_name }); copied++; }
-    if (profile?.pronouns) { setPending({ pendingPronouns: profile.pronouns }); copied++; }
-    if (profile?.bio) { setPending({ pendingBio: nitro ? await resolveBioEmojis(profile.bio) : cleanBio(profile.bio, false) }); copied++; }
-    if (nitro && Array.isArray(profile?.theme_colors)) { setPending({ pendingThemeColors: [...profile.theme_colors] }); copied++; }
-    if (nitro && typeof profile?.accent_color === "number") { setPending({ pendingAccentColor: profile.accent_color }); copied++; }
-    // Name style, profile effect and nameplate (only with the setting "copyShopItems"): the editor's own pending fields (names read in Discord's editor code, build 653945; only `skuId` is read from the last two). Need Nitro or its trial.
-    const style = user.display_name_styles;
-    if (shop && style && typeof style.font_id === "number" && typeof style.effect_id === "number" && Array.isArray(style.colors)) {
-        setPending({ pendingDisplayNameStyles: { fontId: style.font_id, effectId: style.effect_id, colors: [...style.colors] } });
+    // An empty pronouns field or bio is copied too: the editor keeps an emptied field as an empty text (its bio box commits `bio: text.trim()`, read in the live page), so nothing of yours is left over. Only when Discord gave a profile at all, so a failed load never wipes yours.
+    if (profile && typeof profile === "object") {
+        setPending({ pendingPronouns: profile.pronouns ?? "" });
+        setPending({ pendingBio: profile.bio ? (nitro ? await resolveBioEmojis(profile.bio) : cleanBio(profile.bio, false)) : "" });
         copied++;
     }
+    if (nitro && Array.isArray(profile?.theme_colors)) { setPending({ pendingThemeColors: [...profile.theme_colors] }); copied++; }
+    if (nitro && typeof profile?.accent_color === "number") { setPending({ pendingAccentColor: profile.accent_color }); copied++; }
+    // Name style, profile effect, nameplate, avatar decoration and frame (only with the setting "copyShopItems"): the editor's own pending fields, and the profile is copied as it is, so what the other person does not wear is taken off yours.
+    // Read in Discord's own code in the live page (build 655747): for the effect and the frame, `undefined` leaves it, `null` takes it off and `{ skuId }` puts it on (the editor sends them in `collectibles_sku_ids` of `PATCH /users/@me/profile`, seen in the Network tab); for the name style, the nameplate and the decoration, `null` clears them in `PATCH /users/@me`.
+    const style = user.display_name_styles;
+    const hasStyle = style && typeof style.font_id === "number" && typeof style.effect_id === "number" && Array.isArray(style.colors);
+    if (shop) { setPending({ pendingDisplayNameStyles: hasStyle ? { fontId: style.font_id, effectId: style.effect_id, colors: [...style.colors] } : null }); copied++; }
     const effectSku = profile?.profile_effect?.sku_id;
-    if (shop && typeof effectSku === "string") { setPending({ pendingProfileEffect: { skuId: effectSku } }); copied++; }
+    if (shop) { setPending({ pendingProfileEffect: typeof effectSku === "string" ? { skuId: effectSku } : null }); copied++; }
     const plateSku = user.collectibles?.nameplate?.sku_id;
-    if (shop && typeof plateSku === "string") { setPending({ pendingNameplate: { skuId: plateSku } }); copied++; }
+    if (shop) { setPending({ pendingNameplate: typeof plateSku === "string" ? { skuId: plateSku } : null }); copied++; }
     // The avatar decoration is `user.avatar_decoration_data`; the profile frame is the profile's collectible of type 3 (type 1 is the effect). Seen in a real profile answer.
     const decoration = user.avatar_decoration_data;
-    if (shop && typeof decoration?.sku_id === "string") { setPending({ pendingAvatarDecoration: { skuId: decoration.sku_id, asset: decoration.asset } }); copied++; }
+    if (shop) { setPending({ pendingAvatarDecoration: typeof decoration?.sku_id === "string" ? { skuId: decoration.sku_id, asset: decoration.asset } : null }); copied++; }
     const frameSku = (Array.isArray(profile?.collectibles) ? profile.collectibles : []).find((item: { type?: number; }) => item?.type === 3)?.sku_id;
-    if (shop && typeof frameSku === "string") { setPending({ pendingProfileFrame: { skuId: frameSku } }); copied++; }
+    if (shop) { setPending({ pendingProfileFrame: typeof frameSku === "string" ? { skuId: frameSku } : null }); copied++; }
 
     if (user.avatar) {
         const uri = await toDataUri(imageUrl("avatars", targetId, user.avatar, 512));
@@ -398,7 +402,8 @@ export async function copyProfile(targetId: string): Promise<void> {
     if (statusResult) { toast(statusResult, statusResult.startsWith("Could not") ? "error" : "info"); copied++; } else toast("No custom status to copy: Discord shows none for that person (they may be offline or share no server with you).", "info");
     if (settings.store.copyGameWidgets) {
         const failed = await copyWidgets(body?.widgets);
-        if (failed === "") { toast("Their game widgets were applied to your profile.", "info"); copied++; } else if (failed) toast(`Could not copy the game widgets (${failed}).`, "error");
+        if (failed === "") { toast(Array.isArray(body?.widgets) && body.widgets.length === 0 ? "They have no game widgets, so yours were taken off." : "Their game widgets were applied to your profile.", "info"); copied++; } else if (failed) toast(`Could not copy the game widgets (${failed}).`, "error");
+        else if (!Array.isArray(body?.widgets)) toast("Discord sent no list of game widgets for them, so yours were left as they are.", "info");
     }
     const tagGuild = user.primary_guild?.identity_guild_id ?? user.clan?.identity_guild_id;
     if (tagGuild) { await joinTagServer(tagGuild); copied++; } else toast(`Their profile has no server tag to copy (Discord sent: ${JSON.stringify(user.primary_guild ?? user.clan ?? null).slice(0, 140)}).`, "info");
