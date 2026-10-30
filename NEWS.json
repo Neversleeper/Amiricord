@@ -1,5 +1,15 @@
 [
     {
+        "version": "0.7.1",
+        "date": "2026-10-30",
+        "title": "Fake Mute Deafen",
+        "author": "Neversleeper",
+        "notes": [
+            "New plugin Fake Mute Deafen (off until you switch it on): others see you muted or deafened while you can still talk and hear. A button in the user panel, key shortcuts and slash commands.",
+            "The fake also shows on your own screen (panel and voice list go red) and stays on when Discord restarts or rejoins a call, until you turn it off."
+        ]
+    },
+    {
         "version": "0.7.0",
         "date": "2026-10-30",
         "title": "122 new plugins (all off until you switch them on), a Main tab and Auto Redeem",
