@@ -100,7 +100,7 @@ describe("the Settings plugin in use", () => {
         assert.equal(item.useTitle?.(), "Amiricord");
         const custom = item.buildLayout!()[0].buildLayout!()[0].buildLayout!()[0];
         assert.equal(typeof custom.Component, "function");
-        assert.deepEqual(log.styles.map(([, name]) => name), ["settings", "plugins-tab"]);
+        assert.deepEqual(log.styles.map(([, name]) => name), ["settings", "plugins-tab", "polish"]);
         assert.match(log.styles[0][0], /\.amiricord-tab/);
         assert.match(log.styles[1][0], /\.amiricord-plugin\b/);
         assert.deepEqual(section.buildLayout!().map(entry => entry.key), ["amiricord", "privacy", "plugins", "updater"], "the main tab first, then Privacy & Security, the Plugins tab and the Updates tab");
