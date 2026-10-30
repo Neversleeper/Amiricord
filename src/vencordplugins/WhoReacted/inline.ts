@@ -55,10 +55,10 @@ interface Entry { count: number; people: Person[] | undefined; pending: boolean;
 
 const MARK = "amiricord-who-reacted";
 const CSS = `
-.${MARK} { display: inline-flex; align-items: center; margin-left: 6px; transform: scale(0.9); transform-origin: left center; }
-.${MARK} img, .${MARK} span { width: 16px; height: 16px; border-radius: 50%; box-sizing: border-box; border: 2px solid var(--background-base-lower, var(--background-primary, #313338)); background: var(--background-base-low, #2b2d31); margin-left: -4px; object-fit: cover; }
+.${MARK} { display: inline-flex; align-items: center; margin-left: 6px; }
+.${MARK} img, .${MARK} span { width: 22px; height: 22px; flex: none; border-radius: 50%; box-sizing: border-box; box-shadow: 0 0 0 2px var(--background-base-lower, var(--background-primary, #313338)); background: var(--background-base-low, #2b2d31); margin-left: -6px; object-fit: cover; }
 .${MARK} > :first-child { margin-left: 0; }
-.${MARK} span { display: inline-flex; align-items: center; justify-content: center; font-size: 8px; font-weight: 600; color: var(--text-muted, #949ba4); }
+.${MARK} span { display: inline-flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 600; color: var(--text-muted, #949ba4); }
 `;
 
 export function startInline(ctx: EnginePluginContext, enabled: () => boolean): () => void {
