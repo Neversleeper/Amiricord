@@ -11,6 +11,7 @@ import { isServerMutedHere } from "../src/testcordplugins/AskMeToMute/index";
 import { type AwayState, MAX_REPLIES, shouldReply } from "../src/testcordplugins/DMAway/index";
 import { stillActive } from "../src/testcordplugins/GhostTyping/index";
 import { pollText } from "../src/testcordplugins/PollMaker/index";
+import { chips } from "../src/vencordplugins/TypingAvatars/index";
 
 describe("ported plugins, tenth batch", () => {
     it("makes a poll", () => {
@@ -39,6 +40,13 @@ describe("ported plugins, tenth batch", () => {
         assert.deepEqual(stillActive(started, 9 * 60000, 10), ["a", "b"]);
         assert.deepEqual(stillActive(started, 10 * 60000, 10), ["b"]);
         assert.deepEqual(stillActive(started, 99 * 60000, 10), []);
+    });
+
+    it("limits the typing avatars", () => {
+        assert.deepEqual(chips(["a", "b", "c"], 5), { shown: ["a", "b", "c"], more: 0 });
+        assert.deepEqual(chips(["a", "b", "c", "d"], 2), { shown: ["a", "b"], more: 2 });
+        assert.deepEqual(chips([], 3), { shown: [], more: 0 });
+        assert.deepEqual(chips(["a", "b"], 0), { shown: ["a"], more: 1 });
     });
 
     it("answers a direct message once per cooldown, and only the right ones", () => {

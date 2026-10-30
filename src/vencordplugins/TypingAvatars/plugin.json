@@ -1,0 +1,41 @@
+{
+    "schema": 1,
+    "id": "TypingAvatars",
+    "name": "Typing Avatars",
+    "version": "1.0.0",
+    "description": "Shows the avatars of the people who are typing in the channel, in a small row above the message box, next to Discord's own \"is typing\" text.",
+    "origin": "vencord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        {
+            "name": "zt",
+            "role": "original author"
+        },
+        {
+            "name": "sadan",
+            "role": "original author"
+        },
+        {
+            "name": "MrDiamond",
+            "role": "original author"
+        },
+        {
+            "name": "Neversleeper",
+            "role": "Amiricord port"
+        }
+    ],
+    "credits": [
+        {
+            "name": "Vendicated and contributors (Vencord), plugin TypingTweaks",
+            "license": "GPL-3.0-or-later",
+            "url": "https://github.com/Vendicated/Vencord"
+        }
+    ],
+    "tags": ["chat", "ui"],
+    "enabledByDefault": false,
+    "startAt": "init",
+    "entry": {
+        "renderer": "index.ts"
+    },
+    "permissions": {}
+}
