@@ -1,5 +1,15 @@
 [
     {
+        "version": "0.7.2",
+        "date": "2026-10-30",
+        "title": "Copy Profile copies exactly",
+        "author": "Neversleeper",
+        "notes": [
+            "Copy Profile now copies the profile exactly: with Copy Shop Items on, the name style, effect, frame, nameplate and avatar decoration the other person does not have are taken off yours.",
+            "Empty pronouns and an empty bio are copied too, and if they have no game widgets yours are taken off. The editor fields still wait for your Save; the widgets change at once."
+        ]
+    },
+    {
         "version": "0.7.1",
         "date": "2026-10-30",
         "title": "Fake Mute Deafen",
