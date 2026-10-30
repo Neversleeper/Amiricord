@@ -11,7 +11,7 @@
 
 const STYLE_ID = "amiricord-tooltip-style";
 const TIP_ID = "amiricord-tooltip";
-const GAP = 8;
+const GAP = 2;
 const EDGE = 8;
 
 export const TOOLTIP_CSS = `

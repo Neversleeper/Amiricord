@@ -16,7 +16,7 @@ describe("tooltip placement", () => {
     it("goes above the element, centred, with the arrow in the middle", () => {
         const spot = placeTip({ left: 400, top: 300, width: 20, height: 20 }, tip, view);
         assert.equal(spot.side, "top");
-        assert.equal(spot.top, 300 - 32 - 8);
+        assert.equal(spot.top, 300 - 32 - 2);
         assert.equal(spot.left, 410 - 80);
         assert.equal(spot.arrow, 80);
     });
@@ -24,7 +24,7 @@ describe("tooltip placement", () => {
     it("goes below when there is no room above", () => {
         const spot = placeTip({ left: 400, top: 20, width: 20, height: 20 }, tip, view);
         assert.equal(spot.side, "bottom");
-        assert.equal(spot.top, 20 + 20 + 8);
+        assert.equal(spot.top, 20 + 20 + 2);
     });
 
     it("stays inside the window and the arrow still points at the element", () => {
