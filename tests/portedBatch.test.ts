@@ -13,7 +13,7 @@ import { channelName, isExempted } from "../src/equicordplugins/Ghosted/index";
 import { firstMessageOf } from "../src/equicordplugins/LastActive/index";
 import { OUTGOING_REQUEST } from "../src/equicordplugins/PendingFriendRequest/index";
 import { pickUsers } from "../src/equicordplugins/UniversalMention/index";
-import { customStatusSettings } from "../src/testcordplugins/ProfileCopyButton/index";
+import { customStatusSettings, serverProfileOf } from "../src/testcordplugins/ProfileCopyButton/index";
 import { matchExperiment } from "../src/vencordplugins/Experiments/index";
 
 describe("LastActive", () => {
@@ -122,5 +122,22 @@ describe("BetterInvites time left", () => {
         assert.equal(timeLeft((3 * 60 + 5) * 1000), "3m 5s");
         assert.equal(timeLeft((2 * 3600 + 30 * 60 + 1) * 1000), "2h 30m 1s");
         assert.equal(timeLeft((29 * 86400 + 3 * 3600) * 1000), "29d 3h 0m 0s");
+    });
+});
+
+describe("ProfileCopyButton, server profile", () => {
+    it("reads what a person set in one server and points the pictures at the server's folder", () => {
+        const body = { guild_member: { nick: "Ana", avatar: "a_abc", banner: "ban" }, guild_member_profile: { bio: "hi" } };
+        assert.deepEqual(serverProfileOf(body, "5", "9"), {
+            nick: "Ana", bio: "hi",
+            avatarUrl: "https://cdn.discordapp.com/guilds/5/users/9/avatars/a_abc.gif?size=512",
+            bannerUrl: "https://cdn.discordapp.com/guilds/5/users/9/banners/ban.png?size=1024"
+        });
+    });
+
+    it("says there is none when nothing was set in that server", () => {
+        assert.equal(serverProfileOf({ guild_member: { nick: null, avatar: null } }, "5", "9"), undefined);
+        assert.equal(serverProfileOf({}, "5", "9"), undefined);
+        assert.equal(serverProfileOf(undefined, "5", "9"), undefined);
     });
 });

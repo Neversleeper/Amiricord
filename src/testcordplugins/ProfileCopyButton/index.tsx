@@ -11,6 +11,7 @@
 //    The other things the original did are kept because they are the point of the plugin, and each one is announced on screen: the custom status (with its emoji) is set at once,
 //    the public server behind the profile's server tag is joined (through its vanity link, only when it has one) and set as your tag, and the custom emojis of the bio that you do
 //    not have are uploaded to a server YOU pick in a window (or removed from the bio if you skip). The game widgets are copied too (a setting, on by default);
+//  - inside a server the right-click entry opens "Copy Main Profile" and "Copy Server Profile" (the nickname, bio, picture and banner the person set in that server, taken from `guild_member` and `guild_member_profile` of the profile answer; what they did not set there falls back to their main profile);
 //  - no button in the editor (its anchor no longer exists in Discord's web build 653945). The entries are the right-click menu of a user (`user-context`, a name that could not
 //    be checked in the readable part of the build) and a box in this plugin's own settings window, which does not depend on any patch;
 //  - the name style, profile effect, nameplate, avatar decoration and profile frame are copied through the editor's pending fields when you have Nitro (their names come from Discord's editor code; NOT yet seen working in a real Discord).
@@ -53,6 +54,22 @@ export function imageUrl(kind: "avatars" | "banners", id: string, hash: string, 
 
 export function cleanBio(bio: string, hasNitro: boolean): string {
     return hasNitro ? bio : bio.replace(CUSTOM_EMOJI, "").replace(/[ \t]+\n/g, "\n").trim();
+}
+
+export interface ServerProfile { nick?: string; bio?: string; avatarUrl?: string; bannerUrl?: string; }
+
+/** What a person's profile in one server holds (their server nickname, bio, picture and banner), or `undefined` when they set none there. */
+export function serverProfileOf(body: any, guildId: string, userId: string): ServerProfile | undefined {
+    const member = body?.guild_member;
+    const own = body?.guild_member_profile;
+    const text = (value: unknown) => typeof value === "string" && value ? value : undefined;
+    const nick = text(member?.nick);
+    const bio = text(own?.bio) ?? text(member?.bio);
+    const avatar = text(member?.avatar);
+    const banner = text(own?.banner) ?? text(member?.banner);
+    if (!nick && !bio && !avatar && !banner) return undefined;
+    const image = (kind: "avatars" | "banners", hash: string, size: number) => `${CDN}/guilds/${guildId}/users/${userId}/${kind}/${hash}.${hash.startsWith("a_") ? "gif" : "png"}?size=${size}`;
+    return { nick, bio, avatarUrl: avatar ? image("avatars", avatar, 512) : undefined, bannerUrl: banner ? image("banners", banner, 1024) : undefined };
 }
 
 async function toDataUri(url: string): Promise<string | null> {
@@ -332,13 +349,13 @@ async function copyWidgets(widgets: unknown): Promise<string | null> {
     }
 }
 
-export async function copyProfile(targetId: string): Promise<void> {
+export async function copyProfile(targetId: string, guildId?: string): Promise<void> {
     if (!rest || !dispatcher) { toast("Discord's functions for this were not found.", "error"); return; }
     const me = users?.getCurrentUser?.();
     if (!me || targetId === me.id) { toast("Pick somebody else.", "error"); return; }
     let body: any;
     try {
-        body = await rest.get({ url: `/users/${targetId}/profile`, query: { type: "popout", with_mutual_guilds: false, with_mutual_friends: false }, rejectWithError: true });
+        body = await rest.get({ url: `/users/${targetId}/profile`, query: { type: "popout", with_mutual_guilds: false, with_mutual_friends: false, ...(guildId ? { guild_id: guildId } : {}) }, rejectWithError: true });
         const answer = body;
         body = answer?.body;
         if (!body && typeof answer?.text === "string") {
@@ -363,12 +380,16 @@ export async function copyProfile(targetId: string): Promise<void> {
     const shop = nitro && settings.store.copyShopItems;
     emojiGuild = undefined;
     let copied = 0;
+    const server = guildId ? serverProfileOf(body, guildId, targetId) : undefined;
+    if (guildId && !server) toast(`${user.username} has no profile of their own in this server, so their main profile is copied.`, "info");
 
-    if (user.global_name) { setPending({ pendingGlobalName: user.global_name }); copied++; }
+    const name = server?.nick ?? user.global_name;
+    if (name) { setPending({ pendingGlobalName: name }); copied++; }
     // An empty pronouns field or bio is copied too: the editor keeps an emptied field as an empty text (its bio box commits `bio: text.trim()`, read in the live page), so nothing of yours is left over. Only when Discord gave a profile at all, so a failed load never wipes yours.
     if (profile && typeof profile === "object") {
         setPending({ pendingPronouns: profile.pronouns ?? "" });
-        setPending({ pendingBio: profile.bio ? (nitro ? await resolveBioEmojis(profile.bio) : cleanBio(profile.bio, false)) : "" });
+        const bio = server?.bio ?? profile.bio;
+        setPending({ pendingBio: bio ? (nitro ? await resolveBioEmojis(bio) : cleanBio(bio, false)) : "" });
         copied++;
     }
     if (nitro && Array.isArray(profile?.theme_colors)) { setPending({ pendingThemeColors: [...profile.theme_colors] }); copied++; }
@@ -388,13 +409,15 @@ export async function copyProfile(targetId: string): Promise<void> {
     const frameSku = (Array.isArray(profile?.collectibles) ? profile.collectibles : []).find((item: { type?: number; }) => item?.type === 3)?.sku_id;
     if (shop) { setPending({ pendingProfileFrame: typeof frameSku === "string" ? { skuId: frameSku } : null }); copied++; }
 
-    if (user.avatar) {
-        const uri = await toDataUri(imageUrl("avatars", targetId, user.avatar, 512));
+    const avatarUrl = server?.avatarUrl ?? (user.avatar ? imageUrl("avatars", targetId, user.avatar, 512) : undefined);
+    if (avatarUrl) {
+        const uri = await toDataUri(avatarUrl);
         if (uri) { setPending({ pendingAvatar: { assetOrigin: "NEW_ASSET", imageUri: uri, description: `profile-copy-${targetId}` } }); copied++; }
     }
     const banner = profile?.banner ?? user.banner;
-    if (nitro && banner) {
-        const uri = await toDataUri(imageUrl("banners", targetId, banner, 1024));
+    const bannerUrl = server?.bannerUrl ?? (banner ? imageUrl("banners", targetId, banner, 1024) : undefined);
+    if (nitro && bannerUrl) {
+        const uri = await toDataUri(bannerUrl);
         if (uri) { setPending({ pendingBanner: { assetOrigin: "NEW_ASSET", imageUri: uri, description: `profile-copy-${targetId}` } }); copied++; }
     }
 
@@ -446,14 +469,18 @@ const plugin: PluginCode = {
         presenceFinder = ctx.finders.byStore("PresenceStore");
         permissions = ctx.common.PermissionStore.get();
         ctx.contextMenu.addNative("user-context", (children, props) => {
-            const user = (props as { user?: any; } | undefined)?.user;
+            const { user, guildId } = (props ?? {}) as { user?: any; guildId?: string | null; };
             const parts = ctx.contextMenu.parts();
             const react = ctx.components.react.get() as any;
             if (!user || !parts || !react || user.id === users?.getCurrentUser?.()?.id) return;
-            children.splice(-1, 0, react.createElement(parts.MenuItem as any, {
-                id: "amiricord-copy-profile", key: "amiricord-copy-profile", label: "Copy Profile",
-                action: () => { toast(`Copying the profile of ${user.username}...`); void copyProfile(user.id); }
-            }));
+            const item = (id: string, label: string, server?: string) => react.createElement(parts.MenuItem as any, {
+                id, key: id, label, action: () => { toast(`Copying the profile of ${user.username}...`); void copyProfile(user.id, server); }
+            });
+            // Inside a server the person may have a profile of their own there, so the entry opens a choice; elsewhere there is only the main one.
+            children.splice(-1, 0, guildId
+                ? react.createElement(parts.MenuItem as any, { id: "amiricord-copy-profile", key: "amiricord-copy-profile", label: "Copy Profile" },
+                    item("amiricord-copy-profile-main", "Copy Main Profile"), item("amiricord-copy-profile-server", "Copy Server Profile", guildId))
+                : item("amiricord-copy-profile", "Copy Profile"));
         });
     },
 
