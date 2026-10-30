@@ -3,7 +3,7 @@
     "id": "WhoReacted",
     "name": "Who Reacted",
     "version": "1.0.0",
-    "description": "Right-click a message that has reactions and choose Who Reacted to see, for each reaction, the people who used it.",
+    "description": "Shows the avatars of the people who reacted next to each reaction under a message, as the original does (hover a face for the name). Also keeps a Who Reacted window in the right-click menu of a message with the full list of each reaction.",
     "origin": "vencord",
     "license": "GPL-3.0-or-later",
     "authors": [
