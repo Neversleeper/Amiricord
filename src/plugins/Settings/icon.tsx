@@ -126,6 +126,17 @@ export function ThemesIcon() {
     );
 }
 
+/** A person (head and shoulders) with a small swap arrow, for the profile presets. */
+export function ProfilePresetsIcon() {
+    return (
+        <Solid>
+            <circle cx="10" cy="7" r="4" />
+            <path d="M2 20.5C2 16.4 5.4 14 10 14s8 2.4 8 6.5a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1Z" />
+            <path d="M19 3.5l3 3-3 3V7.5h-3v-2h3z" />
+        </Solid>
+    );
+}
+
 /** Discord's own "update ready" icon (an arrow down onto a line), taken from Discord's interface by the owner. Used for the Updater instead of his drawing. */
 export function UpdaterIcon() {
     return <Solid><path d="M12 2a1 1 0 0 1 1 1v10.59l3.3-3.3a1 1 0 1 1 1.4 1.42l-5 5a1 1 0 0 1-1.4 0l-5-5a1 1 0 1 1 1.4-1.42l3.3 3.3V3a1 1 0 0 1 1-1ZM3 20a1 1 0 1 0 0 2h18a1 1 0 1 0 0-2H3Z" /></Solid>;
