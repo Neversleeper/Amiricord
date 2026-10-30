@@ -1,0 +1,37 @@
+{
+    "schema": 1,
+    "id": "NoButtons",
+    "name": "No Buttons",
+    "version": "1.0.0",
+    "description": "Hides buttons you never use: gift, boost, stickers, GIFs, apps, emoji, help and pop-out chat. Each one has its own switch.",
+    "origin": "testcord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        {
+            "name": "Sharp",
+            "role": "original author"
+        },
+        {
+            "name": "Neversleeper",
+            "github": "https://github.com/Neversleeper",
+            "role": "Amiricord port"
+        }
+    ],
+    "credits": [
+        {
+            "name": "Vendicated and contributors (Vencord), Sharp (TestCord), plugin NoButtons",
+            "license": "GPL-3.0-or-later",
+            "url": "https://github.com/TestcordDev/TestCord"
+        }
+    ],
+    "tags": [
+        "ui",
+        "chat"
+    ],
+    "enabledByDefault": false,
+    "startAt": "domReady",
+    "entry": {
+        "renderer": "index.ts"
+    },
+    "permissions": {}
+}

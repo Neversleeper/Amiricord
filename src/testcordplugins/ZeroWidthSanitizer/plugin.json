@@ -1,0 +1,37 @@
+{
+    "schema": 1,
+    "id": "ZeroWidthSanitizer",
+    "name": "Zero Width Sanitizer",
+    "version": "1.0.0",
+    "description": "Removes invisible zero-width characters from the messages you send, so nobody can use them to mark or track your text.",
+    "origin": "testcord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        {
+            "name": "Irritably",
+            "role": "original author"
+        },
+        {
+            "name": "Neversleeper",
+            "github": "https://github.com/Neversleeper",
+            "role": "Amiricord port"
+        }
+    ],
+    "credits": [
+        {
+            "name": "Vendicated and contributors (Vencord), Irritably (TestCord), plugin ZeroWidthSanitizer",
+            "license": "GPL-3.0-or-later",
+            "url": "https://github.com/TestcordDev/TestCord"
+        }
+    ],
+    "tags": [
+        "chat",
+        "privacy"
+    ],
+    "enabledByDefault": false,
+    "startAt": "domReady",
+    "entry": {
+        "renderer": "index.ts"
+    },
+    "permissions": {}
+}
