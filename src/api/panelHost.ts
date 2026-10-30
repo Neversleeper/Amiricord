@@ -22,7 +22,7 @@ export type PanelRender = (kit: Kit, react: any, refresh: () => void) => unknown
 export interface PanelHostContext {
     addStyle(css: string, name?: string): unknown;
     components: { Button: { get(): unknown; }; ModalRoot: { get(): unknown; }; ModalContent: { get(): unknown; }; ModalCloseButton: { get(): unknown; }; };
-    settingsTabs: { add(tab: { title: string; panelTitle?: string; Component: unknown; icon?: () => unknown; }): boolean; };
+    settingsTabs: { add(tab: { title: string; panelTitle?: string; Component: unknown; icon?: () => unknown; }): unknown; };
     modals: { open(render: (props: { onClose(): void; }) => unknown): string | undefined; };
 }
 
@@ -37,10 +37,11 @@ export function panelComponent(ctx: PanelHostContext, render: PanelRender, subsc
     };
 }
 
-/** A tab in the Amiricord settings. Returns false when the engine did not accept the tab. */
+/** A tab in the Amiricord settings (the short form of `ctx.settingsTabs.add`, so one tab per plugin). The engine writes a refused tab in the plugin's health report. */
 export function addPanelTab(ctx: PanelHostContext, options: { title: string; panelTitle?: string; render: PanelRender; subscribe?: (listener: () => void) => () => void; }): boolean {
     ctx.addStyle(PANEL_CSS, "panel");
-    return ctx.settingsTabs.add({ title: options.title, panelTitle: options.panelTitle, Component: panelComponent(ctx, options.render, options.subscribe) });
+    ctx.settingsTabs.add({ title: options.title, panelTitle: options.panelTitle, Component: panelComponent(ctx, options.render, options.subscribe) });
+    return true;
 }
 
 /** A window with the content. Returns false when Discord's window pieces were not found. */
