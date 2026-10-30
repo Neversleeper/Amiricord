@@ -9,7 +9,7 @@
 // (the member's `colorString`, the role's `colorString`). Places, with how each was read in her running Discord (build 655747):
 //  - mentions in messages: `span.mention`, whose React props (a few levels up) hold `user` and `guildId`;
 //  - the name in a reply: `username_*` inside `repliedMessage_*`, the props of the reply (13 levels up) hold `referencedMessage`;
-//  - the names in "is typing" (new here, the original does not have it): the `strong` of the typing text, matched to the people typing by their shown name;
+//  - (the names in "is typing" are coloured by the plugin Typing Tweaks, which has its own switch for it);
 //  - the titles of roles in the member list: `h3.membersGroup_*`, props with the role `id` and `guildId`;
 //  - the text of a message (off by default, as in the original): `message-content-*`, mixed with the normal text colour by a percentage.
 // Not here: the voice channel list, the list of who reacted, poll results and mentions typed in the message box (their pieces were not seen in the page; the original has them for voice, reactors
@@ -21,7 +21,6 @@ import type { PluginCode } from "../../renderer/engine";
 const settings = definePluginSettings({
     chatMentions: { type: "boolean", default: true, description: "Colour the mentions of people in messages." },
     replyNames: { type: "boolean", default: true, description: "Colour the name in the line that shows what a message replies to." },
-    typingNames: { type: "boolean", default: true, description: "Colour the names in \"is typing\"." },
     memberList: { type: "boolean", default: true, description: "Colour the role titles of the member list." },
     colorChatMessages: { type: "boolean", default: false, description: "Colour the text of a message with the colour of its author's top role." },
     messageSaturation: { type: "number", default: 30, min: 0, max: 100, integer: true, description: "How strong the colour of the message text is (0 to 100)." }
@@ -48,24 +47,12 @@ export function messageColor(color: string | null | undefined, percent: number):
     return `color-mix(in oklab, ${color} ${Math.min(100, Math.round(percent))}%, var(--text-default))`;
 }
 
-/** The person whose shown name is exactly this text, or undefined when nobody or more than one has it. */
-export function namedPerson<T extends { name: string; }>(text: string, people: readonly T[]): T | undefined {
-    const wanted = text.trim();
-    if (wanted === "") return undefined;
-    const found = people.filter(person => person.name === wanted);
-    return found.length === 1 ? found[0] : undefined;
-}
-
 interface MemberStore { getMember(guildId: string, userId: string): { colorString?: string | null; } | undefined; }
 interface RoleStore { getRole(guildId: string, roleId: string): { colorString?: string | null; } | undefined; }
 interface MessageStoreLike { getMessage(channelId: string, id: string): { author?: { id?: string; }; state?: string; } | undefined; }
-interface TypingStore { getTypingUsers(channelId: string): Record<string, number> | undefined; }
-interface Users { getCurrentUser(): { id: string; } | undefined; getUser(id: string): { username?: string; globalName?: string; } | undefined; }
-interface Nicks { getNick?(guildId: string, userId: string): string | null | undefined; }
 
 const MARK = "data-amiricord-role-color";
 const SYNC_DELAY_MS = 100;
-const TYPING_NAMES = "[class*=\"typing_\"] [class*=\"text_\"][aria-hidden=\"true\"] strong";
 
 let stop: (() => void) | undefined;
 
@@ -76,11 +63,8 @@ const plugin: PluginCode = {
         const view = page.defaultView!;
         const members = ctx.common.GuildMemberStore;
         const guildSelection = ctx.common.SelectedGuildStore;
-        const channelSelection = ctx.common.SelectedChannelStore;
         const messages = ctx.common.MessageStore;
-        const users = ctx.common.UserStore;
         const roles = ctx.finders.byStore<RoleStore>("GuildRoleStore");
-        const typing = ctx.finders.byStore<TypingStore>("TypingStore");
 
         const memberColor = (guildId: unknown, userId: unknown): string | null => {
             if (typeof guildId !== "string" || typeof userId !== "string") return null;
@@ -125,24 +109,6 @@ const plugin: PluginCode = {
                 const props = findProps(name, candidate => "referencedMessage" in candidate && "baseMessage" in candidate);
                 const author = (props?.referencedMessage as { message?: { author?: { id?: unknown; }; }; } | undefined)?.message?.author;
                 paint(name, "reply", memberColor(guildId, author?.id));
-            }
-
-            const typingNames = [...page.querySelectorAll<HTMLElement>(TYPING_NAMES)];
-            if (typingNames.length > 0) {
-                const channelId = channelSelection.get()?.getChannelId();
-                const userStore = users.get() as unknown as Users | undefined;
-                const nicks = members.get() as unknown as Nicks | undefined;
-                const me = userStore?.getCurrentUser()?.id;
-                const people = channelId && settings.store.typingNames
-                    ? Object.keys(typing.get()?.getTypingUsers(channelId) ?? {}).filter(id => id !== me).map(id => {
-                        const user = userStore?.getUser(id);
-                        return { id, name: (guildId && nicks?.getNick?.(guildId, id)) || user?.globalName || user?.username || "" };
-                    })
-                    : [];
-                for (const strong of typingNames) {
-                    const person = namedPerson(strong.textContent ?? "", people);
-                    paint(strong, "typing", person ? memberColor(guildId, person.id) : null);
-                }
             }
 
             for (const header of page.querySelectorAll<HTMLElement>("h3[class*=\"membersGroup\"]")) {

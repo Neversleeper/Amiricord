@@ -7,7 +7,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import { findProps, messageColor, namedPerson } from "../src/vencordplugins/RoleColorEverywhere/index";
+import { findProps, messageColor } from "../src/vencordplugins/RoleColorEverywhere/index";
 
 describe("RoleColorEverywhere", () => {
     it("finds the props that hold what is asked, going up from the element's React node", () => {
@@ -28,11 +28,4 @@ describe("RoleColorEverywhere", () => {
         assert.equal(messageColor("red; background: url(x)", 30), undefined);
     });
 
-    it("matches a shown name to one person only", () => {
-        const people = [{ id: "1", name: "Ana" }, { id: "2", name: "Leo" }, { id: "3", name: "Leo" }];
-        assert.equal(namedPerson("Ana", people)?.id, "1");
-        assert.equal(namedPerson(" Ana ", people)?.id, "1");
-        assert.equal(namedPerson("Leo", people), undefined);
-        assert.equal(namedPerson("", people), undefined);
-    });
 });

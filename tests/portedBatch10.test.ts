@@ -11,7 +11,7 @@ import { isServerMutedHere } from "../src/testcordplugins/AskMeToMute/index";
 import { type AwayState, MAX_REPLIES, shouldReply } from "../src/testcordplugins/DMAway/index";
 import { stillActive } from "../src/testcordplugins/GhostTyping/index";
 import { pollText } from "../src/testcordplugins/PollMaker/index";
-import { typistNamed } from "../src/vencordplugins/TypingAvatars/index";
+import { listed, typistNamed } from "../src/vencordplugins/TypingAvatars/index";
 
 describe("ported plugins, tenth batch", () => {
     it("makes a poll", () => {
@@ -49,6 +49,13 @@ describe("ported plugins, tenth batch", () => {
         assert.equal(typistNamed("Leo", typists), undefined);
         assert.equal(typistNamed("Zed", typists), undefined);
         assert.equal(typistNamed("", [{ id: "9", name: "" }]), undefined);
+    });
+
+    it("lists the first names for the typing text and counts the others", () => {
+        assert.deepEqual(listed(["a", "b", "c", "d", "e"], 3), { named: ["a", "b", "c"], others: 2 });
+        assert.deepEqual(listed(["a", "b", "c", "d"], 3), { named: ["a", "b", "c"], others: 1 });
+        assert.deepEqual(listed(["a"], 3), { named: ["a"], others: 0 });
+        assert.deepEqual(listed(["a", "b"], 0), { named: ["a"], others: 1 });
     });
 
     it("answers a direct message once per cooldown, and only the right ones", () => {
