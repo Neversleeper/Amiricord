@@ -1,0 +1,35 @@
+{
+    "schema": 1,
+    "id": "ValidReply",
+    "name": "Valid Reply",
+    "version": "1.0.0",
+    "description": "Fixes \"Message could not be loaded\" in a reply: hover it and the message it answers is fetched and shown in its place (or \"Original message was deleted\" when it is gone).",
+    "origin": "vencord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        {
+            "name": "newwares",
+            "role": "original author"
+        },
+        {
+            "name": "Neversleeper",
+            "role": "Amiricord port"
+        }
+    ],
+    "credits": [
+        {
+            "name": "Vendicated and contributors (Vencord), plugin ValidReply",
+            "license": "GPL-3.0-or-later",
+            "url": "https://github.com/Vendicated/Vencord"
+        }
+    ],
+    "tags": ["chat", "fix"],
+    "enabledByDefault": false,
+    "startAt": "domReady",
+    "entry": {
+        "renderer": "index.ts"
+    },
+    "permissions": {
+        "messages": { "read": "visible" }
+    }
+}

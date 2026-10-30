@@ -39,6 +39,7 @@ import { cardsForPerson } from "./pluginsModel";
 import { makePluginsTab } from "./PluginsTab";
 import { PLUGINS_TAB_CSS, PLUGINS_TAB_STYLE_NAME } from "./pluginsTabStyles";
 import { makePluginWindow, type WindowParts } from "./PluginWindow";
+import { POLISH_CSS, POLISH_STYLE_NAME } from "./polish";
 import { makePrivacyTab } from "./PrivacyTab";
 import { SETTINGS_CSS, SETTINGS_STYLE_NAME } from "./styles";
 import { LAYOUT_MAX_CHARS, parseLayout, visibleTabs } from "./tabLayout";
@@ -236,6 +237,7 @@ const plugin: PluginCode & { buildLayout(builder: { key?: unknown; buildLayout()
         ctx.onDispose(removeMain);
 
         ctx.addStyle(PLUGINS_TAB_CSS, PLUGINS_TAB_STYLE_NAME);
+        ctx.addStyle(POLISH_CSS, POLISH_STYLE_NAME);
 
         // The window of a plugin (gear or "i"): drawn with the engine's window pieces inside the modal layer of Discord. The component is made once per
         // opening, so Discord drawing the layer again does not start it over (and lose what is being typed).

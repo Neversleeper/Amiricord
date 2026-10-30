@@ -1,0 +1,27 @@
+{
+    "schema": 1,
+    "id": "RoleColorEverywhere",
+    "name": "Role Color Everywhere",
+    "version": "1.0.0",
+    "description": "Paints names with the colour of the person's top role in more places than Discord does: mentions in messages, the name in a reply, the role titles of the member list, and (off by default) the whole text of a message.",
+    "origin": "vencord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        { "name": "KingFish", "role": "original author" },
+        { "name": "lewisakura", "role": "original author" },
+        { "name": "AutumnVN", "role": "original author" },
+        { "name": "Kyuuhachi", "role": "original author" },
+        { "name": "jamesbt365", "role": "original author" },
+        { "name": "Neversleeper", "github": "https://github.com/Neversleeper", "role": "Amiricord port" }
+    ],
+    "credits": [
+        { "name": "Vendicated and contributors (Vencord), plugin RoleColorEverywhere", "license": "GPL-3.0-or-later", "url": "https://github.com/Vendicated/Vencord" }
+    ],
+    "tags": ["ui", "chat"],
+    "enabledByDefault": false,
+    "startAt": "domReady",
+    "entry": { "renderer": "index.ts" },
+    "permissions": {
+        "messages": { "read": "visible" }
+    }
+}

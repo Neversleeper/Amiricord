@@ -67,6 +67,7 @@ let computePermissions: ((options: Record<string, unknown>) => bigint) | undefin
 let channels: any;
 let selectedChannel: any;
 let guilds: any;
+let dispatcher: any;
 
 const setting = (key: string): unknown => (settings.store as Record<string, unknown>)[key];
 
@@ -109,6 +110,32 @@ function tagElement(user: any): unknown {
         context?.reportError("MoreUserTags", error);
         return null;
     }
+}
+
+const RETRIES = 6;
+const RETRY_MS = 500;
+
+/**
+ * A member list row is drawn once, and when that happens before Discord knows the open channel (right after Discord starts or the page is reloaded) it got no tag and kept none until it
+ * was drawn again (seen live: the Mod and Admin tags of a whole list missing until the list was scrolled). So the tag has a piece of its own that draws it again when the channel is
+ * chosen, and a few times in the first seconds.
+ */
+function TagSlot(props: { user?: unknown; }): unknown {
+    const react = currentReact() as any;
+    const [, bump] = react.useReducer((count: number) => count + 1, 0);
+    react.useEffect(() => {
+        const listener = () => { bump(); };
+        dispatcher?.subscribe?.("CHANNEL_SELECT", listener);
+        let left = RETRIES;
+        const timer = setInterval(() => { bump(); if (--left <= 0) clearInterval(timer); }, RETRY_MS);
+        return () => {
+            clearInterval(timer);
+            dispatcher?.unsubscribe?.("CHANNEL_SELECT", listener);
+        };
+    }, []);
+    const tag = tagElement(props.user);
+    // The row's pieces are in a flex line: ours goes after Discord's own (the boost icon stays next to the name) with a little space, and before the plugin texts of the engine (`order` 20).
+    return tag === null ? null : react.createElement("span", { style: { order: 10, marginLeft: "4px", display: "inline-flex", alignItems: "center", flex: "none" } }, tag);
 }
 
 const plugin: PluginCode & {
@@ -168,7 +195,8 @@ const plugin: PluginCode & {
     },
 
     renderMemberListTag(props) {
-        return tagElement(props?.user);
+        if (!props?.user) return null;
+        return (currentReact() as any).createElement(TagSlot, { user: props.user, key: "amiricord-tag-slot" });
     },
 
     withProfileTag(props, original) {
@@ -185,11 +213,12 @@ const plugin: PluginCode & {
         channels = ctx.common.ChannelStore.get();
         selectedChannel = ctx.common.SelectedChannelStore.get();
         guilds = ctx.common.GuildStore.get();
+        dispatcher = ctx.common.FluxDispatcher.get();
     },
 
     stop() {
         permissionCache.clear();
-        context = Tag = computePermissions = channels = selectedChannel = guilds = undefined;
+        context = Tag = computePermissions = channels = selectedChannel = guilds = dispatcher = undefined;
     }
 };
 

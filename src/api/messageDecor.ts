@@ -63,6 +63,7 @@ export class MessageDecorHub {
     private readonly entries = new Map<string, Entry>();
     private observer: MutationObserver | undefined;
     private timer: unknown;
+    private dirty = false;
     private styled = false;
 
     constructor(private readonly page: MessageDecorPage, private readonly addStyle: (css: string, name: string) => void, private readonly onError: (plugin: string, source: string, error: unknown) => void) {}
@@ -104,9 +105,22 @@ export class MessageDecorHub {
         this.observer = undefined;
     }
 
+    /**
+     * The first change runs at once: the observer's callback comes before the browser draws, so a text added there (the username after a name, a time in a reply) is on the screen with
+     * the message and does not pop in a moment later. Changes that come while the wait runs are put together into one more run when it ends.
+     */
     private schedule(): void {
-        if (this.timer !== undefined) return;
-        this.timer = this.page.setTimeout(() => { this.timer = undefined; this.sync(); }, SYNC_DELAY_MS);
+        if (this.timer !== undefined) { this.dirty = true; return; }
+        this.run();
+    }
+
+    private run(): void {
+        this.dirty = false;
+        this.sync();
+        this.timer = this.page.setTimeout(() => {
+            this.timer = undefined;
+            if (this.dirty) this.run();
+        }, SYNC_DELAY_MS);
     }
 
     private sync(): void {

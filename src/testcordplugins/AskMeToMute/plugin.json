@@ -1,0 +1,43 @@
+{
+    "schema": 1,
+    "id": "AskMeToMute",
+    "name": "Ask Me To Mute",
+    "version": "1.0.0",
+    "description": "When a moderator server-mutes you in your voice channel, you mute yourself and the server mute is taken off (if your role may do it).",
+    "origin": "testcord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        {
+            "name": "x2b",
+            "role": "original author"
+        },
+        {
+            "name": "Neversleeper",
+            "github": "https://github.com/Neversleeper",
+            "role": "Amiricord port"
+        }
+    ],
+    "credits": [
+        {
+            "name": "Vendicated and contributors (Vencord), x2b (TestCord), plugin AskMeToMute",
+            "license": "GPL-3.0-or-later",
+            "url": "https://github.com/TestcordDev/TestCord"
+        }
+    ],
+    "tags": [
+        "voice",
+        "utility"
+    ],
+    "enabledByDefault": false,
+    "startAt": "init",
+    "entry": {
+        "renderer": "index.ts"
+    },
+    "permissions": {
+        "account": {
+            "write": [
+                "server-voice-moderation"
+            ]
+        }
+    }
+}

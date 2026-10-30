@@ -1,0 +1,44 @@
+{
+    "schema": 1,
+    "id": "TypingAvatars",
+    "name": "Typing Tweaks",
+    "version": "1.0.0",
+    "description": "Typing text above the message box: a small avatar in front of each name, names in the colour of their role, a click on a name or avatar opens the profile, and a clearer text when more than three people type.",
+    "origin": "vencord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        {
+            "name": "zt",
+            "role": "original author"
+        },
+        {
+            "name": "sadan",
+            "role": "original author"
+        },
+        {
+            "name": "MrDiamond",
+            "role": "original author"
+        },
+        {
+            "name": "Neversleeper",
+            "role": "Amiricord port"
+        }
+    ],
+    "credits": [
+        {
+            "name": "Vendicated and contributors (Vencord), plugin TypingTweaks",
+            "license": "GPL-3.0-or-later",
+            "url": "https://github.com/Vendicated/Vencord"
+        }
+    ],
+    "tags": [
+        "chat",
+        "ui"
+    ],
+    "enabledByDefault": false,
+    "startAt": "init",
+    "entry": {
+        "renderer": "index.ts"
+    },
+    "permissions": {}
+}

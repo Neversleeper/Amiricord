@@ -56,12 +56,33 @@ function openImage(url: string | null | undefined, event?: Clickable) {
     const ctx = context;
     if (!ctx || !url) return;
     const { shown, original } = viewUrls(url, window.location.href, String(settings.store.format), String(settings.store.imgSize));
+    // A picture that is not in the cache yet left Discord's viewer waiting on its loading screen with nothing drawn (seen live: the same picture opened fine the second time), so it is
+    // loaded first and the viewer is opened with the picture's own size.
+    void preload(shown).then(size => {
+        if (!size) { ctx.toasts.show("Could not load the picture", "failure"); return; }
+        display(ctx, shown, original, size);
+    });
+}
+
+const PRELOAD_LIMIT_MS = 8000;
+
+/** Loads a picture into the browser's cache; its size, or undefined when it did not load in time. */
+function preload(url: string): Promise<{ width: number; height: number; } | undefined> {
+    return new Promise(resolve => {
+        const image = new Image();
+        const timer = setTimeout(() => { image.src = ""; resolve(undefined); }, PRELOAD_LIMIT_MS);
+        image.onload = () => { clearTimeout(timer); resolve({ width: image.naturalWidth || 1, height: image.naturalHeight || 1 }); };
+        image.onerror = () => { clearTimeout(timer); resolve(undefined); };
+        image.src = url;
+    });
+}
+
+function display(ctx: EnginePluginContext, shown: string, original: string, size: { width: number; height: number; }) {
     // Discord's own picture viewer (zoom, right-click to save or copy, open in the browser), the one a picture in a chat opens, like the original plugin.
     const open = mediaViewer?.get();
     if (typeof open === "function") {
         try {
-            const size = Number(settings.store.imgSize);
-            open({ items: [{ type: "IMAGE", url: shown, proxyUrl: shown, original, width: size, height: size, spoiler: false, srcIsAnimated: false }], startingIndex: 0, location: "ViewIcons" });
+            open({ items: [{ type: "IMAGE", url: shown, proxyUrl: shown, original, width: size.width, height: size.height, spoiler: false, srcIsAnimated: false }], startingIndex: 0, location: "ViewIcons" });
             return;
         } catch {
             // the viewer changed: fall through to the window of the plugin

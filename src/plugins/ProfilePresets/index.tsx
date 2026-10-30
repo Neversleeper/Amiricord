@@ -21,6 +21,7 @@ import { definePluginSettings } from "../../api/pluginSettings";
 import type { EnginePluginContext, PluginCode } from "../../renderer/engine";
 import { hasMarker, withMarker, withoutMarker } from "../../shared/badgeList";
 import type { JsonValue } from "../../shared/settings";
+import { ProfilePresetsIcon } from "../Settings/icon";
 
 const CDN = "https://cdn.discordapp.com";
 /** Stay under the storage limit (1 MB of text per value) with room for the JSON quotes. */
@@ -598,6 +599,12 @@ function openWindow(ctx: EnginePluginContext): void {
     Close ? h(Close, { onClick: props.onClose }) : null));
 }
 
+/** The panel as a tab of the Amiricord settings, so a preset can be changed without going through the Plugins tab. */
+function PresetsTab() {
+    const react = currentReact() as any;
+    return react.createElement("div", { style: { padding: "4px 0" } }, react.createElement(PresetsPanel));
+}
+
 const plugin: PluginCode = {
     settings,
     settingsComponent: (() => (currentReact() as any).createElement("div", { style: { marginTop: "12px" } }, (currentReact() as any).createElement(PresetsPanel))) as never,
@@ -624,6 +631,7 @@ const plugin: PluginCode = {
             }
         });
         if (!added) throw new Error("the command /profile-preset could not be added (the name is taken or the commands API refused it)");
+        ctx.settingsTabs.add({ title: "Profile Presets", panelTitle: "Profile presets", Component: PresetsTab, icon: ProfilePresetsIcon as () => unknown });
     },
 
     stop() {

@@ -62,6 +62,33 @@ describe("message decorations", () => {
         assert.equal(state.disconnected, 1);
     });
 
+    it("looks at the page at once on the first change (before the browser draws), and once more after the wait if more changes came", () => {
+        const state = { reads: 0, timers: [] as Array<() => void>, notify: () => undefined as void };
+        class FakeObserver {
+            constructor(callback: () => void) { state.notify = callback; }
+            observe() { /* nothing */ }
+            disconnect() { /* nothing */ }
+        }
+        const page = {
+            document: { body: {}, querySelectorAll: () => { state.reads++; return []; } },
+            MutationObserver: FakeObserver,
+            setTimeout: (run: () => void) => { state.timers.push(run); return state.timers.length; }
+        } as unknown as MessageDecorPage;
+        const hub = new MessageDecorHub(page, () => undefined, () => undefined);
+        hub.add("P", decoration("one"));
+        const afterAdd = state.reads;
+        assert.ok(afterAdd > 0, "the first look is not delayed");
+        // Changes during the wait are put together into one more look.
+        state.notify();
+        state.notify();
+        assert.equal(state.reads, afterAdd);
+        for (const run of state.timers.splice(0)) run();
+        assert.ok(state.reads > afterAdd, "one more look after the wait");
+        const afterSecond = state.reads;
+        for (const run of state.timers.splice(0)) run();
+        assert.equal(state.reads, afterSecond, "and no more when nothing else changed");
+    });
+
     it("waits for the page body when it does not exist yet", () => {
         const state = { timers: [] as Array<() => void>, observers: 0 };
         const document = { body: null as unknown, querySelectorAll: () => [] };

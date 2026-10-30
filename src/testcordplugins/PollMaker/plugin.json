@@ -1,0 +1,37 @@
+{
+    "schema": 1,
+    "id": "PollMaker",
+    "name": "Poll Maker",
+    "version": "1.0.0",
+    "description": "/poll question | option | option sends a message with numbered options to react to.",
+    "origin": "testcord",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        {
+            "name": "Dann",
+            "role": "original author"
+        },
+        {
+            "name": "Neversleeper",
+            "github": "https://github.com/Neversleeper",
+            "role": "Amiricord port"
+        }
+    ],
+    "credits": [
+        {
+            "name": "Vendicated and contributors (Vencord), Dann (TestCord), plugin PollMaker",
+            "license": "GPL-3.0-or-later",
+            "url": "https://github.com/TestcordDev/TestCord"
+        }
+    ],
+    "tags": [
+        "chat",
+        "utility"
+    ],
+    "enabledByDefault": false,
+    "startAt": "init",
+    "entry": {
+        "renderer": "index.ts"
+    },
+    "permissions": {}
+}

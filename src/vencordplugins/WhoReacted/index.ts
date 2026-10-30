@@ -8,7 +8,9 @@
 
 import { messageFromTarget } from "../../api/clickTargets";
 import { openPanelWindow } from "../../api/panelHost";
+import { definePluginSettings } from "../../api/pluginSettings";
 import type { PluginCode } from "../../renderer/engine";
+import { startInline } from "./inline";
 
 export interface Reaction { emoji: { id?: string | null; name?: string | null; }; count?: number; }
 
@@ -22,8 +24,20 @@ export const GAP_MS = 250;
 interface Person { id: string; username?: string; global_name?: string | null; }
 interface Rest { get(request: { url: string; query?: Record<string, unknown>; oldFormErrors?: boolean; }): Promise<{ body: Person[]; }>; }
 
+const settings = definePluginSettings({
+    showFaces: { type: "boolean", default: true, description: "Show the avatars of the people who reacted next to each reaction (as Vencord's plugin does). The right-click window stays either way." }
+});
+
+let stopFaces: (() => void) | undefined;
+
 const plugin: PluginCode = {
+    settings,
+    stop() {
+        stopFaces?.();
+        stopFaces = undefined;
+    },
     start(ctx) {
+        stopFaces = startInline(ctx, () => settings.store.showFaces);
         const messages = ctx.common.MessageStore;
         const rest = ctx.finders.byProps<Rest>("get", "post", "put", "patch", "del", "!Request", "!getXHR");
         ctx.menuItems.add("who-reacted", click => {
